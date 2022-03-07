@@ -1,0 +1,51 @@
+{
+  "name": "hardhat-project",
+  "scripts": {
+    "compile": "hardhat compile",
+    "lint": "prettier --check \"**/*.{ts,js,sol}\" && eslint \"**/*.{js,ts}\" && solhint 'contracts/**/*.sol'",
+    "lint:fix": "prettier --write \"**/*.{ts,js,sol}\" && eslint --fix \"**/*.{js,ts}\" && solhint --fix 'contracts/**/*.sol'",
+    "local:dev": "hardhat node --no-deploy",
+    "size": "cross-env REPORT_SIZE=true hardhat compile",
+    "test": "hardhat test"
+  },
+  "devDependencies": {
+    "@fintechstudios/eslint-plugin-chai-as-promised": "^3.1.0",
+    "@nomiclabs/hardhat-ethers": "^2.0.5",
+    "@nomiclabs/hardhat-etherscan": "^3.0.3",
+    "@nomiclabs/hardhat-waffle": "^2.0.3",
+    "@openzeppelin/contracts": "^4.5.0",
+    "@typechain/ethers-v5": "^9.0.0",
+    "@typechain/hardhat": "^5.0.0",
+    "@types/chai": "^4.3.0",
+    "@types/chai-as-promised": "^7.1.5",
+    "@types/mocha": "^9.1.0",
+    "@types/node": "^12.20.46",
+    "@typescript-eslint/eslint-plugin": "^5.13.0",
+    "@typescript-eslint/parser": "^5.13.0",
+    "chai": "^4.3.6",
+    "chai-as-promised": "^7.1.1",
+    "dotenv": "^10.0.0",
+    "eslint": "^8.10.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-promise": "^5.2.0",
+    "ethereum-waffle": "^3.4.0",
+    "ethers": "^5.5.4",
+    "hardhat": "^2.9.1",
+    "hardhat-gas-reporter": "^1.0.8",
+    "prettier": "^2.5.1",
+    "prettier-plugin-solidity": "^1.0.0-beta.13",
+    "solhint": "^3.3.7",
+    "solidity-coverage": "^0.7.20",
+    "ts-generator": "^0.1.1",
+    "ts-node": "^10.7.0",
+    "typechain": "^7.0.1",
+    "typescript": "^4.6.2"
+  },
+  "engines": {
+    "node": ">=16"
+  }
+}

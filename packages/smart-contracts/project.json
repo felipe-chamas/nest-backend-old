@@ -1,0 +1,28 @@
+{
+  "root": "packages/smart-contracts",
+  "tags": [],
+  "targets": {
+    "setup": {
+      "executor": "@nrwl/workspace:run-commands",
+      "options": {
+        "cwd": "packages/smart-contracts",
+        "commands": ["yarn install", "yarn compile"],
+        "parallel": false
+      }
+    },
+    "test": {
+      "executor": "@nrwl/workspace:run-commands",
+      "options": {
+        "cwd": "packages/smart-contracts",
+        "command": "yarn test"
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/workspace:run-commands",
+      "options": {
+        "cwd": "packages/smart-contracts",
+        "command": "yarn lint"
+      }
+    }
+  }
+}
