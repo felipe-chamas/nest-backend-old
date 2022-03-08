@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.12;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
-import "@openzeppelin/contracts/security/Pausable.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
 // TODO make this upgradeable
 // TODO define tokenomics wallets on the smart contract
@@ -13,16 +14,24 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 // TODO upgrade to allow users to withdraw mistakenly transferred lost funds
 
 /// @custom:security-contact security@leeroy.gg
-contract GameToken is ERC20, ERC20Burnable, Pausable, AccessControl {
-    using SafeERC20 for IERC20;
+contract GameToken is UUPSUpgradeable, ERC20BurnableUpgradeable, PausableUpgradeable, AccessControlUpgradeable {
+    using SafeERC20Upgradeable for IERC20Upgradeable;
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
-    constructor(
+    /**
+     * @custom:oz-upgrades-unsafe-allow constructor
+     */
+    constructor() initializer {}
+
+    function initialize(
         address owner,
         string memory name,
         string memory symbol,
         uint256 supply
-    ) ERC20(name, symbol) {
+    ) external initializer {
+        __Pausable_init();
+        __ERC20_init(name, symbol);
+
         _setupRole(DEFAULT_ADMIN_ROLE, owner);
         _setupRole(PAUSER_ROLE, owner);
         _mint(owner, supply);
@@ -44,7 +53,9 @@ contract GameToken is ERC20, ERC20Burnable, Pausable, AccessControl {
         super._beforeTokenTransfer(from, to, amount);
     }
 
-    function recover(IERC20 token, address to, uint256 amount) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function recover(IERC20Upgradeable token, address to, uint256 amount) external onlyRole(DEFAULT_ADMIN_ROLE) {
       token.safeTransfer(to, amount);
     }
+
+    function _authorizeUpgrade(address newImplementation) internal override onlyRole(DEFAULT_ADMIN_ROLE) {}
 }

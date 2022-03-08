@@ -1,6 +1,6 @@
 import { baseContext } from './shared/context';
-import { shouldBehaveLikeGameToken } from './unit/game-token.test';
+import { unitTestGameToken } from './unit/game-token.test';
 
 baseContext('Unit Tests', function () {
-  shouldBehaveLikeGameToken();
+  unitTestGameToken();
 });

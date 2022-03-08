@@ -6,7 +6,8 @@
     "lint:fix": "prettier --write \"**/*.{ts,js,sol}\" && eslint --fix \"**/*.{js,ts}\" && solhint --fix 'contracts/**/*.sol'",
     "local:dev": "hardhat node --no-deploy",
     "size": "cross-env REPORT_SIZE=true hardhat compile",
-    "test": "hardhat test"
+    "test": "hardhat test",
+    "typechain": "hardhat typechain"
   },
   "devDependencies": {
     "@fintechstudios/eslint-plugin-chai-as-promised": "^3.1.0",
@@ -14,6 +15,8 @@
     "@nomiclabs/hardhat-etherscan": "^3.0.3",
     "@nomiclabs/hardhat-waffle": "^2.0.3",
     "@openzeppelin/contracts": "^4.5.0",
+    "@openzeppelin/contracts-upgradeable": "^4.5.2",
+    "@openzeppelin/hardhat-upgrades": "^1.15.0",
     "@typechain/ethers-v5": "^9.0.0",
     "@typechain/hardhat": "^5.0.0",
     "@types/chai": "^4.3.0",
