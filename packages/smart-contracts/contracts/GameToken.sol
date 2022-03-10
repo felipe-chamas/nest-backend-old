@@ -5,16 +5,14 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20Burnable
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
-import "./ACL.sol";
+import "./extras/ERC20TokenRecoverable.sol";
+
 // TODO define tokenomics wallets on the smart contract
 // TODO define tokenomics cliff/vesting schedules on the smart contract
 
 /// @custom:security-contact security@leeroy.gg
-contract GameToken is UUPSUpgradeable, ERC20BurnableUpgradeable, PausableUpgradeable, ACL {
-    using SafeERC20Upgradeable for IERC20Upgradeable;
-
+contract GameToken is ERC20BurnableUpgradeable, PausableUpgradeable, ERC20TokenRecoverable, UUPSUpgradeable {
     /**
      * @custom:oz-upgrades-unsafe-allow constructor
      */
@@ -24,19 +22,21 @@ contract GameToken is UUPSUpgradeable, ERC20BurnableUpgradeable, PausableUpgrade
         address owner,
         string memory name,
         string memory symbol,
-        uint256 supply
+        uint256 supply,
+        address acl
     ) external initializer {
         __Pausable_init();
-        __ACL_init();
+        __ERC20TokenRecoverable_init(acl);
         __ERC20_init(name, symbol);
+        __UUPSUpgradeable_init();
         _mint(owner, supply);
     }
 
-    function pause() external onlyManager {
+    function pause() external onlyOperator {
         _pause();
     }
 
-    function unpause() external onlyManager {
+    function unpause() external onlyOperator {
         _unpause();
     }
 
@@ -46,10 +46,6 @@ contract GameToken is UUPSUpgradeable, ERC20BurnableUpgradeable, PausableUpgrade
         uint256 amount
     ) internal override whenNotPaused {
         super._beforeTokenTransfer(from, to, amount);
-    }
-
-    function recover(IERC20Upgradeable token, address to, uint256 amount) external onlyAdmin {
-      token.safeTransfer(to, amount);
     }
 
     function _authorizeUpgrade(address newImplementation) internal override onlyAdmin {}
