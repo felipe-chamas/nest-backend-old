@@ -8,17 +8,16 @@
     "lint": "nx run-many --target=lint --all"
   },
   "lint-staged": {
-    "packages/**/*.ts": "eslint --fix",
-    "packages/smart-contracts/contracts/**/*.sol": "solhint --fix",
+    "packages/**/*": "yarn lint",
     "package.json": "sort-package-json"
   },
   "private": true,
   "dependencies": {},
   "devDependencies": {
-    "@nrwl/cli": "13.8.4",
-    "@nrwl/js": "13.8.4",
-    "@nrwl/tao": "13.8.4",
-    "@nrwl/workspace": "13.8.4",
+    "@nrwl/cli": "13.8.5",
+    "@nrwl/js": "13.8.5",
+    "@nrwl/tao": "13.8.5",
+    "@nrwl/workspace": "13.8.5",
     "@types/node": "16.11.7",
     "husky": "^7.0.4",
     "lint-staged": "^12.3.5",
