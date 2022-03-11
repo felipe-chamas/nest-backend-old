@@ -7,6 +7,7 @@ import "./Roles.sol";
 
 contract ACL is IACL, AccessControlUpgradeable, UUPSUpgradeable {
     /// @custom:oz-upgrades-unsafe-allow constructor
+    // solhint-disable-next-line no-empty-blocks
     constructor() initializer {}
 
     function initialize(address admin, address operator) external initializer {
@@ -22,5 +23,6 @@ contract ACL is IACL, AccessControlUpgradeable, UUPSUpgradeable {
         _checkRole(role, account);
     }
 
+    // solhint-disable-next-line no-empty-blocks
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(Roles.ADMIN) {}
 }

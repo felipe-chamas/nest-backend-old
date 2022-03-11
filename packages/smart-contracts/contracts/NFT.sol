@@ -7,19 +7,25 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 
 import "./extras/ERC20TokenRecoverable.sol";
+import "./access/AccessControllable.sol";
 
-contract NFT is ERC721EnumerableUpgradeable, ERC721BurnableUpgradeable, ERC20TokenRecoverable, UUPSUpgradeable {
+// solhint-disable no-empty-blocks
+contract NFT is
+    ERC721EnumerableUpgradeable,
+    ERC721BurnableUpgradeable,
+    ERC20TokenRecoverable,
+    AccessControllable,
+    UUPSUpgradeable
+{
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
-
-
 
     function initialize(
         string calldata name,
         string calldata symbol,
         address aclContract
     ) external initializer {
-        __ERC20TokenRecoverable_init(aclContract);
+        __AccessControllable_init(aclContract);
         __ERC721_init(name, symbol);
         __ERC721Enumerable_init();
         __UUPSUpgradeable_init();
@@ -29,14 +35,13 @@ contract NFT is ERC721EnumerableUpgradeable, ERC721BurnableUpgradeable, ERC20Tok
         _safeMint(to, tokenId);
     }
 
-
-
     // The following functions are overrides required by Solidity.
 
-    function _beforeTokenTransfer(address from, address to, uint256 tokenId)
-        internal
-        override(ERC721Upgradeable, ERC721EnumerableUpgradeable)
-    {
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal override(ERC721Upgradeable, ERC721EnumerableUpgradeable) {
         super._beforeTokenTransfer(from, to, tokenId);
     }
 
@@ -50,4 +55,10 @@ contract NFT is ERC721EnumerableUpgradeable, ERC721BurnableUpgradeable, ERC20Tok
     }
 
     function _authorizeUpgrade(address newImplementation) internal override onlyAdmin {}
+
+    function _authorizeRecover(
+        IERC20Upgradeable,
+        address,
+        uint256
+    ) internal override onlyAdmin {}
 }

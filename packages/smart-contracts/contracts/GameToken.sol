@@ -7,12 +7,20 @@ import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 import "./extras/ERC20TokenRecoverable.sol";
+import "./access/AccessControllable.sol";
 
 // TODO define tokenomics wallets on the smart contract
 // TODO define tokenomics cliff/vesting schedules on the smart contract
 
 /// @custom:security-contact security@leeroy.gg
-contract GameToken is ERC20BurnableUpgradeable, PausableUpgradeable, ERC20TokenRecoverable, UUPSUpgradeable {
+// solhint-disable no-empty-blocks
+contract GameToken is
+    ERC20BurnableUpgradeable,
+    PausableUpgradeable,
+    ERC20TokenRecoverable,
+    AccessControllable,
+    UUPSUpgradeable
+{
     /**
      * @custom:oz-upgrades-unsafe-allow constructor
      */
@@ -26,7 +34,7 @@ contract GameToken is ERC20BurnableUpgradeable, PausableUpgradeable, ERC20TokenR
         address acl
     ) external initializer {
         __Pausable_init();
-        __ERC20TokenRecoverable_init(acl);
+        __AccessControllable_init(acl);
         __ERC20_init(name, symbol);
         __UUPSUpgradeable_init();
         _mint(owner, supply);
@@ -48,5 +56,11 @@ contract GameToken is ERC20BurnableUpgradeable, PausableUpgradeable, ERC20TokenR
         super._beforeTokenTransfer(from, to, amount);
     }
 
-    function _authorizeUpgrade(address newImplementation) internal override onlyAdmin {}
+    function _authorizeUpgrade(address) internal override onlyAdmin {}
+
+    function _authorizeRecover(
+        IERC20Upgradeable,
+        address,
+        uint256
+    ) internal override onlyAdmin {}
 }

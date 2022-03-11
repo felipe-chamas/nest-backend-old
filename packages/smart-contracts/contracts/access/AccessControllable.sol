@@ -30,10 +30,12 @@ abstract contract AccessControllable is Initializable, ContextUpgradeable {
         _;
     }
 
+    // solhint-disable-next-line func-name-mixedcase
     function __AccessControllable_init(address aclContract) internal onlyInitializing {
         __AccessControllable_init_unchained(aclContract);
     }
 
+    // solhint-disable-next-line func-name-mixedcase
     function __AccessControllable_init_unchained(address aclContract) internal onlyInitializing {
         acl = IACL(aclContract);
     }

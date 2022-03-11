@@ -8,3 +8,5 @@ import { subtask } from 'hardhat/config';
 subtask(TASK_TEST_SETUP_TEST_ENVIRONMENT, async (): Promise<void> => {
   chai.use(chaiAsPromised);
 });
+
+export {};

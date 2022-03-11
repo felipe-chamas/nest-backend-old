@@ -15,7 +15,6 @@ const env = dotenv.config();
 
 const HH_MNEMONIC = 'test test test test test test test test test test test junk';
 const MNEMONIC = env.parsed?.MNEMONIC || HH_MNEMONIC;
-const PRIVATE_KEY = env.parsed?.PRIVATE_KEY;
 
 const config: HardhatUserConfig = {
   mocha: {
@@ -42,7 +41,7 @@ const config: HardhatUserConfig = {
     localhost: {
       chainId: 31337,
       accounts: {
-        mnemonic: HH_MNEMONIC,
+        mnemonic: MNEMONIC,
       },
     },
   },
