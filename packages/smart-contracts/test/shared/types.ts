@@ -22,6 +22,7 @@ export interface Contracts {
 
 export interface Signers {
   admin: SignerWithAddress;
+  operator: SignerWithAddress;
   other: SignerWithAddress;
   stranger: SignerWithAddress;
 }

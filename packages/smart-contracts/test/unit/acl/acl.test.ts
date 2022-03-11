@@ -1,13 +1,15 @@
-import { ethers } from 'hardhat';
+import { Signer } from 'ethers';
 import { ACL } from '../../../typechain';
 import { deployACL } from '../../shared/deployers';
 import { shouldBehaveLikeACL } from './acl.behavior';
 
-async function aclFixture(): Promise<{ acl: ACL }> {
-  const [deployer] = await ethers.getSigners();
+async function aclFixture(signers: Signer[]): Promise<{ acl: ACL }> {
+  const [deployer, operator] = signers;
+
+  const [deployerAddress, operatorAddress] = await Promise.all([deployer.getAddress(), operator.getAddress()]);
 
   return {
-    acl: await deployACL(deployer, deployer.address, deployer.address),
+    acl: await deployACL(deployer, deployerAddress, operatorAddress),
   };
 }
 

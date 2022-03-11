@@ -7,7 +7,7 @@ import "./IACL.sol";
 import "./Roles.sol";
 
 abstract contract AccessControllable is Initializable, ContextUpgradeable {
-    IACL private acl;
+    IACL private _accessControl;
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new
      * variables without shifting down storage in the inheritance chain.
@@ -16,17 +16,17 @@ abstract contract AccessControllable is Initializable, ContextUpgradeable {
     uint256[49] private __gap;
 
     modifier onlyAdmin() {
-        _acl().checkRole(Roles.ADMIN, _msgSender());
+        _accessControl.checkRole(Roles.ADMIN, _msgSender());
         _;
     }
 
     modifier onlyOperator() {
-        _acl().checkRole(Roles.OPERATOR, _msgSender());
+        _accessControl.checkRole(Roles.OPERATOR, _msgSender());
         _;
     }
 
     modifier onlyRole(bytes32 role) {
-        _acl().checkRole(role, _msgSender());
+        _accessControl.checkRole(role, _msgSender());
         _;
     }
 
@@ -37,10 +37,10 @@ abstract contract AccessControllable is Initializable, ContextUpgradeable {
 
     // solhint-disable-next-line func-name-mixedcase
     function __AccessControllable_init_unchained(address aclContract) internal onlyInitializing {
-        acl = IACL(aclContract);
+        _accessControl = IACL(aclContract);
     }
 
     function _acl() internal virtual returns (IACL) {
-        return acl;
+        return _accessControl;
     }
 }

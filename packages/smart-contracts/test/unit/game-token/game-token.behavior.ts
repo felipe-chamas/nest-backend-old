@@ -9,11 +9,12 @@ export function shouldBehaveLikeGameToken() {
     let token: GameToken;
     let stranger: SignerWithAddress;
     let admin: SignerWithAddress;
+    let operator: SignerWithAddress;
     let other: SignerWithAddress;
 
     beforeEach(function () {
       ({ OPERATOR_ROLE } = this.roles);
-      ({ admin, other, stranger } = this.signers);
+      ({ admin, other, stranger, operator } = this.signers);
       token = this.contracts.gameToken;
     });
 
@@ -38,8 +39,8 @@ export function shouldBehaveLikeGameToken() {
         );
       });
 
-      it('should allow admin to pause', async function () {
-        await token.pause();
+      it('should allow operator to pause', async function () {
+        await token.connect(operator).pause();
 
         await expect(token.paused()).eventually.to.be.true;
       });
@@ -47,7 +48,7 @@ export function shouldBehaveLikeGameToken() {
 
     describe('when paused', function () {
       beforeEach(async function () {
-        await token.pause();
+        await token.connect(operator).pause();
       });
 
       it('should fail to transfer tokens', async function () {

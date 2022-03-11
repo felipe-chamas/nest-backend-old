@@ -8,12 +8,13 @@ export function shouldBehaveLikeACL() {
     let ADMIN_ROLE: string;
     let acl: ACL;
     let admin: SignerWithAddress;
+    let operator: SignerWithAddress;
     let stranger: SignerWithAddress;
 
     beforeEach(function () {
       ({ acl } = this.contracts);
       ({ ADMIN_ROLE, OPERATOR_ROLE } = this.roles);
-      ({ admin, stranger } = this.signers);
+      ({ admin, operator, stranger } = this.signers);
     });
 
     describe('when admin', function () {
@@ -30,7 +31,7 @@ export function shouldBehaveLikeACL() {
 
     describe('when operator', function () {
       it('admin should pass check', async function () {
-        await expect(acl.checkRole(OPERATOR_ROLE, admin.address)).to.not.be.reverted;
+        await expect(acl.checkRole(OPERATOR_ROLE, operator.address)).to.not.be.reverted;
       });
 
       it('stranger should not pass operator check', async function () {

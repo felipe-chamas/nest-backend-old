@@ -1,10 +1,11 @@
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+import { Signer } from 'ethers';
 import hre, { ethers } from 'hardhat';
 import { TASK_DEPLOY_ACL, TASK_DEPLOY_GAME_TOKEN, TASK_DEPLOY_MOCK_ERC20, TASK_DEPLOY_NFT } from '../../tasks';
 import { ACL__factory, ERC20Mock__factory, GameToken__factory, NFT__factory } from '../../typechain';
+import { MAX_UINT256 } from './constants';
 
 export async function deployMockERC20(
-  deployer: SignerWithAddress,
+  deployer: Signer,
   name = 'Mock',
   symbol = 'MCK',
   supply = ethers.utils.parseEther('100000').toString(),
@@ -19,7 +20,7 @@ export async function deployMockERC20(
 }
 
 export async function deployGameToken(
-  deployer: SignerWithAddress,
+  deployer: Signer,
 
   admin: string,
   acl: string,
@@ -38,14 +39,27 @@ export async function deployGameToken(
   return GameToken__factory.connect(address, deployer);
 }
 
-export async function deployACL(deployer: SignerWithAddress, admin: string, operator: string) {
+export async function deployACL(deployer: Signer, admin: string, operator: string) {
   const acl = await hre.run(TASK_DEPLOY_ACL, { admin, operator });
 
   return ACL__factory.connect(acl, deployer);
 }
 
-export async function deployNFT(deployer: SignerWithAddress, acl: string, name = 'Testing NFT', symbol = 'TNFT') {
-  const nft = await hre.run(TASK_DEPLOY_NFT, { acl, name, symbol });
+export async function deployNFT(
+  deployer: Signer,
+  acl: string,
+  name = 'Testing NFT',
+  symbol = 'TNFT',
+  baseUri = 'ipfs://',
+  maxTokenSupply = MAX_UINT256,
+) {
+  const nft = await hre.run(TASK_DEPLOY_NFT, {
+    acl,
+    name,
+    symbol,
+    maxTokenSupply: maxTokenSupply.toString(10),
+    baseUri,
+  });
 
   return NFT__factory.connect(nft, deployer);
 }
