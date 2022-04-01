@@ -10,19 +10,13 @@
         "outputPath": "dist/packages/backend",
         "main": "packages/backend/src/main.ts",
         "tsConfig": "packages/backend/tsconfig.app.json",
-        "assets": ["packages/backend/src/assets"]
+        "assets": ["packages/backend/src/common/assets"]
       },
       "configurations": {
         "production": {
           "optimization": true,
           "extractLicenses": true,
-          "inspect": false,
-          "fileReplacements": [
-            {
-              "replace": "packages/backend/src/environments/environment.ts",
-              "with": "packages/backend/src/environments/environment.prod.ts"
-            }
-          ]
+          "inspect": false
         }
       }
     },

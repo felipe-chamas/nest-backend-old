@@ -9,5 +9,9 @@
     {
       "path": "./tsconfig.spec.json"
     }
-  ]
+  ],
+  "compilerOptions": {
+    "baseUrl": "./src",
+    "sourceMap": true
+  }
 }
