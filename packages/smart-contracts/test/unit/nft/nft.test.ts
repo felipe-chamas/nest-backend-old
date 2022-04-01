@@ -9,12 +9,12 @@ async function nftFixture(signers: Signer[], maxLimitedSupply = MAX_UINT256) {
   const [deployer, operator] = signers;
   const [deployerAddress, operatorAddress] = await Promise.all([deployer.getAddress(), operator.getAddress()]);
 
-  const acl = await deployACL(deployer, deployerAddress, operatorAddress);
+  const acl = await deployACL(deployer, { admin: deployerAddress, operator: operatorAddress });
 
   return {
     acl,
-    nft: await deployNFT(deployer, acl.address, undefined, undefined, undefined, maxLimitedSupply),
-    mockToken: await deployMockERC20(deployer),
+    nft: await deployNFT(deployer, { acl: acl.address, maxTokenSupply: maxLimitedSupply.toString(10) }),
+    mockToken: await deployMockERC20(deployer, {}),
   };
 }
 

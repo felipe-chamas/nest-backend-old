@@ -1,4 +1,5 @@
 import { task, types } from 'hardhat/config';
+import { GameTokenConstructor } from '../types';
 
 export const TASK_DEPLOY_GAME_TOKEN = 'deploy:game-token';
 
@@ -8,28 +9,17 @@ task(TASK_DEPLOY_GAME_TOKEN, 'Deploy the Game Token')
   .addParam('symbol', 'Token symbol', undefined, types.string)
   .addParam('supply', 'Token supply', undefined, types.string)
   .addParam('acl', 'ACL contract address', undefined, types.string)
-  .setAction(
-    async (
+  .setAction(async ({ admin, name, symbol, supply, acl }: GameTokenConstructor, { upgrades, ethers }) => {
+    const token = await upgrades.deployProxy(
+      await ethers.getContractFactory('GameToken'),
+      [admin, name, symbol, supply, acl],
       {
-        admin,
-        name,
-        symbol,
-        supply,
-        acl,
-      }: { admin: string; name: string; symbol: string; supply: string; acl: string },
-      { upgrades, ethers },
-    ) => {
-      const token = await upgrades.deployProxy(
-        await ethers.getContractFactory('GameToken'),
-        [admin, name, symbol, supply, acl],
-        {
-          kind: 'uups',
-          initializer: 'initialize',
-        },
-      );
+        kind: 'uups',
+        initializer: 'initialize',
+      },
+    );
 
-      return token.address;
-    },
-  );
+    return token.address;
+  });
 
 export {};

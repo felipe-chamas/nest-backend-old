@@ -3,11 +3,16 @@ pragma solidity 0.8.12;
 
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "./IACL.sol";
 import "./Roles.sol";
 
+error ACLContractIsZeroAddress();
+error ACLAddressIsNotContract();
+
 abstract contract AccessControllable is Initializable, ContextUpgradeable {
-    IACL private _accessControl;
+    using AddressUpgradeable for address;
+    IACL internal _accessControl;
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new
      * variables without shifting down storage in the inheritance chain.
@@ -37,6 +42,8 @@ abstract contract AccessControllable is Initializable, ContextUpgradeable {
 
     // solhint-disable-next-line func-name-mixedcase
     function __AccessControllable_init_unchained(address aclContract) internal onlyInitializing {
+        if (aclContract == address(0)) revert ACLContractIsZeroAddress();
+        if (!aclContract.isContract()) revert ACLAddressIsNotContract();
         _accessControl = IACL(aclContract);
     }
 

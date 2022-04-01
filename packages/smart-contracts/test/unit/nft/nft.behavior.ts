@@ -2,7 +2,7 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
 import { BigNumber } from 'ethers';
 import { NFT } from '../../../typechain';
-import { AddressZero } from '../../shared/types';
+import { AddressZero } from '../../shared/constants';
 import { getTransferEvent } from '../../shared/utils';
 
 export function shouldBehaveLikeNFT() {

@@ -4,12 +4,8 @@ pragma solidity 0.8.12;
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721BurnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
-
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
-import "./extras/ERC20TokenRecoverable.sol";
-import "./access/AccessControllable.sol";
+import "../BaseContract.sol";
+import "./NFTStorage.sol";
 
 error MaximumTotalSupplyReached(uint256 maximum);
 
@@ -18,15 +14,10 @@ contract NFT is
     ERC721EnumerableUpgradeable,
     ERC721URIStorageUpgradeable,
     ERC721BurnableUpgradeable,
-    ERC20TokenRecoverable,
-    AccessControllable,
-    UUPSUpgradeable
+    BaseContract,
+    NFTStorage
 {
     using CountersUpgradeable for CountersUpgradeable.Counter;
-
-    string private _baseTokenURI;
-    CountersUpgradeable.Counter private _tokenIdCounter;
-    uint256 private _maxTokenSupply;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
@@ -38,10 +29,9 @@ contract NFT is
         uint256 maxTokenSupply,
         address aclContract
     ) external initializer {
-        __AccessControllable_init(aclContract);
         __ERC721_init(name, symbol);
         __ERC721Enumerable_init();
-        __UUPSUpgradeable_init();
+        __BaseContract_init(aclContract);
         _baseTokenURI = baseTokenURI;
         _maxTokenSupply = maxTokenSupply;
     }
@@ -100,14 +90,6 @@ contract NFT is
     ) internal override(ERC721Upgradeable, ERC721EnumerableUpgradeable) {
         super._beforeTokenTransfer(from, to, tokenId);
     }
-
-    function _authorizeUpgrade(address newImplementation) internal override onlyAdmin {}
-
-    function _authorizeRecover(
-        IERC20Upgradeable,
-        address,
-        uint256
-    ) internal override onlyAdmin {}
 
     function _baseURI() internal view override returns (string memory) {
         return _baseTokenURI;
