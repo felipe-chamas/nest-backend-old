@@ -5,7 +5,7 @@
     "defaultBase": "main"
   },
   "cli": {
-    "defaultCollection": "@nrwl/nest"
+    "defaultCollection": "@nrwl/workspace"
   },
   "tasksRunnerOptions": {
     "default": {
@@ -14,6 +14,5 @@
         "cacheableOperations": ["build", "lint", "test", "e2e"]
       }
     }
-  },
-  "defaultProject": "backend"
+  }
 }
