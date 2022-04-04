@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { NftCollection } from 'models/nft-collection/entities/nft-collection.entity';
+import { Nft } from 'models/nft/entities/nft.entity';
 import { User } from 'models/user/entities/user.entity';
 
 @Module({
@@ -10,10 +12,10 @@ import { User } from 'models/user/entities/user.entity';
       useFactory: (config: ConfigService) => ({
         type: 'mongodb',
         url: config.get<string>('database.url'),
-        entities: [User],
+        entities: [User, Nft, NftCollection],
         useNewUrlParser: true,
         logging: true,
-        synchronize: config.get<string>('env') === 'development' ? true : false,
+        useUnifiedTopology: true,
       }),
     }),
   ],

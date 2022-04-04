@@ -8,8 +8,8 @@ describe('UserController', () => {
 
   beforeEach(async () => {
     service = {
-      create: jest.fn(),
-      findAll: jest.fn(),
+      create: jest.fn().mockImplementation(() => ({})),
+      findAll: jest.fn().mockImplementation(() => Promise.resolve([])),
       findOne: jest.fn(),
       update: jest.fn(),
       remove: jest.fn(),
