@@ -5,6 +5,7 @@ import {
   TASK_DEPLOY_GAME_TOKEN,
   TASK_DEPLOY_MOCK_ERC20,
   TASK_DEPLOY_NFT,
+  TASK_DEPLOY_NFT_BOX,
   TASK_DEPLOY_TOKEN_SALE,
 } from '../../tasks';
 import {
@@ -12,6 +13,7 @@ import {
   AtLeast,
   ERC20MockConstructor,
   GameTokenConstructor,
+  NFTBoxConstructor,
   NFTConstructor,
   TokenSaleConstructor,
 } from '../../tasks/types';
@@ -19,6 +21,7 @@ import {
   ACL__factory,
   ERC20Mock__factory,
   GameToken__factory,
+  NFTBox__factory,
   NFT__factory,
   TokenSale__factory,
 } from '../../typechain';
@@ -90,4 +93,18 @@ export async function deployTokenSale(deployer: Signer, args: TokenSaleConstruct
   const tokenSale = await hre.run(TASK_DEPLOY_TOKEN_SALE, args);
 
   return TokenSale__factory.connect(tokenSale, deployer);
+}
+
+export async function deployNFTBox(
+  deployer: Signer,
+  { acl, name = 'Testing NFT Box', symbol = 'NFTBOX', baseUri = 'ipfs://' }: AtLeast<NFTBoxConstructor, 'acl'>,
+) {
+  const nft = await hre.run(TASK_DEPLOY_NFT_BOX, {
+    acl,
+    name,
+    symbol,
+    baseUri,
+  });
+
+  return NFTBox__factory.connect(nft, deployer);
 }

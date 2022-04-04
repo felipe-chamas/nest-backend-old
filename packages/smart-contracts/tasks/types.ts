@@ -10,5 +10,6 @@ export type TokenSaleConstructor = {
   gameToken: string;
   paymentToken: string;
 };
+export type NFTBoxConstructor = { acl: string; name: string; symbol: string; baseUri: string };
 
 export type AtLeast<T, K extends keyof T> = Partial<T> & Pick<T, K>;

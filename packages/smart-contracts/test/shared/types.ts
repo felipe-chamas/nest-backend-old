@@ -1,7 +1,16 @@
 import { MockContract } from '@defi-wonderland/smock';
 import type { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signer-with-address';
 import type { Fixture } from 'ethereum-waffle';
-import { ACL, ERC20Mock, ERC20TokenRecoverable, GameToken, GodModeTokenSale, NFT, TokenSale } from '../../typechain';
+import {
+  ACL,
+  ERC20Mock,
+  ERC20TokenRecoverable,
+  GameToken,
+  GodModeTokenSale,
+  NFT,
+  NFTBox,
+  TokenSale,
+} from '../../typechain';
 
 declare module 'mocha' {
   interface Context {
@@ -21,6 +30,7 @@ export interface Contracts {
   gameToken: GameToken;
   recoverable: ERC20TokenRecoverable;
   tokenSale: TokenSale;
+  nftBox: NFTBox;
 }
 
 export interface Mocks {

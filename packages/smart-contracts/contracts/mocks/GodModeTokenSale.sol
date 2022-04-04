@@ -3,6 +3,7 @@ pragma solidity 0.8.12;
 
 import "../tokenSale/TokenSale.sol";
 
+// solhint-disable func-name-mixedcase,private-vars-leading-underscore
 contract GodModeTokenSale is TokenSale {
     function __god_mode_setPaymentToken(address paymentToken) external {
         _paymentToken = IERC20Upgradeable(paymentToken);

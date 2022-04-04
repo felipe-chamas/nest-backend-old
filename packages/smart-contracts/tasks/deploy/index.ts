@@ -3,3 +3,4 @@ export * from './01_acl';
 export * from './02_game_token';
 export * from './03_nft';
 export * from './04_token_sale';
+export * from './05_nft_box';

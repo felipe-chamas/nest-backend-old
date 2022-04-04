@@ -1,11 +1,11 @@
 import { ContractTransaction } from 'ethers';
 import { ethers } from 'hardhat';
 import { MerkleTree } from 'merkletreejs';
-import { NFT, TokenSale } from '../../typechain';
+import { ERC721Upgradeable, TokenSale } from '../../typechain';
 
-export const getTransferEvent = async (tx: ContractTransaction, nft: NFT) => {
+export const getTransferEvent = async (tx: ContractTransaction, erc721: ERC721Upgradeable) => {
   const receipt = await tx.wait();
-  const events = await nft.queryFilter(nft.filters.Transfer(), receipt.blockNumber);
+  const events = await erc721.queryFilter(erc721.filters.Transfer(), receipt.blockNumber);
   return events[0].args;
 };
 
