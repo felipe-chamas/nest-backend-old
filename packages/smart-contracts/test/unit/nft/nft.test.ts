@@ -1,7 +1,8 @@
 import { Signer } from 'ethers';
-import { ERC20TokenRecoverable__factory } from '../../../typechain';
+import { AccessControllable__factory, ERC20TokenRecoverable__factory } from '../../../typechain';
 import { MAX_UINT256 } from '../../shared/constants';
 import { deployACL, deployMockERC20, deployNFT } from '../../shared/deployers';
+import { shouldBehaveLikeAccessControllable } from '../access-controllable/access-controllable.behavior';
 import { shouldBehaveLikeERC20TokenRecoverable } from '../recoverable/recoverable.behavior';
 import { shouldBehaveLikeNFT, shouldBehaveLikeNFTWithLimitedSupply } from './nft.behavior';
 
@@ -27,11 +28,13 @@ export function unitTestNFT(): void {
       this.contracts.acl = acl;
       this.contracts.nft = nft;
       this.contracts.recoverable = ERC20TokenRecoverable__factory.connect(nft.address, this.signers.admin);
+      this.contracts.accessControllable = AccessControllable__factory.connect(nft.address, this.signers.admin);
       this.contracts.mockToken = mockToken;
     });
 
     shouldBehaveLikeNFT();
     shouldBehaveLikeERC20TokenRecoverable();
+    shouldBehaveLikeAccessControllable();
   });
 
   describe('NFT Limited Supply', function () {
@@ -43,11 +46,14 @@ export function unitTestNFT(): void {
       this.contracts.acl = acl;
       this.contracts.nft = nft;
       this.contracts.recoverable = ERC20TokenRecoverable__factory.connect(nft.address, this.signers.admin);
+      this.contracts.accessControllable = AccessControllable__factory.connect(nft.address, this.signers.admin);
+
       this.contracts.mockToken = mockToken;
     });
 
     shouldBehaveLikeNFT();
     shouldBehaveLikeNFTWithLimitedSupply(MAX_TOKEN_SUPPLY);
     shouldBehaveLikeERC20TokenRecoverable();
+    shouldBehaveLikeAccessControllable();
   });
 }

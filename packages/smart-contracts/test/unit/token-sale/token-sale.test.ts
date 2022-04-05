@@ -1,8 +1,9 @@
 import { Signer } from 'ethers';
-import { ERC20TokenRecoverable__factory } from '../../../typechain';
+import { AccessControllable__factory, ERC20TokenRecoverable__factory } from '../../../typechain';
 import { deployACL, deployGameToken, deployMockERC20, deployTokenSale } from '../../shared/deployers';
 import { deployGodModeTokenSale } from '../../shared/godmode';
 import { deployERC20 } from '../../shared/mocks';
+import { shouldBehaveLikeAccessControllable } from '../access-controllable/access-controllable.behavior';
 import { shouldBehaveLikeERC20TokenRecoverable } from '../recoverable/recoverable.behavior';
 import { shouldBehaveLikeTokenSale } from './token-sale.behavior';
 
@@ -51,10 +52,12 @@ export function unitTestTokenSale(): void {
       this.contracts.tokenSale = tokenSale;
       this.contracts.gameToken = gameToken;
       this.contracts.recoverable = ERC20TokenRecoverable__factory.connect(tokenSale.address, admin);
+      this.contracts.accessControllable = AccessControllable__factory.connect(tokenSale.address, this.signers.admin);
       this.mocks.erc20 = erc20;
       this.godMode.tokenSale = godModeTokenSale;
     });
     shouldBehaveLikeTokenSale();
     shouldBehaveLikeERC20TokenRecoverable();
+    shouldBehaveLikeAccessControllable();
   });
 }

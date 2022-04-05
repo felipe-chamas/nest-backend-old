@@ -2,6 +2,7 @@ import { MockContract } from '@defi-wonderland/smock';
 import type { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signer-with-address';
 import type { Fixture } from 'ethereum-waffle';
 import {
+  AccessControllable,
   ACL,
   ERC20Mock,
   ERC20TokenRecoverable,
@@ -30,6 +31,7 @@ export interface Contracts {
   nft: NFT;
   gameToken: GameToken;
   recoverable: ERC20TokenRecoverable;
+  accessControllable: AccessControllable;
   tokenSale: TokenSale;
   nftBox: NFTBox;
   nftClaim: NFTClaim;

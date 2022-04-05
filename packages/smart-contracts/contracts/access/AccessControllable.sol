@@ -35,6 +35,14 @@ abstract contract AccessControllable is Initializable, ContextUpgradeable {
         _;
     }
 
+    function owner() external view virtual returns (address) {
+        return _getOwner();
+    }
+
+    function getOwner() external view virtual returns (address) {
+        return _getOwner();
+    }
+
     // solhint-disable-next-line func-name-mixedcase
     function __AccessControllable_init(address aclContract) internal onlyInitializing {
         __AccessControllable_init_unchained(aclContract);
@@ -49,5 +57,11 @@ abstract contract AccessControllable is Initializable, ContextUpgradeable {
 
     function _acl() internal virtual returns (IACL) {
         return _accessControl;
+    }
+
+    function _getOwner() internal view returns (address) {
+        if (_accessControl.getRoleMemberCount(Roles.OWNER) == 0) return address(0);
+
+        return _accessControl.getRoleMember(Roles.OWNER, 0);
     }
 }

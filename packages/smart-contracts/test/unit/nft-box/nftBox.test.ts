@@ -1,6 +1,7 @@
 import { Signer } from 'ethers';
-import { ERC20TokenRecoverable__factory } from '../../../typechain';
+import { AccessControllable__factory, ERC20TokenRecoverable__factory } from '../../../typechain';
 import { deployACL, deployMockERC20, deployNFTBox } from '../../shared/deployers';
+import { shouldBehaveLikeAccessControllable } from '../access-controllable/access-controllable.behavior';
 import { shouldBehaveLikeERC20TokenRecoverable } from '../recoverable/recoverable.behavior';
 import { NFT_BOX_BASE_URI, shouldBehaveLikeNFTBox } from './nftBox.behavior';
 
@@ -26,10 +27,12 @@ export function unitTestNFTBox(): void {
       this.contracts.acl = acl;
       this.contracts.nftBox = nftBox;
       this.contracts.recoverable = ERC20TokenRecoverable__factory.connect(nftBox.address, this.signers.admin);
+      this.contracts.accessControllable = AccessControllable__factory.connect(nftBox.address, this.signers.admin);
       this.contracts.mockToken = mockToken;
     });
 
     shouldBehaveLikeNFTBox();
     shouldBehaveLikeERC20TokenRecoverable();
+    shouldBehaveLikeAccessControllable();
   });
 }
