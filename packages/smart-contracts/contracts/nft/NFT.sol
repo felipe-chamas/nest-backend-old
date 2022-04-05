@@ -6,11 +6,13 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721Burnab
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 import "../BaseContract.sol";
 import "./NFTStorage.sol";
+import "./INFT.sol";
 
 error MaximumTotalSupplyReached(uint256 maximum);
 
 // solhint-disable no-empty-blocks
 contract NFT is
+    INFT,
     ERC721EnumerableUpgradeable,
     ERC721URIStorageUpgradeable,
     ERC721BurnableUpgradeable,
@@ -36,12 +38,11 @@ contract NFT is
         _maxTokenSupply = maxTokenSupply;
     }
 
-    function mint(address to, string calldata _tokenURI) external onlyOperator {
+    function mint(address to) external onlyOperator returns (uint256 tokenId) {
         if (totalSupply() >= _maxTokenSupply) revert MaximumTotalSupplyReached(_maxTokenSupply);
-        uint256 tokenId = _tokenIdCounter.current();
+        tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _safeMint(to, tokenId);
-        _setTokenURI(tokenId, _tokenURI);
     }
 
     function setBaseTokenURI(string calldata baseTokenURI) external onlyOperator {
@@ -73,7 +74,7 @@ contract NFT is
     function supportsInterface(bytes4 interfaceId)
         public
         view
-        override(ERC721Upgradeable, ERC721EnumerableUpgradeable)
+        override(IERC165Upgradeable, ERC721Upgradeable, ERC721EnumerableUpgradeable)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);

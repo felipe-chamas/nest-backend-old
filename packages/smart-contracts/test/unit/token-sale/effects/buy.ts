@@ -5,15 +5,10 @@ import { BigNumberish, ContractTransaction } from 'ethers';
 import MerkleTree from 'merkletreejs';
 import { beforeEach } from 'mocha';
 import forEach from 'mocha-each';
+import { createAllowlistMerkleTree, createAllowlistMerkleTreeLeaf } from '../../../../scripts/utils';
 import { ERC20Mock, GameToken, GodModeTokenSale, TokenSale } from '../../../../typechain';
 import { EMPTY_MERKLE_ROOT, ONE_TOKEN } from '../../../shared/constants';
-import {
-  createAllowlistMerkleTree,
-  createMerkleTreeLeaf,
-  currentTime,
-  getRoundAdded,
-  nextBlock,
-} from '../../../shared/utils';
+import { currentTime, getRoundAdded, nextBlock } from '../../../shared/utils';
 
 export function shouldBehaveLikeBuy() {
   const ROUND_DURATION = 100;
@@ -293,7 +288,7 @@ export function shouldBehaveLikeBuy() {
       const roundStart = (await currentTime()) + 100;
       const chainId = await admin.getChainId();
       tree = createAllowlistMerkleTree(chainId, tokenSale.address, [user.address, admin.address]);
-      leafFunction = (account: string) => createMerkleTreeLeaf(chainId, tokenSale.address, account);
+      leafFunction = (account: string) => createAllowlistMerkleTreeLeaf(chainId, tokenSale.address, account);
 
       await addRound({ start: roundStart, merkleRoot: tree.getHexRoot() });
       await nextBlock(roundStart + 50);

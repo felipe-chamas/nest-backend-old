@@ -6,6 +6,7 @@ import {
   TASK_DEPLOY_MOCK_ERC20,
   TASK_DEPLOY_NFT,
   TASK_DEPLOY_NFT_BOX,
+  TASK_DEPLOY_NFT_CLAIM,
   TASK_DEPLOY_TOKEN_SALE,
 } from '../../tasks';
 import {
@@ -14,6 +15,7 @@ import {
   ERC20MockConstructor,
   GameTokenConstructor,
   NFTBoxConstructor,
+  NFTClaimConstructor,
   NFTConstructor,
   TokenSaleConstructor,
 } from '../../tasks/types';
@@ -22,6 +24,7 @@ import {
   ERC20Mock__factory,
   GameToken__factory,
   NFTBox__factory,
+  NFTClaim__factory,
   NFT__factory,
   TokenSale__factory,
 } from '../../typechain';
@@ -107,4 +110,13 @@ export async function deployNFTBox(
   });
 
   return NFTBox__factory.connect(nft, deployer);
+}
+
+export async function deployNFTClaim(deployer: Signer, { acl, nft }: NFTClaimConstructor) {
+  const nftClaim = await hre.run(TASK_DEPLOY_NFT_CLAIM, {
+    acl,
+    nft,
+  });
+
+  return NFTClaim__factory.connect(nftClaim, deployer);
 }

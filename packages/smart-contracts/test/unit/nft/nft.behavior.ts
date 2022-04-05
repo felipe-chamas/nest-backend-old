@@ -1,7 +1,7 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
 import { BigNumber } from 'ethers';
-import { NFT } from '../../../typechain';
+import { ERC721Upgradeable, NFT } from '../../../typechain';
 import { AddressZero } from '../../shared/constants';
 import { getTransferEvent } from '../../shared/utils';
 
@@ -31,16 +31,16 @@ export function shouldBehaveLikeNFT() {
 
     context('minting', () => {
       it('should be possible to mint NFT', async () => {
-        await expect(nft.connect(operator).mint(other.address, 'nft'))
+        await expect(nft.connect(operator).mint(other.address))
           .to.emit(nft, 'Transfer')
           .withArgs(AddressZero, other.address, 0);
 
         await expect(nft.balanceOf(other.address)).eventually.to.eq(1);
-        await expect(nft.tokenURI(0)).eventually.to.eq('ipfs://nft');
+        await expect(nft.tokenURI(0)).eventually.to.eq('ipfs://0');
       });
 
       it('stranger cannot mint NFT', async () => {
-        await expect(nft.connect(stranger).mint(other.address, 'nft')).to.be.eventually.rejectedWith(
+        await expect(nft.connect(stranger).mint(other.address)).to.be.eventually.rejectedWith(
           `AccessControl: account ${stranger.address.toLowerCase()} is missing role ${OPERATOR_ROLE}`,
         );
       });
@@ -63,8 +63,8 @@ export function shouldBehaveLikeNFT() {
     context('token URI', () => {
       let tokenId: BigNumber;
       beforeEach(async () => {
-        const tx = await nft.connect(operator).mint(other.address, 'nft');
-        ({ tokenId } = await getTransferEvent(tx, nft));
+        const tx = await nft.connect(operator).mint(other.address);
+        ({ tokenId } = await getTransferEvent(tx, nft as unknown as ERC721Upgradeable));
       });
 
       it('should allow operator to change token URI', async () => {
@@ -101,7 +101,7 @@ export function shouldBehaveLikeNFTWithLimitedSupply(maxTokenSupply: BigInt) {
 
     it('should be possible to mint up to maxTokenSupply', async () => {
       for (let i = 0; i < Number(maxTokenSupply); i++) {
-        await nft.mint(other.address, 'nft');
+        await nft.mint(other.address);
       }
 
       await expect(nft.totalSupply()).eventually.to.eq(maxTokenSupply);
@@ -110,10 +110,10 @@ export function shouldBehaveLikeNFTWithLimitedSupply(maxTokenSupply: BigInt) {
 
     it('should not be possible to mint more than maxTokenSupply', async () => {
       for (let i = 0; i < Number(maxTokenSupply); i++) {
-        await nft.mint(other.address, 'nft');
+        await nft.mint(other.address);
       }
 
-      await expect(nft.mint(other.address, 'nft')).to.be.rejectedWith(`MaximumTotalSupplyReached(${maxTokenSupply})`);
+      await expect(nft.mint(other.address)).to.be.rejectedWith(`MaximumTotalSupplyReached(${maxTokenSupply})`);
     });
   });
 }

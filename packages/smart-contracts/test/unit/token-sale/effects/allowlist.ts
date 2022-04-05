@@ -2,9 +2,10 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
 import MerkleTree from 'merkletreejs';
 import { beforeEach } from 'mocha';
+import { createAllowlistMerkleTree, createAllowlistMerkleTreeLeaf } from '../../../../scripts/utils';
 import { GameToken, TokenSale } from '../../../../typechain';
 import { EMPTY_MERKLE_ROOT, ONE_TOKEN } from '../../../shared/constants';
-import { createAllowlistMerkleTree, createMerkleTreeLeaf, currentTime, getRoundAdded } from '../../../shared/utils';
+import { currentTime, getRoundAdded } from '../../../shared/utils';
 
 export function shouldBehaveLikeAllowlist() {
   const ROUND_CAP = 1000n * ONE_TOKEN;
@@ -86,7 +87,7 @@ export function shouldBehaveLikeAllowlist() {
     beforeEach(async () => {
       const chainId = await admin.getChainId();
       tree = createAllowlistMerkleTree(chainId, tokenSale.address, [other.address, admin.address]);
-      leafFunction = (account: string) => createMerkleTreeLeaf(chainId, tokenSale.address, account);
+      leafFunction = (account: string) => createAllowlistMerkleTreeLeaf(chainId, tokenSale.address, account);
 
       await tokenSale.connect(operator).setRoundMerkleRoot(roundIndex, tree.getHexRoot());
     });

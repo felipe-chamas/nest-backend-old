@@ -9,6 +9,7 @@ import {
   GodModeTokenSale,
   NFT,
   NFTBox,
+  NFTClaim,
   TokenSale,
 } from '../../typechain';
 
@@ -31,6 +32,7 @@ export interface Contracts {
   recoverable: ERC20TokenRecoverable;
   tokenSale: TokenSale;
   nftBox: NFTBox;
+  nftClaim: NFTClaim;
 }
 
 export interface Mocks {

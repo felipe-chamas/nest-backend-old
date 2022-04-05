@@ -101,7 +101,7 @@ export function shouldBehaveLikeRound() {
 
     context('multiple rounds', () => {
       it('adds', async () => {
-        await addRound(operator, { start: now + 10 });
+        await addRound(operator, { start: now + 100 });
 
         await expect(addRound(operator, { start: now + 1000 }))
           .to.emit(tokenSale, 'RoundAdded')
