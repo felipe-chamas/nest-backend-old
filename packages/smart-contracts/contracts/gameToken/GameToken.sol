@@ -3,14 +3,11 @@ pragma solidity 0.8.12;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/draft-ERC20PermitUpgradeable.sol";
 import "../BaseContract.sol";
 
-// TODO define tokenomics wallets on the smart contract
-// TODO define tokenomics cliff/vesting schedules on the smart contract
-
-/// @custom:security-contact security@leeroy.gg
 // solhint-disable no-empty-blocks
-contract GameToken is ERC20BurnableUpgradeable, PausableUpgradeable, BaseContract {
+contract GameToken is ERC20BurnableUpgradeable, PausableUpgradeable, ERC20PermitUpgradeable, BaseContract {
     /**
      * @custom:oz-upgrades-unsafe-allow constructor
      */
@@ -26,6 +23,7 @@ contract GameToken is ERC20BurnableUpgradeable, PausableUpgradeable, BaseContrac
         __Pausable_init();
         __BaseContract_init(acl);
         __ERC20_init(name, symbol);
+        __ERC20Permit_init(name);
         _mint(owner, supply);
     }
 
