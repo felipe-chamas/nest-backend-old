@@ -1,5 +1,6 @@
-import { NftCollection } from 'models/nft-collection/entities/nft-collection.entity';
-import { User } from 'models/user/entities/user.entity';
+import { NftCollection } from '../../nft-collection/entities/nft-collection.entity';
+import { User } from '../../user/entities/user.entity';
+
 import {
   Column,
   Entity,

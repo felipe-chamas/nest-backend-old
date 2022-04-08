@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Nft } from 'models/nft/entities/nft.entity';
+import { Nft } from '../nft/entities/nft.entity';
+
 import { Repository } from 'typeorm';
 import { CreateNftCollectionDto } from './dto/create-nft-collection.dto';
 import { UpdateNftCollectionDto } from './dto/update-nft-collection.dto';

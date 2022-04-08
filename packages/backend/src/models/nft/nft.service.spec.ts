@@ -1,18 +1,100 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigService } from '@nestjs/config';
+import { Test } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+
+import {
+  createConnection,
+  getConnection,
+  getRepository,
+  Repository,
+} from 'typeorm';
+import { mockCreateNft } from '../../test/mocks/nft.mock';
+import { NftCollection } from '../nft-collection/entities/nft-collection.entity';
+import { User } from '../user/entities/user.entity';
+import { Nft } from './entities/nft.entity';
 import { NftService } from './nft.service';
 
+const dbConnName = 'default';
+const config = new ConfigService();
+
 describe('NftService', () => {
-  let service: NftService;
+  let service: Partial<NftService>;
+  let neftRepo: Repository<Nft>;
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [NftService],
+    await Test.createTestingModule({
+      providers: [
+        { provide: getRepositoryToken(Nft), useClass: Repository },
+        {
+          provide: getRepositoryToken(User),
+          useClass: Repository,
+        },
+        {
+          provide: getRepositoryToken(NftCollection),
+          useClass: Repository,
+        },
+      ],
     }).compile();
 
-    service = module.get<NftService>(NftService);
+    const connection = await createConnection({
+      type: 'mongodb',
+      url: config.get<string>('database.url'),
+      entities: [Nft, User, NftCollection],
+      useNewUrlParser: true,
+      logging: true,
+      useUnifiedTopology: true,
+      name: dbConnName,
+    });
+
+    neftRepo = getRepository(Nft, dbConnName);
+    service = new NftService(neftRepo);
+
+    return connection;
+  });
+
+  afterEach(async () => {
+    await getConnection(dbConnName).close();
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
+  });
+
+  it('should create an nft', async () => {
+    const nft = neftRepo.create(mockCreateNft);
+    await neftRepo.save(nft);
+
+    const result = await service.create(mockCreateNft);
+    expect(result).toEqual({ ...mockCreateNft, ...result });
+  });
+
+  it('should find an nft', async () => {
+    const nft = neftRepo.create(mockCreateNft);
+    await neftRepo.save(nft);
+
+    const result = await service.findOne(nft.id);
+    expect(result).toEqual({ ...mockCreateNft, ...result });
+  });
+
+  it('should find all nfts', async () => {
+    const nfts = await neftRepo.find();
+    const result = await service.findAll();
+    expect(result).toEqual(nfts);
+  });
+
+  it('should update an nft', async () => {
+    const nft = neftRepo.create(mockCreateNft);
+    await neftRepo.save(nft);
+
+    const result = await service.update(nft.id, mockCreateNft);
+    expect(result).toEqual({ ...mockCreateNft, ...result });
+  });
+
+  it('should delete an nft', async () => {
+    const nft = neftRepo.create(mockCreateNft);
+    await neftRepo.save(nft);
+
+    const result = await service.remove(nft.id);
+    expect(result.id).toBeUndefined();
   });
 });
