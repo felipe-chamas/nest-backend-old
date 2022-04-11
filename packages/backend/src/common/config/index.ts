@@ -7,4 +7,9 @@ export default () => ({
     userName: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
   },
+  sqs: {
+    queueUrl:
+      process.env.AWS_SQS_QUEUE_URL ||
+      'https://sqs.us-east-1.amazonaws.com/166126423048/events-listener-develop-queue',
+  },
 });

@@ -43,3 +43,7 @@ Thumbs.db
 
 # Requests
 *.http
+
+# Log files
+*.log
+*logs/*
