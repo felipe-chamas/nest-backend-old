@@ -3,7 +3,7 @@
   "scripts": {
     "prepare": "hardhat typechain",
     "compile": "hardhat compile",
-    "coverage": "hardhat coverage --solcoverjs ./.solcover.js --temp artifacts --testfiles \"./test/*.ts\"",
+    "coverage": "cross-env TS_NODE_TRANSPILE_ONLY=1 HARDHAT_DEPLOY_FIXTURE=true HARDHAT_COMPILE=true hardhat coverage --solcoverjs ./.solcover.js --temp artifacts --testfiles \"./test/*.ts\"",
     "lint": "prettier --check \"**/*.{ts,js,sol}\" && eslint \"**/*.{js,ts}\" && solhint 'contracts/**/*.sol'",
     "lint:fix": "prettier --write \"**/*.{ts,js,sol}\" && eslint --fix \"**/*.{js,ts}\" && solhint --fix 'contracts/**/*.sol'",
     "local:dev": "hardhat node --no-deploy",
@@ -14,6 +14,7 @@
     "slither": "slither . --filter-paths \"node_modules|contracts/mocks\" --exclude solc-version"
   },
   "devDependencies": {
+    "@chainlink/contracts": "^0.4.0",
     "@defi-wonderland/smock": "^2.0.7",
     "@fintechstudios/eslint-plugin-chai-as-promised": "^3.1.0",
     "@nomiclabs/hardhat-ethers": "^2.0.5",
@@ -63,5 +64,8 @@
   },
   "engines": {
     "node": ">=16"
+  },
+  "dependencies": {
+    "solc": "^0.8.13"
   }
 }

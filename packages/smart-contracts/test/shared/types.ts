@@ -11,7 +11,9 @@ import {
   NFT,
   NFTBox,
   NFTClaim,
+  NFTUnboxing,
   TokenSale,
+  VRFCoordinatorV2Mock,
 } from '../../typechain';
 
 declare module 'mocha' {
@@ -35,6 +37,9 @@ export interface Contracts {
   tokenSale: TokenSale;
   nftBox: NFTBox;
   nftClaim: NFTClaim;
+  nftUnboxing: NFTUnboxing;
+  vrfCoordinator: VRFCoordinatorV2Mock;
+  collection: NFT[];
 }
 
 export interface Mocks {

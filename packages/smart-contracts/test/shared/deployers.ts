@@ -6,6 +6,7 @@ import {
   TASK_DEPLOY_MOCK_ERC20,
   TASK_DEPLOY_NFT,
   TASK_DEPLOY_NFT_BOX,
+  TASK_DEPLOY_NFT_BOX_UNBOXING,
   TASK_DEPLOY_NFT_CLAIM,
   TASK_DEPLOY_TOKEN_SALE,
 } from '../../tasks';
@@ -15,6 +16,7 @@ import {
   ERC20MockConstructor,
   GameTokenConstructor,
   NFTBoxConstructor,
+  NFTBoxUnboxingConstructor,
   NFTClaimConstructor,
   NFTConstructor,
   TokenSaleConstructor,
@@ -25,8 +27,10 @@ import {
   GameToken__factory,
   NFTBox__factory,
   NFTClaim__factory,
+  NFTUnboxing__factory,
   NFT__factory,
   TokenSale__factory,
+  VRFCoordinatorV2Mock__factory,
 } from '../../typechain';
 import { MAX_UINT256 } from './constants';
 
@@ -119,4 +123,24 @@ export async function deployNFTClaim(deployer: Signer, { acl, nft }: NFTClaimCon
   });
 
   return NFTClaim__factory.connect(nftClaim, deployer);
+}
+
+export async function deployVRFCoordinatorV2(deployer: Signer) {
+  return await new VRFCoordinatorV2Mock__factory(deployer).deploy(0, 0);
+}
+
+export async function deployNFTUnboxing(
+  deployer: Signer,
+  { acl, vrfCoordinator, keyHash, nftBox, requestConfirmations, subscriptionId }: NFTBoxUnboxingConstructor,
+) {
+  const nftUnboxing = await hre.run(TASK_DEPLOY_NFT_BOX_UNBOXING, {
+    acl,
+    vrfCoordinator,
+    keyHash,
+    nftBox,
+    requestConfirmations,
+    subscriptionId,
+  });
+
+  return NFTUnboxing__factory.connect(nftUnboxing, deployer);
 }

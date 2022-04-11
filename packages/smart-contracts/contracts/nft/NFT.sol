@@ -36,6 +36,8 @@ contract NFT is
         __BaseContract_init(aclContract);
         _baseTokenURI = baseTokenURI;
         _maxTokenSupply = maxTokenSupply;
+        // nextTokenId is initialized to 1
+        _tokenIdCounter.increment();
     }
 
     function mint(address to) external onlyOperator returns (uint256 tokenId) {

@@ -1,7 +1,7 @@
 import { ContractTransaction } from 'ethers';
 import { ethers } from 'hardhat';
 import { MerkleTree } from 'merkletreejs';
-import { ERC721Upgradeable, TokenSale } from '../../typechain';
+import { ERC721Upgradeable, NFTUnboxing, TokenSale, VRFCoordinatorV2Mock } from '../../typechain';
 
 export const getTransferEvent = async (tx: ContractTransaction, erc721: ERC721Upgradeable) => {
   const receipt = await tx.wait();
@@ -30,6 +30,8 @@ export const currentTime = async (): Promise<number> => {
   return block.timestamp;
 };
 
+export const mineBlocks = (count: number) => ethers.provider.send('hardhat_mine', [BigInt(count).toString(16)]);
+
 export const createAllowlistMerkleTree = (chainid: number, contract: string, accounts: string[]) => {
   if (accounts.length < 2) throw new Error('At least two accounts must be specified!');
   const leaves = accounts.map(x => createMerkleTreeLeaf(chainid, contract, x));
@@ -38,3 +40,15 @@ export const createAllowlistMerkleTree = (chainid: number, contract: string, acc
 
 export const createMerkleTreeLeaf = (chainid: number, contract: string, account: string) =>
   ethers.utils.solidityKeccak256(['uint256', 'address', 'address'], [chainid, contract, account]);
+
+export const getSubscriptionCreatedEvent = async (tx: ContractTransaction, coordinator: VRFCoordinatorV2Mock) => {
+  const receipt = await tx.wait();
+  const events = await coordinator.queryFilter(coordinator.filters.SubscriptionCreated(), receipt.blockNumber);
+  return events[0].args;
+};
+
+export const getUnboxedEvent = async (tx: ContractTransaction, nftUnboxing: NFTUnboxing) => {
+  const receipt = await tx.wait();
+  const events = await nftUnboxing.queryFilter(nftUnboxing.filters.Unboxed(), receipt.blockNumber);
+  return events[0].args;
+};

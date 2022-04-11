@@ -35,14 +35,14 @@ contract NFTClaim is BaseContract {
         bytes32 merkleRoot,
         bytes32[] calldata proof,
         address account,
-        uint256 tokens
+        uint256 tokenCount
     ) external {
-        if (!_isAllowed(merkleRoot, proof, account, tokens)) revert ClaimingNotAllowed();
+        if (!_isAllowed(merkleRoot, proof, account, tokenCount)) revert ClaimingNotAllowed();
 
         _claimedRoots[account][merkleRoot] = true;
 
         INFT nft = _nft;
-        for (uint256 i = 0; i < tokens; i++) {
+        for (uint256 i = 0; i < tokenCount; i++) {
             uint256 tokenId = nft.mint(account);
             emit TokenClaimed(account, merkleRoot, tokenId);
         }

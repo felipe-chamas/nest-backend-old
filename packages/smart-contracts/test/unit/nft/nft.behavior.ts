@@ -33,10 +33,10 @@ export function shouldBehaveLikeNFT() {
       it('should be possible to mint NFT', async () => {
         await expect(nft.connect(operator).mint(other.address))
           .to.emit(nft, 'Transfer')
-          .withArgs(AddressZero, other.address, 0);
+          .withArgs(AddressZero, other.address, 1);
 
         await expect(nft.balanceOf(other.address)).eventually.to.eq(1);
-        await expect(nft.tokenURI(0)).eventually.to.eq('ipfs://0');
+        await expect(nft.tokenURI(1)).eventually.to.eq('ipfs://1');
       });
 
       it('stranger cannot mint NFT', async () => {

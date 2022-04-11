@@ -1,6 +1,7 @@
 import { Signer } from 'ethers';
-import { ERC20TokenRecoverable__factory } from '../../../typechain';
+import { AccessControllable__factory, ERC20TokenRecoverable__factory } from '../../../typechain';
 import { deployACL, deployNFT, deployNFTClaim } from '../../shared/deployers';
+import { shouldBehaveLikeAccessControllable } from '../access-controllable/access-controllable.behavior';
 import { shouldBehaveLikeERC20TokenRecoverable } from '../recoverable/recoverable.behavior';
 import { shouldBehaveLikeNFTClaim } from './nft-claim.behavior';
 
@@ -32,10 +33,15 @@ export function unitTestNFTClaim(): void {
       this.contracts.nft = nft;
       this.contracts.nftClaim = nftClaim;
       this.contracts.recoverable = ERC20TokenRecoverable__factory.connect(nftClaim.address, this.signers.admin);
+      this.contracts.accessControllable = AccessControllable__factory.connect(nftClaim.address, this.signers.admin);
     });
 
     describe('NFT Claim', function () {
       shouldBehaveLikeNFTClaim();
+    });
+
+    describe('Access Controllable', function () {
+      shouldBehaveLikeAccessControllable();
     });
 
     describe('ERC20 Token Recoverable', function () {

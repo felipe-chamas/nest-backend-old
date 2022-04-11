@@ -2,20 +2,14 @@
 pragma solidity 0.8.12;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721BurnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 import "../BaseContract.sol";
 import "./NFTBoxStorage.sol";
+import "./INFTBox.sol";
 
 error MaximumTotalSupplyReached(uint256 maximum);
 
-contract NFTBox is
-    ERC721EnumerableUpgradeable,
-    ERC721URIStorageUpgradeable,
-    ERC721BurnableUpgradeable,
-    BaseContract,
-    NFTBoxStorage
-{
+contract NFTBox is INFTBox, ERC721EnumerableUpgradeable, ERC721URIStorageUpgradeable, BaseContract, NFTBoxStorage {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -31,16 +25,18 @@ contract NFTBox is
         __ERC721Enumerable_init();
         __BaseContract_init(aclContract);
         _baseTokenURI = baseTokenURI;
+        // nextTokenId is initialized to 1
+        _tokenIdCounter.increment();
     }
 
-    function mint(address to, uint256 count) external onlyOperator {
-        uint256 tokenId = _tokenIdCounter.current();
+    function mint(address to) external onlyOperator returns (uint256 tokenId) {
+        tokenId = _tokenIdCounter.current();
+        _tokenIdCounter.increment();
+        _safeMint(to, tokenId);
+    }
 
-        for (uint256 i = 0; i < count; i++) {
-            _safeMint(to, tokenId);
-            tokenId++;
-        }
-        _tokenIdCounter._value = tokenId;
+    function burn(uint256 tokenId) external onlyOperator {
+        _burn(tokenId);
     }
 
     function setBaseTokenURI(string calldata baseTokenURI) external onlyOperator {
@@ -49,6 +45,10 @@ contract NFTBox is
 
     function setTokenURI(uint256 tokenId, string calldata _tokenURI) external onlyOperator {
         _setTokenURI(tokenId, _tokenURI);
+    }
+
+    function isApprovedOrOwner(address spender, uint256 tokenId) external view returns (bool) {
+        return _isApprovedOrOwner(spender, tokenId);
     }
 
     function getBaseTokenURI() external view returns (string memory) {
@@ -68,7 +68,7 @@ contract NFTBox is
     function supportsInterface(bytes4 interfaceId)
         public
         view
-        override(ERC721Upgradeable, ERC721EnumerableUpgradeable)
+        override(IERC165Upgradeable, ERC721Upgradeable, ERC721EnumerableUpgradeable)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
