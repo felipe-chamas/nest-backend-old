@@ -25,12 +25,21 @@ task(TASK_DEPLOY_NFT_BOX_UNBOXING, 'Deploy NFT Box Unboxing contract')
     types.int,
   )
   .addParam('subscriptionId', 'Chainlink VRF Subscription ID', undefined, types.string)
+  .addFlag('addToACL', 'Add NFT Box Unboxing contract to MINTER_ROLE')
   .setAction(
     async (
-      { acl, vrfCoordinator, keyHash, nftBox, subscriptionId, requestConfirmations }: NFTBoxUnboxingConstructor,
+      {
+        acl,
+        vrfCoordinator,
+        keyHash,
+        nftBox,
+        subscriptionId,
+        requestConfirmations,
+        addToACL,
+      }: NFTBoxUnboxingConstructor,
       { upgrades, ethers },
     ) => {
-      const nftClaim = await upgrades.deployProxy(
+      const nftUnboxing = await upgrades.deployProxy(
         await ethers.getContractFactory('NFTUnboxing'),
         [nftBox, requestConfirmations, subscriptionId, vrfCoordinator, keyHash, acl],
         {
@@ -39,7 +48,14 @@ task(TASK_DEPLOY_NFT_BOX_UNBOXING, 'Deploy NFT Box Unboxing contract')
         },
       );
 
-      return nftClaim.address;
+      if (addToACL === true) {
+        const aclFactory = await ethers.getContractFactory('ACL');
+        await aclFactory
+          .attach(acl)
+          .grantRole(ethers.utils.keccak256(ethers.utils.toUtf8Bytes('MINTER_ROLE')), nftUnboxing.address);
+      }
+
+      return nftUnboxing.address;
     },
   );
 

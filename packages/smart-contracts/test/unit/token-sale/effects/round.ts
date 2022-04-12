@@ -5,10 +5,10 @@ import { ethers } from 'hardhat';
 import { beforeEach } from 'mocha';
 import { GameToken, TokenSale } from '../../../../typechain';
 import { EMPTY_MERKLE_ROOT, ONE_TOKEN } from '../../../shared/constants';
+import { Roles } from '../../../shared/types';
 import { currentTime, getRoundAdded, setNextBlockTimestamp } from '../../../shared/utils';
 
 export function shouldBehaveLikeRound() {
-  let OPERATOR_ROLE: string;
   let admin: SignerWithAddress;
   let operator: SignerWithAddress;
   let stranger: SignerWithAddress;
@@ -20,7 +20,6 @@ export function shouldBehaveLikeRound() {
   beforeEach(async function () {
     ({ admin, stranger, operator, other, custody } = this.signers);
     ({ tokenSale, gameToken } = this.contracts);
-    ({ OPERATOR_ROLE } = this.roles);
     now = await currentTime();
   });
 
@@ -122,7 +121,7 @@ export function shouldBehaveLikeRound() {
     context('when called by stranger', () => {
       it('reverts', async () => {
         await expect(addRound(stranger, { start: now + 1 })).to.be.revertedWith(
-          `AccessControl: account ${stranger.address.toLowerCase()} is missing role ${OPERATOR_ROLE}`,
+          `AccessControl: account ${stranger.address.toLowerCase()} is missing role ${Roles.OPERATOR_ROLE}`,
         );
       });
     });
@@ -162,7 +161,7 @@ export function shouldBehaveLikeRound() {
           await expect(
             tokenSale.connect(stranger).setRoundMerkleRoot(roundIndex, NEW_ROUND_MERKLE_ROOT),
           ).to.be.revertedWith(
-            `AccessControl: account ${stranger.address.toLowerCase()} is missing role ${OPERATOR_ROLE}`,
+            `AccessControl: account ${stranger.address.toLowerCase()} is missing role ${Roles.OPERATOR_ROLE}`,
           );
         });
       });

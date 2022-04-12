@@ -1,6 +1,7 @@
 import { Signer } from 'ethers';
 import { AccessControllable__factory, ERC20TokenRecoverable__factory } from '../../../typechain';
 import { deployACL, deployMockERC20, deployNFTBox } from '../../shared/deployers';
+import { Roles } from '../../shared/types';
 import { shouldBehaveLikeAccessControllable } from '../access-controllable/access-controllable.behavior';
 import { shouldBehaveLikeERC20TokenRecoverable } from '../recoverable/recoverable.behavior';
 import { NFT_BOX_BASE_URI, shouldBehaveLikeNFTBox } from './nftBox.behavior';
@@ -10,11 +11,10 @@ async function nftBoxFixture(signers: Signer[]) {
   const [deployerAddress, operatorAddress] = await Promise.all([deployer.getAddress(), operator.getAddress()]);
 
   const acl = await deployACL(deployer, { admin: deployerAddress, operator: operatorAddress });
-
+  await acl.grantRole(Roles.MINTER_ROLE, operatorAddress);
   return {
     acl,
     nftBox: await deployNFTBox(deployer, { acl: acl.address, baseUri: NFT_BOX_BASE_URI }),
-
     mockToken: await deployMockERC20(deployer, {}),
   };
 }

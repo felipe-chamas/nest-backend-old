@@ -2,6 +2,7 @@ import { Signer } from 'ethers';
 import { AccessControllable__factory, ERC20TokenRecoverable__factory } from '../../../typechain';
 import { MAX_UINT256 } from '../../shared/constants';
 import { deployACL, deployMockERC20, deployNFT } from '../../shared/deployers';
+import { Roles } from '../../shared/types';
 import { shouldBehaveLikeAccessControllable } from '../access-controllable/access-controllable.behavior';
 import { shouldBehaveLikeERC20TokenRecoverable } from '../recoverable/recoverable.behavior';
 import { shouldBehaveLikeNFT, shouldBehaveLikeNFTWithLimitedSupply } from './nft.behavior';
@@ -11,6 +12,8 @@ async function nftFixture(signers: Signer[], maxLimitedSupply = MAX_UINT256) {
   const [deployerAddress, operatorAddress] = await Promise.all([deployer.getAddress(), operator.getAddress()]);
 
   const acl = await deployACL(deployer, { admin: deployerAddress, operator: operatorAddress });
+
+  await acl.grantRole(Roles.MINTER_ROLE, operatorAddress);
 
   return {
     acl,

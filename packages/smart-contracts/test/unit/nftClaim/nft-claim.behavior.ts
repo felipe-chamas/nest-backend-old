@@ -4,9 +4,9 @@ import MerkleTree from 'merkletreejs';
 import { createNFTClaimMerkleTree, createNFTClaimMerkleTreeLeaf } from '../../../scripts/utils';
 import { NFT, NFTClaim } from '../../../typechain';
 import { EMPTY_MERKLE_ROOT } from '../../shared/constants';
+import { Roles } from '../../shared/types';
 
 export function shouldBehaveLikeNFTClaim() {
-  let OPERATOR_ROLE: string;
   let nft: NFT;
   let nftClaim: NFTClaim;
   let stranger: SignerWithAddress;
@@ -18,7 +18,6 @@ export function shouldBehaveLikeNFTClaim() {
   beforeEach(async function () {
     ({ nft, nftClaim } = this.contracts);
     ({ stranger, other, user, operator } = this.signers);
-    ({ OPERATOR_ROLE } = this.roles);
 
     tree = createNFTClaimMerkleTree(await operator.getChainId(), nftClaim.address, [
       { account: other.address, tokens: 2 },
@@ -38,7 +37,7 @@ export function shouldBehaveLikeNFTClaim() {
     context('when stranger adds merkle root', () => {
       it('reverts', async () => {
         await expect(nftClaim.connect(stranger).addMerkleRoot(tree.getHexRoot())).to.revertedWith(
-          `AccessControl: account ${stranger.address.toLowerCase()} is missing role ${OPERATOR_ROLE}`,
+          `AccessControl: account ${stranger.address.toLowerCase()} is missing role ${Roles.OPERATOR_ROLE}`,
         );
       });
     });

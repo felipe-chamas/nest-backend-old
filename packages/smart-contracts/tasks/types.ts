@@ -19,6 +19,7 @@ export type NFTBoxUnboxingConstructor = {
   requestConfirmations: number;
   subscriptionId: string;
   keyHash: string;
+  addToACL?: boolean;
 };
 
 export type AtLeast<T, K extends keyof T> = Partial<T> & Pick<T, K>;

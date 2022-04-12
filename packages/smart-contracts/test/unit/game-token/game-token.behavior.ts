@@ -3,10 +3,10 @@ import { expect } from 'chai';
 import { signERC2612Permit } from 'eth-permit';
 import { GameToken } from '../../../typechain';
 import { ONE_TOKEN } from '../../shared/constants';
+import { Roles } from '../../shared/types';
 
 export function shouldBehaveLikeGameToken() {
   context('Game Token', function () {
-    let OPERATOR_ROLE: string;
     let token: GameToken;
     let stranger: SignerWithAddress;
     let admin: SignerWithAddress;
@@ -15,7 +15,6 @@ export function shouldBehaveLikeGameToken() {
     let user: SignerWithAddress;
 
     beforeEach(function () {
-      ({ OPERATOR_ROLE } = this.roles);
       ({ admin, other, stranger, operator, user } = this.signers);
       token = this.contracts.gameToken;
     });
@@ -37,7 +36,7 @@ export function shouldBehaveLikeGameToken() {
     describe('when unpaused', function () {
       it('should not allow stranger to pause', async function () {
         await expect(token.connect(stranger).pause()).to.be.revertedWith(
-          `AccessControl: account ${stranger.address.toLowerCase()} is missing role ${OPERATOR_ROLE}`,
+          `AccessControl: account ${stranger.address.toLowerCase()} is missing role ${Roles.OPERATOR_ROLE}`,
         );
       });
 

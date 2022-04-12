@@ -29,13 +29,13 @@ contract NFTBox is INFTBox, ERC721EnumerableUpgradeable, ERC721URIStorageUpgrade
         _tokenIdCounter.increment();
     }
 
-    function mint(address to) external onlyOperator returns (uint256 tokenId) {
+    function mint(address to) external onlyMinter returns (uint256 tokenId) {
         tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _safeMint(to, tokenId);
     }
 
-    function burn(uint256 tokenId) external onlyOperator {
+    function burn(uint256 tokenId) external onlyMinter {
         _burn(tokenId);
     }
 

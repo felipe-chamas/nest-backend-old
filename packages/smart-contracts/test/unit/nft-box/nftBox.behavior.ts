@@ -1,14 +1,14 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
-import { BigNumber, BigNumberish } from 'ethers';
+import { BigNumber } from 'ethers';
 import { ERC721Upgradeable, NFT, NFTBox } from '../../../typechain';
 import { AddressZero } from '../../shared/constants';
+import { Roles } from '../../shared/types';
 import { getTransferEvent } from '../../shared/utils';
 export const NFT_BOX_BASE_URI = 'http://harvest.io/box/';
 
 export function shouldBehaveLikeNFTBox() {
   context('NFT Box', function () {
-    let OPERATOR_ROLE: string;
     let nftBox: NFTBox;
     let stranger: SignerWithAddress;
     let other: SignerWithAddress;
@@ -18,7 +18,6 @@ export function shouldBehaveLikeNFTBox() {
     beforeEach(function () {
       ({ nftBox } = this.contracts);
       ({ stranger, other, operator, user } = this.signers);
-      ({ OPERATOR_ROLE } = this.roles);
     });
 
     context('Basic', () => {
@@ -43,7 +42,7 @@ export function shouldBehaveLikeNFTBox() {
 
       it('stranger cannot mint NFT', async () => {
         await expect(nftBox.connect(stranger).mint(other.address)).to.be.eventually.rejectedWith(
-          `AccessControl: account ${stranger.address.toLowerCase()} is missing role ${OPERATOR_ROLE}`,
+          `AccessControl: account ${stranger.address.toLowerCase()} is missing role ${Roles.MINTER_ROLE}`,
         );
       });
     });
@@ -69,7 +68,7 @@ export function shouldBehaveLikeNFTBox() {
       context('when stranger burns token', () => {
         it('reverts', async () => {
           await expect(nftBox.connect(stranger).burn(tokenId)).to.be.eventually.rejectedWith(
-            `AccessControl: account ${stranger.address.toLowerCase()} is missing role ${OPERATOR_ROLE}`,
+            `AccessControl: account ${stranger.address.toLowerCase()} is missing role ${Roles.MINTER_ROLE}`,
           );
         });
       });
@@ -84,7 +83,7 @@ export function shouldBehaveLikeNFTBox() {
 
       it('should not allow stranger to change base token URI', async () => {
         await expect(nftBox.connect(stranger).setBaseTokenURI('http://')).to.be.rejectedWith(
-          `AccessControl: account ${stranger.address.toLowerCase()} is missing role ${OPERATOR_ROLE}`,
+          `AccessControl: account ${stranger.address.toLowerCase()} is missing role ${Roles.OPERATOR_ROLE}`,
         );
       });
     });
@@ -104,7 +103,7 @@ export function shouldBehaveLikeNFTBox() {
 
       it('should forbid stranger to change token URI', async () => {
         await expect(nftBox.connect(stranger).setTokenURI(tokenId, 'ipfs://tfn')).to.be.rejectedWith(
-          `AccessControl: account ${stranger.address.toLowerCase()} is missing role ${OPERATOR_ROLE}`,
+          `AccessControl: account ${stranger.address.toLowerCase()} is missing role ${Roles.OPERATOR_ROLE}`,
         );
       });
     });

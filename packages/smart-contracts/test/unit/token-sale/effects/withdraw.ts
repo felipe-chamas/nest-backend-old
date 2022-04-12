@@ -3,13 +3,13 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
 import { ERC20Mock, GameToken, TokenSale } from '../../../../typechain';
 import { EMPTY_MERKLE_ROOT, ONE_TOKEN } from '../../../shared/constants';
+import { Roles } from '../../../shared/types';
 import { currentTime, nextBlock, setNextBlockTimestamp } from '../../../shared/utils';
 
 export function shouldBehaveLikeWithdraw() {
   const ROUND_DURATION = 100;
   const ROUND_CAP = 1000n * ONE_TOKEN;
   const ROUND_PRICE = ONE_TOKEN;
-  let OPERATOR_ROLE: string;
   let admin: SignerWithAddress;
   let operator: SignerWithAddress;
   let custody: SignerWithAddress;
@@ -24,7 +24,6 @@ export function shouldBehaveLikeWithdraw() {
     ({ admin, stranger, operator, custody, user } = this.signers);
     ({ tokenSale, gameToken } = this.contracts);
     ({ erc20 } = this.mocks);
-    ({ OPERATOR_ROLE } = this.roles);
 
     now = await currentTime();
     await gameToken.connect(admin).transfer(custody.address, ROUND_CAP);
@@ -94,7 +93,7 @@ export function shouldBehaveLikeWithdraw() {
     context('when stranger calls withdraw', () => {
       it('reverts', async () => {
         await expect(tokenSale.connect(stranger).withdraw(currentRound)).to.revertedWith(
-          `AccessControl: account ${stranger.address.toLowerCase()} is missing role ${OPERATOR_ROLE}`,
+          `AccessControl: account ${stranger.address.toLowerCase()} is missing role ${Roles.OPERATOR_ROLE}`,
         );
       });
     });

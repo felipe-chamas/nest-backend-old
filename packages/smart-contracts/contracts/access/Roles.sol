@@ -17,4 +17,5 @@ library Roles {
      *      limitations/priveleges.
      */
     bytes32 public constant OWNER = keccak256("OWNER_ROLE");
+    bytes32 public constant MINTER = keccak256("MINTER_ROLE");
 }

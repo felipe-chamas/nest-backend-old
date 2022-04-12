@@ -7,6 +7,13 @@ import "./access/AccessControllable.sol";
 
 // solhint-disable func-name-mixedcase
 abstract contract BaseContract is ERC20TokenRecoverable, AccessControllable, UUPSUpgradeable {
+    /**
+     * @dev This empty reserved space is put in place to allow future versions to add new
+     * variables without shifting down storage in the inheritance chain.
+     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+     */
+    uint256[50] private __gap;
+
     function __BaseContract_init(address acl) internal onlyInitializing {
         __BaseContract_init_unchained(acl);
     }
@@ -23,11 +30,4 @@ abstract contract BaseContract is ERC20TokenRecoverable, AccessControllable, UUP
         address,
         uint256
     ) internal override onlyAdmin {}
-
-    /**
-     * @dev This empty reserved space is put in place to allow future versions to add new
-     * variables without shifting down storage in the inheritance chain.
-     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
-     */
-    uint256[50] private __gap;
 }

@@ -53,7 +53,7 @@ contract NFTUnboxing is VRFConsumerBaseV2Upgradeable, ReentrancyGuardUpgradeable
             _keyHash,
             _subscriptionId,
             _requestConfirmations,
-            CALLBACK_GAS_LIMIT,
+            _CALLBACK_GAS_LIMIT,
             1
         );
 

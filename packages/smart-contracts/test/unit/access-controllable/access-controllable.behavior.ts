@@ -2,18 +2,17 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
 import { AccessControllable, ACL } from '../../../typechain';
 import { AddressZero } from '../../shared/constants';
+import { Roles } from '../../shared/types';
 
 export function shouldBehaveLikeAccessControllable() {
   context('access controllable', function () {
     let accessControllable: AccessControllable;
     let acl: ACL;
     let user: SignerWithAddress;
-    let OWNER_ROLE: string;
 
     beforeEach(function () {
       ({ accessControllable, acl } = this.contracts);
       ({ user } = this.signers);
-      ({ OWNER_ROLE } = this.roles);
     });
 
     context('when ROLE_OWNER is not set', () => {
@@ -32,7 +31,7 @@ export function shouldBehaveLikeAccessControllable() {
 
     context('when user is granted owner roles', () => {
       beforeEach(async () => {
-        await acl.grantRole(OWNER_ROLE, user.address);
+        await acl.grantRole(Roles.OWNER_ROLE, user.address);
       });
 
       context('when calling owner() function', () => {

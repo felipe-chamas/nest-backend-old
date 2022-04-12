@@ -10,6 +10,7 @@ import {
   deployNFTUnboxing,
   deployVRFCoordinatorV2,
 } from '../../shared/deployers';
+import { Roles } from '../../shared/types';
 import { getSubscriptionCreatedEvent } from '../../shared/utils';
 import { shouldBehaveLikeAccessControllable } from '../access-controllable/access-controllable.behavior';
 import { shouldBehaveLikeERC20TokenRecoverable } from '../recoverable/recoverable.behavior';
@@ -25,6 +26,8 @@ async function nftUnboxingFixture(signers: Signer[]) {
   const nftBox = await deployNFTBox(deployer, { acl: acl.address, baseUri: NFT_BOX_BASE_URI });
   const coordinator = await deployVRFCoordinatorV2(deployer);
 
+  await acl.grantRole(Roles.MINTER_ROLE, operatorAddress);
+
   const { subId } = await getSubscriptionCreatedEvent(await coordinator.createSubscription(), coordinator);
 
   await coordinator.fundSubscription(subId, ONE_TOKEN * 100n);
@@ -37,6 +40,8 @@ async function nftUnboxingFixture(signers: Signer[]) {
     subscriptionId: subId.toString(),
     keyHash: '0xd4bb89654db74673a187bd804519e65e3f71a52bc55f11da7601a13dcf505314',
   });
+
+  await acl.grantRole(Roles.MINTER_ROLE, nftUnboxing.address);
 
   return {
     acl,

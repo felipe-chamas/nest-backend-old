@@ -2,10 +2,10 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
 import { beforeEach } from 'mocha';
 import { TokenSale } from '../../../../typechain';
+import { Roles } from '../../../shared/types';
 import { currentTime } from '../../../shared/utils';
 
 export function shouldBehaveLikeVesting() {
-  let OPERATOR_ROLE: string;
   let operator: SignerWithAddress;
   let stranger: SignerWithAddress;
   let tokenSale: TokenSale;
@@ -13,7 +13,6 @@ export function shouldBehaveLikeVesting() {
   beforeEach(async function () {
     ({ operator, stranger } = this.signers);
     ({ tokenSale } = this.contracts);
-    ({ OPERATOR_ROLE } = this.roles);
 
     now = await currentTime();
   });
@@ -47,7 +46,7 @@ export function shouldBehaveLikeVesting() {
     context('when called by stranger', () => {
       it('reverts', async () => {
         await expect(tokenSale.connect(stranger).setVestingStart(now + 10)).to.be.revertedWith(
-          `AccessControl: account ${stranger.address.toLowerCase()} is missing role ${OPERATOR_ROLE}`,
+          `AccessControl: account ${stranger.address.toLowerCase()} is missing role ${Roles.OPERATOR_ROLE}`,
         );
       });
     });

@@ -5,11 +5,11 @@ import { beforeEach } from 'mocha';
 import { createAllowlistMerkleTree, createAllowlistMerkleTreeLeaf } from '../../../../scripts/utils';
 import { GameToken, TokenSale } from '../../../../typechain';
 import { EMPTY_MERKLE_ROOT, ONE_TOKEN } from '../../../shared/constants';
+import { Roles } from '../../../shared/types';
 import { currentTime, getRoundAdded } from '../../../shared/utils';
 
 export function shouldBehaveLikeAllowlist() {
   const ROUND_CAP = 1000n * ONE_TOKEN;
-  let OPERATOR_ROLE: string;
   let admin: SignerWithAddress;
   let operator: SignerWithAddress;
   let other: SignerWithAddress;
@@ -21,7 +21,6 @@ export function shouldBehaveLikeAllowlist() {
   beforeEach(async function () {
     ({ admin, operator, other, stranger, custody } = this.signers);
     ({ tokenSale, gameToken } = this.contracts);
-    ({ OPERATOR_ROLE } = this.roles);
 
     await gameToken.connect(admin).transfer(custody.address, ROUND_CAP);
     await gameToken.connect(custody).approve(tokenSale.address, ROUND_CAP);
@@ -75,7 +74,7 @@ export function shouldBehaveLikeAllowlist() {
     context('when called by stranger', () => {
       it('reverts', async () => {
         await expect(tokenSale.connect(stranger).addToAllowlist(roundIndex, [other.address])).to.be.revertedWith(
-          `AccessControl: account ${stranger.address.toLowerCase()} is missing role ${OPERATOR_ROLE}`,
+          `AccessControl: account ${stranger.address.toLowerCase()} is missing role ${Roles.OPERATOR_ROLE}`,
         );
       });
     });

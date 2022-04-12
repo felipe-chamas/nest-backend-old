@@ -3,9 +3,9 @@ import { expect } from 'chai';
 import { beforeEach } from 'mocha';
 import { TokenSale } from '../../../../typechain';
 import { AddressZero } from '../../../shared/constants';
+import { Roles } from '../../../shared/types';
 
 export function shouldBehaveLikeCustody() {
-  let OPERATOR_ROLE: string;
   let operator: SignerWithAddress;
   let stranger: SignerWithAddress;
   let custody: SignerWithAddress;
@@ -14,7 +14,6 @@ export function shouldBehaveLikeCustody() {
   beforeEach(function () {
     ({ operator, stranger, custody, other } = this.signers);
     ({ tokenSale } = this.contracts);
-    ({ OPERATOR_ROLE } = this.roles);
   });
 
   context('when called by operator', () => {
@@ -33,7 +32,7 @@ export function shouldBehaveLikeCustody() {
   context('when called by stranger', () => {
     it('reverts', async () => {
       await expect(tokenSale.connect(stranger).setCustody(other.address)).to.be.revertedWith(
-        `AccessControl: account ${stranger.address.toLowerCase()} is missing role ${OPERATOR_ROLE}`,
+        `AccessControl: account ${stranger.address.toLowerCase()} is missing role ${Roles.OPERATOR_ROLE}`,
       );
     });
   });

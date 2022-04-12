@@ -30,6 +30,11 @@ abstract contract AccessControllable is Initializable, ContextUpgradeable {
         _;
     }
 
+    modifier onlyMinter() {
+        _accessControl.checkRole(Roles.MINTER, _msgSender());
+        _;
+    }
+
     modifier onlyRole(bytes32 role) {
         _accessControl.checkRole(role, _msgSender());
         _;

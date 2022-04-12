@@ -1,6 +1,7 @@
 import { MockContract } from '@defi-wonderland/smock';
 import type { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signer-with-address';
 import type { Fixture } from 'ethereum-waffle';
+import { ethers } from 'hardhat';
 import {
   AccessControllable,
   ACL,
@@ -20,7 +21,6 @@ declare module 'mocha' {
   interface Context {
     loadFixture: <T>(fixture: Fixture<T>) => Promise<T>;
     signers: Signers;
-    roles: Record<string, string>;
     contracts: Contracts;
     mocks: Mocks;
     godMode: GodMode;
@@ -59,3 +59,10 @@ export interface Signers {
   custody: SignerWithAddress;
   user: SignerWithAddress;
 }
+
+export const Roles = {
+  ADMIN_ROLE: '0x0000000000000000000000000000000000000000000000000000000000000000',
+  OPERATOR_ROLE: ethers.utils.keccak256(ethers.utils.toUtf8Bytes('OPERATOR_ROLE')),
+  OWNER_ROLE: ethers.utils.keccak256(ethers.utils.toUtf8Bytes('OWNER_ROLE')),
+  MINTER_ROLE: ethers.utils.keccak256(ethers.utils.toUtf8Bytes('MINTER_ROLE')),
+};

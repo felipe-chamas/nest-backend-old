@@ -4,7 +4,7 @@ pragma solidity 0.8.12;
 import "./INFTBox.sol";
 
 abstract contract NFTUnboxingStorage {
-    uint32 internal constant CALLBACK_GAS_LIMIT = 40_000;
+    uint32 internal constant _CALLBACK_GAS_LIMIT = 40_000;
 
     // The gas lane to use, which specifies the maximum gas price to bump to.
     // For a list of available gas lanes on each network,

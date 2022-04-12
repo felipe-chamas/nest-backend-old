@@ -1,20 +1,18 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
 import { BigNumber } from 'ethers';
-import { ACL, ERC721Upgradeable, NFT, NFTBox, NFTUnboxing, VRFCoordinatorV2Mock } from '../../../typechain';
+import { ERC721Upgradeable, NFT, NFTBox, NFTUnboxing, VRFCoordinatorV2Mock } from '../../../typechain';
+import { Roles } from '../../shared/types';
 import { getTransferEvent, getUnboxedEvent } from '../../shared/utils';
 
 export const NFT_BOX_BASE_URI = 'http://harvest.io/box/';
 
 export function shouldBehaveLikeNFTUnboxing() {
   context('NFT Unboxing', () => {
-    let OPERATOR_ROLE: string;
-    let acl: ACL;
     let nftBox: NFTBox;
     let nftUnboxing: NFTUnboxing;
     let vrfCoordinator: VRFCoordinatorV2Mock;
     let stranger: SignerWithAddress;
-    let admin: SignerWithAddress;
     let user: SignerWithAddress;
     let other: SignerWithAddress;
     let operator: SignerWithAddress;
@@ -22,9 +20,8 @@ export function shouldBehaveLikeNFTUnboxing() {
     let collection: NFT[];
 
     beforeEach(async function () {
-      ({ nftBox, nftUnboxing, vrfCoordinator, collection, acl } = this.contracts);
-      ({ admin, stranger, operator, user, other } = this.signers);
-      ({ OPERATOR_ROLE } = this.roles);
+      ({ nftBox, nftUnboxing, vrfCoordinator, collection } = this.contracts);
+      ({ stranger, operator, user, other } = this.signers);
 
       const tx = await nftBox.connect(operator).mint(user.address);
 
@@ -138,8 +135,6 @@ export function shouldBehaveLikeNFTUnboxing() {
         await nftUnboxing.connect(user).requestUnboxing(nftBoxId);
         requestId = await nftUnboxing.getRequestId(nftBoxId);
         await vrfCoordinator.fulfillRandomWords(requestId, nftUnboxing.address);
-
-        await acl.connect(admin).grantRole(OPERATOR_ROLE, nftUnboxing.address);
       });
 
       context('when operator completes unboxing', () => {
@@ -197,7 +192,7 @@ export function shouldBehaveLikeNFTUnboxing() {
               collection.map(_ => 1),
             ),
           ).to.be.revertedWith(
-            `AccessControl: account ${stranger.address.toLowerCase()} is missing role ${OPERATOR_ROLE}`,
+            `AccessControl: account ${stranger.address.toLowerCase()} is missing role ${Roles.OPERATOR_ROLE}`,
           );
         });
       });

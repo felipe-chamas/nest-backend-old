@@ -40,7 +40,7 @@ contract NFT is
         _tokenIdCounter.increment();
     }
 
-    function mint(address to) external onlyOperator returns (uint256 tokenId) {
+    function mint(address to) external onlyMinter returns (uint256 tokenId) {
         if (totalSupply() >= _maxTokenSupply) revert MaximumTotalSupplyReached(_maxTokenSupply);
         tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
