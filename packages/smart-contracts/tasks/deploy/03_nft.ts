@@ -9,7 +9,8 @@ task(TASK_DEPLOY_NFT, 'Deploy NFT contract')
   .addParam('symbol', 'Token symbol', undefined, types.string)
   .addOptionalParam('baseUri', 'Base Token URI', '', types.string)
   .addOptionalParam('maxTokenSupply', 'Maximum token supply', (2n ** 256n - 1n).toString(10), types.string)
-  .setAction(async ({ acl, name, symbol, baseUri, maxTokenSupply }: NFTConstructor, { upgrades, ethers }) => {
+  .addOptionalParam('silent', 'Silent', false, types.boolean)
+  .setAction(async ({ acl, name, symbol, baseUri, maxTokenSupply, silent }: NFTConstructor, { upgrades, ethers }) => {
     const nft = await upgrades.deployProxy(
       await ethers.getContractFactory('NFT'),
       [name, symbol, baseUri, maxTokenSupply, acl],
@@ -18,6 +19,10 @@ task(TASK_DEPLOY_NFT, 'Deploy NFT contract')
         initializer: 'initialize',
       },
     );
+
+    if (!silent) {
+      console.log(`NFT deployed to: ${nft.address}`);
+    }
 
     return nft.address;
   });

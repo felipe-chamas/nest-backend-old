@@ -8,11 +8,16 @@ task(TASK_DEPLOY_NFT_BOX, 'Deploy NFT Box contract')
   .addParam('name', 'Token name', undefined, types.string)
   .addParam('symbol', 'Token symbol', undefined, types.string)
   .addOptionalParam('baseUri', 'Base Token URI', '', types.string)
-  .setAction(async ({ acl, name, symbol, baseUri }: NFTBoxConstructor, { upgrades, ethers }) => {
+  .addOptionalParam('silent', 'Silent', false, types.boolean)
+  .setAction(async ({ acl, name, symbol, baseUri, silent }: NFTBoxConstructor, { upgrades, ethers }) => {
     const nft = await upgrades.deployProxy(await ethers.getContractFactory('NFTBox'), [name, symbol, baseUri, acl], {
       kind: 'uups',
       initializer: 'initialize',
     });
+
+    if (!silent) {
+      console.log(`NFT Box is deployed to: ${nft.address}`);
+    }
 
     return nft.address;
   });

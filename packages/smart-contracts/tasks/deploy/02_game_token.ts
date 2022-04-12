@@ -9,7 +9,8 @@ task(TASK_DEPLOY_GAME_TOKEN, 'Deploy the Game Token')
   .addParam('symbol', 'Token symbol', undefined, types.string)
   .addParam('supply', 'Token supply', undefined, types.string)
   .addParam('acl', 'ACL contract address', undefined, types.string)
-  .setAction(async ({ admin, name, symbol, supply, acl }: GameTokenConstructor, { upgrades, ethers }) => {
+  .addOptionalParam('silent', 'Silent', false, types.boolean)
+  .setAction(async ({ admin, name, symbol, supply, acl, silent }: GameTokenConstructor, { upgrades, ethers }) => {
     const token = await upgrades.deployProxy(
       await ethers.getContractFactory('GameToken'),
       [admin, name, symbol, supply, acl],
@@ -18,6 +19,10 @@ task(TASK_DEPLOY_GAME_TOKEN, 'Deploy the Game Token')
         initializer: 'initialize',
       },
     );
+
+    if (!silent) {
+      console.log(`Game Token deployed to: ${token.address}`);
+    }
 
     return token.address;
   });

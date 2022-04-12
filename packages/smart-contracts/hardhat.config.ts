@@ -8,6 +8,7 @@ import 'solidity-coverage';
 import '@nomiclabs/hardhat-ethers';
 import '@nomiclabs/hardhat-waffle';
 import '@openzeppelin/hardhat-upgrades';
+import { privateKey } from './utils/network';
 
 import './tasks';
 
@@ -50,6 +51,10 @@ const config: HardhatUserConfig = {
       accounts: {
         mnemonic: MNEMONIC,
       },
+    },
+    binanceTestnet: {
+      url: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
+      accounts: privateKey('binanceTestnet'),
     },
   },
   gasReporter: {
