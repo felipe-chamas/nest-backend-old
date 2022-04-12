@@ -29,36 +29,38 @@ export class SqsProvider {
 
   start() {
     this.sqsConsumer.on('error', (err, msg) => {
-      console.error(err, msg);
+      logger.error({ err, msg });
     });
     this.sqsConsumer.on('message_received', (message) => {
-      console.log({
+      logger.info({
         status: 'message_received',
         message,
       });
     });
     this.sqsConsumer.on('message_processed', (message) => {
-      console.log({
+      logger.info({
         status: 'message_processed and removed from the queue',
         message,
       });
     });
     this.sqsConsumer.on('empty', () => {
-      console.log({
-        status: 'messge queue is empty',
-      });
+      logger.info('messge queue is empty');
     });
     this.sqsConsumer.on('response_processed', () => {
-      console.log('response_processed');
+      logger.info('response_processed');
     });
     this.sqsConsumer.on('stopped', () => {
-      console.log('stopped');
+      logger.info('sqs consumer stopped');
     });
     this.sqsConsumer.on('timeout_error', (err, msg) => {
-      console.error(err, msg);
+      logger.error({
+        status: 'timeout_error',
+        err,
+        msg,
+      });
     });
     this.sqsConsumer.on('processing_error', (err, msg) => {
-      console.error(err, msg);
+      logger.error({ err, msg });
     });
     this.sqsConsumer.start();
     logger.info('Sqs consumer started');
