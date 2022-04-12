@@ -1,26 +1,36 @@
-import { NftCollection } from 'models/nft-collection/entities/nft-collection.entity';
-import { User } from 'models/user/entities/user.entity';
+import { NftCollection } from '../../nft-collection/entities/nft-collection.entity';
+import { User } from '../../user/entities/user.entity';
+
 import {
   Column,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
+  ObjectID,
   ObjectIdColumn,
   OneToOne,
 } from 'typeorm';
+import { Metadata } from '../interface';
 
 @Entity()
+@Index(['tokenId', 'userId', 'nftCollectionId'])
 export class Nft {
   @ObjectIdColumn()
-  id: string;
+  id: ObjectID;
 
   @Column()
-  properties: Record<string, string>;
+  @Index({ unique: true })
+  tokenId: string;
 
   @Column()
+  metadata: Metadata;
+
+  @Column()
+  @Index({ unique: true })
   userId?: string;
 
-  @Column()
+  @Column({ unique: true })
   nftCollectionId?: string;
 
   @OneToOne(() => User, (user) => user.id)

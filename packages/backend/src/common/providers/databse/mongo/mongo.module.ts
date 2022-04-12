@@ -15,6 +15,7 @@ import { User } from 'models/user/entities/user.entity';
         entities: [User, Nft, NftCollection],
         useNewUrlParser: true,
         logging: true,
+        useCreateIndex: true,
         useUnifiedTopology: true,
       }),
     }),

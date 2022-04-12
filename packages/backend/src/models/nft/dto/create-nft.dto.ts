@@ -1,11 +1,17 @@
-import { IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
+import { Metadata } from '../interface';
 
 export class CreateNftDto {
   @IsString()
-  properties: Record<string, string>;
+  metadata: Metadata;
 
+  @IsOptional()
   @IsString()
-  userId: string;
+  userId?: string;
+
+  @IsOptional()
+  @IsString()
+  tokenId: string;
 
   @IsString()
   nftCollectionId: string;

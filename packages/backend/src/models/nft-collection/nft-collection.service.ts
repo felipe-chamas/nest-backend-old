@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Nft } from 'models/nft/entities/nft.entity';
 import { Repository } from 'typeorm';
 import { CreateNftCollectionDto } from './dto/create-nft-collection.dto';
 import { UpdateNftCollectionDto } from './dto/update-nft-collection.dto';
@@ -10,9 +9,7 @@ import { NftCollection } from './entities/nft-collection.entity';
 export class NftCollectionService {
   constructor(
     @InjectRepository(NftCollection)
-    private readonly nftCollectionRepo: Repository<NftCollection>,
-    @InjectRepository(Nft)
-    private readonly nftRepo: Repository<Nft>
+    private readonly nftCollectionRepo: Repository<NftCollection>
   ) {}
 
   async create(createNftCollectionDto: CreateNftCollectionDto) {
@@ -33,11 +30,7 @@ export class NftCollectionService {
     if (!collection)
       throw new NotFoundException(`NftCollection with id ${id} not found`);
 
-    const nfts = await this.nftRepo.find({
-      nftCollectionId: collection.id.toString(),
-    });
-
-    return { collection, nfts };
+    return collection;
   }
 
   async update(id: string, updateNftCollectionDto: UpdateNftCollectionDto) {
