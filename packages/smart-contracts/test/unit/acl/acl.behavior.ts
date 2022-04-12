@@ -15,7 +15,7 @@ export function shouldBehaveLikeACL() {
       ({ admin, operator, stranger } = this.signers);
     });
 
-    describe('when admin', function () {
+    context('when admin', function () {
       it('admin should pass check', async function () {
         await expect(acl.checkRole(Roles.ADMIN_ROLE, admin.address)).to.not.be.reverted;
       });
@@ -25,9 +25,21 @@ export function shouldBehaveLikeACL() {
           `AccessControl: account ${stranger.address.toLowerCase()} is missing role ${Roles.ADMIN_ROLE}`,
         );
       });
+
+      context('tries to remove last account from ADMIN role', () => {
+        it('reverts', async () => {
+          await expect(acl.revokeRole(Roles.ADMIN_ROLE, admin.address)).to.be.revertedWith('CannotRemoveLastAdmin()');
+        });
+      });
+
+      context('tries to renounce role, being the last admin', () => {
+        it('reverts', async () => {
+          await expect(acl.renounceRole(Roles.ADMIN_ROLE, admin.address)).to.be.revertedWith('CannotRemoveLastAdmin()');
+        });
+      });
     });
 
-    describe('when operator', function () {
+    context('when operator', function () {
       it('operator should pass check', async function () {
         await expect(acl.checkRole(Roles.OPERATOR_ROLE, operator.address)).to.not.be.reverted;
       });
@@ -37,9 +49,17 @@ export function shouldBehaveLikeACL() {
           `AccessControl: account ${stranger.address.toLowerCase()} is missing role ${Roles.OPERATOR_ROLE}`,
         );
       });
+
+      context('tries to renounce role, being the last operator', () => {
+        it('succeeds', async () => {
+          await acl.connect(operator).renounceRole(Roles.OPERATOR_ROLE, operator.address);
+
+          await expect(acl.hasRole(Roles.OPERATOR_ROLE, operator.address)).eventually.to.be.false;
+        });
+      });
     });
 
-    describe('when owner', function () {
+    context('when owner', function () {
       beforeEach(async () => {
         await acl.grantRole(Roles.OWNER_ROLE, admin.address);
       });

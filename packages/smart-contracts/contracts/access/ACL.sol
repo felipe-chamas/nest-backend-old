@@ -5,6 +5,8 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgrad
 import "./IACL.sol";
 import "./Roles.sol";
 
+error CannotRemoveLastAdmin();
+
 contract ACL is IACL, AccessControlEnumerableUpgradeable, UUPSUpgradeable {
     /// @custom:oz-upgrades-unsafe-allow constructor
     // solhint-disable-next-line no-empty-blocks
@@ -21,6 +23,13 @@ contract ACL is IACL, AccessControlEnumerableUpgradeable, UUPSUpgradeable {
 
     function checkRole(bytes32 role, address account) external view override {
         _checkRole(role, account);
+    }
+
+    function _revokeRole(bytes32 role, address account) internal virtual override {
+        if (role == Roles.ADMIN && hasRole(Roles.ADMIN, account) && getRoleMemberCount(Roles.ADMIN) == 1) {
+            revert CannotRemoveLastAdmin();
+        }
+        super._revokeRole(role, account);
     }
 
     // solhint-disable-next-line no-empty-blocks

@@ -60,9 +60,9 @@ export interface Signers {
   user: SignerWithAddress;
 }
 
-export const Roles = {
+export const Roles: Record<string, string> = {
   ADMIN_ROLE: '0x0000000000000000000000000000000000000000000000000000000000000000',
   OPERATOR_ROLE: ethers.utils.keccak256(ethers.utils.toUtf8Bytes('OPERATOR_ROLE')),
   OWNER_ROLE: ethers.utils.keccak256(ethers.utils.toUtf8Bytes('OWNER_ROLE')),
   MINTER_ROLE: ethers.utils.keccak256(ethers.utils.toUtf8Bytes('MINTER_ROLE')),
-};
+} as const;
