@@ -13,3 +13,7 @@ output "nft_storage_cdn_url" {
 output "nft_storage_s3_bucket" {
   value = module.nft-storage.nft_storage_s3_bucket
 }
+
+output "webserver_ecs_cluster_id" {
+  value = module.webserver.cluster_id
+}
