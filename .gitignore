@@ -37,3 +37,13 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
+
+# Environment Files
+*.env
+
+# Requests
+*.http
+
+# Log files
+*.log
+*logs/*
