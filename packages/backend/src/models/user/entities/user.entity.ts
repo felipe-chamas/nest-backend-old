@@ -1,18 +1,13 @@
-import { Column, Entity, Index, ObjectID, ObjectIdColumn } from 'typeorm';
+import { Column, Entity, ObjectIdColumn } from 'typeorm';
 
 @Entity()
-@Index(['email'])
 export class User {
   @ObjectIdColumn()
-  id: ObjectID;
+  id: string;
 
   @Column()
   name: string;
 
   @Column()
-  @Index({ unique: true })
   email: string;
-
-  @Column()
-  address?: string[] = [];
 }

@@ -1,30 +1,14 @@
-import { Nft } from 'models/nft/entities/nft.entity';
-import {
-  Column,
-  Entity,
-  Index,
-  ObjectID,
-  ObjectIdColumn,
-  OneToMany,
-} from 'typeorm';
+import { Nft } from './../../nft/entities/nft.entity';
+import { Column, Entity, ObjectIdColumn, OneToMany } from 'typeorm';
 
 @Entity()
-@Index(['contractAddress', 'tx'])
 export class NftCollection {
   @ObjectIdColumn()
-  id: ObjectID;
+  id: string;
 
   @Column()
   name: string;
 
-  @Column()
-  @Index()
-  contractAddress?: string;
-
-  @Column()
-  @Index()
-  tx?: string;
-
-  @OneToMany(() => Nft, (nft) => nft.nftCollectionId)
+  @OneToMany(() => Nft, (nft) => nft.nftCollectionId, { eager: true })
   nfts: Nft[];
 }

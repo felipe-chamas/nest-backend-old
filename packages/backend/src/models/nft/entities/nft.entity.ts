@@ -4,33 +4,24 @@ import { User } from '../../user/entities/user.entity';
 import {
   Column,
   Entity,
-  Index,
   JoinColumn,
   ManyToOne,
-  ObjectID,
   ObjectIdColumn,
   OneToOne,
 } from 'typeorm';
-import { Metadata } from '../interface';
 
 @Entity()
-@Index(['tokenId', 'userId', 'nftCollectionId'])
 export class Nft {
   @ObjectIdColumn()
-  id: ObjectID;
+  id: string;
 
   @Column()
-  @Index({ unique: true })
-  tokenId: string;
+  properties: Record<string, string>;
 
   @Column()
-  metadata: Metadata;
-
-  @Column()
-  @Index({ unique: true })
   userId?: string;
 
-  @Column({ unique: true })
+  @Column()
   nftCollectionId?: string;
 
   @OneToOne(() => User, (user) => user.id)

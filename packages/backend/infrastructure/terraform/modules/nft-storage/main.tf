@@ -11,6 +11,11 @@ module "acm" {
   create_route53_records = false
 
   wait_for_validation = true
+
+  tags = {
+    Name        = var.namespace
+    Environment = terraform.workspace
+  }
 }
 
 
@@ -27,4 +32,9 @@ module "cdn" {
   acm_certificate_arn = module.acm.acm_certificate_arn
 
   depends_on = [module.acm]
+
+  tags = {
+    Name        = var.namespace
+    Environment = terraform.workspace
+  }
 }

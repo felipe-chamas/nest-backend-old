@@ -1,6 +1,11 @@
 resource "aws_api_gateway_rest_api" "api" {
   name        = "${var.namespace}-${terraform.workspace}-api"
   description = "POST records to SQS queue"
+
+  tags = {
+    Name        = var.namespace
+    Environment = terraform.workspace
+  }
 }
 
 resource "aws_api_gateway_method" "api" {

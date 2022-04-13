@@ -1,17 +1,13 @@
-import { IsOptional, IsString } from 'class-validator';
-import { Metadata } from '../interface';
+import { Optional } from '@nestjs/common';
+import { IsString } from 'class-validator';
 
 export class CreateNftDto {
   @IsString()
-  metadata: Metadata;
+  properties: Record<string, string>;
 
-  @IsOptional()
   @IsString()
-  userId?: string;
-
-  @IsOptional()
-  @IsString()
-  tokenId: string;
+  @Optional()
+  userId: string;
 
   @IsString()
   nftCollectionId: string;
