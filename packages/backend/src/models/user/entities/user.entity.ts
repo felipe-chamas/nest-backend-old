@@ -12,4 +12,7 @@ export class User {
   @Column()
   @Index({ unique: true })
   email: string;
+
+  @Column()
+  address?: string[] = [];
 }

@@ -8,4 +8,8 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   name: string;
+
+  @IsOptional()
+  @IsString({ each: true })
+  address: string[];
 }
