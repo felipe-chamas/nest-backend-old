@@ -1,9 +1,9 @@
 # Infrastructure
 
 These files setup the infrastructure for the backend application using Terraform.
-Some additional resources are created as part of the state management for the backend
+Some additional resources are created as part of the state management for the [Terraform backend](https://www.terraform.io/language/settings/backends) (state management)
 
-- S3 bucket to serve as terraform backend
+- S3 bucket to serve as Terraform backend
 - DynamoDB table to guarantee state locking and consistency checking
 
 ## Bootstrap terraform backend
