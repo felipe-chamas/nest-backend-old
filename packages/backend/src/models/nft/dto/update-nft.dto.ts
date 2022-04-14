@@ -1,4 +1,5 @@
 import { IsObject, IsOptional, IsString } from 'class-validator';
+import { Metadata } from '../interface';
 
 export class UpdateNftDto {
   @IsOptional()
@@ -11,5 +12,5 @@ export class UpdateNftDto {
 
   @IsOptional()
   @IsObject()
-  properties: Record<string, string>;
+  metadata: Metadata;
 }

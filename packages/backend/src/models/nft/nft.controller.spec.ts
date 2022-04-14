@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ObjectID } from 'typeorm';
 import {
   mockNft,
   mockCreateNft,
@@ -17,14 +18,21 @@ describe('NftController', () => {
   beforeEach(async () => {
     service = {
       create: (createNftDto: CreateNftDto) =>
-        Promise.resolve({ ...mockCreateNftResponse, ...createNftDto } as Nft),
+        Promise.resolve({
+          ...mockCreateNftResponse,
+          ...createNftDto,
+        } as unknown as Nft),
       findAll: () => Promise.resolve([]),
-      findOne: (id: string) => Promise.resolve({ ...mockCreateNft, id } as Nft),
+      findOne: (id: string) =>
+        Promise.resolve({
+          ...mockCreateNft,
+          id: id as unknown as ObjectID,
+        } as Nft),
       update: (_: string, updatedNft: Partial<UpdateNftDto>) =>
         Promise.resolve({
           ...mockNft,
           ...updatedNft,
-        } as Nft),
+        } as unknown as Nft),
       remove: jest.fn(),
     };
     const module: TestingModule = await Test.createTestingModule({

@@ -13,7 +13,6 @@ const dbConnName = 'default';
 const config = new ConfigService();
 describe('NftCollectionService', () => {
   let nftCollection;
-  let nftRepo: Repository<Nft>;
   let service: NftCollectionService;
   let nftCollectionRepo: Repository<NftCollection>;
 
@@ -22,10 +21,6 @@ describe('NftCollectionService', () => {
       providers: [
         {
           provide: getRepositoryToken(NftCollection),
-          useClass: Repository,
-        },
-        {
-          provide: getRepositoryToken(Nft),
           useClass: Repository,
         },
       ],
@@ -41,9 +36,8 @@ describe('NftCollectionService', () => {
       name: dbConnName,
     });
 
-    nftRepo = getRepository(Nft, dbConnName);
     nftCollectionRepo = getRepository(NftCollection, dbConnName);
-    service = new NftCollectionService(nftCollectionRepo, nftRepo);
+    service = new NftCollectionService(nftCollectionRepo);
 
     return connection;
   });
@@ -75,7 +69,7 @@ describe('NftCollectionService', () => {
     await nftCollectionRepo.save(nftCollection);
 
     const result = await service.findOne(nftCollection.id);
-    expect(result.collection).toEqual(nftCollection);
+    expect(result.id).toEqual(nftCollection.id);
   });
 
   it('should update a nftCollection', async () => {

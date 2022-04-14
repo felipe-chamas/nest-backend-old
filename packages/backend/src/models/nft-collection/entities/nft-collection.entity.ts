@@ -1,5 +1,12 @@
-import { Nft } from './../../nft/entities/nft.entity';
-import { Column, Entity, ObjectIdColumn, OneToMany } from 'typeorm';
+import { Nft } from '../../nft/entities/nft.entity';
+import {
+  Column,
+  Entity,
+  Index,
+  ObjectID,
+  ObjectIdColumn,
+  OneToMany,
+} from 'typeorm';
 
 @Entity()
 export class NftCollection {

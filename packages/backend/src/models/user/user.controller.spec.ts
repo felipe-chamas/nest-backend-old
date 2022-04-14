@@ -6,6 +6,7 @@ import { UserController } from './user.controller';
 import { UserService } from './user.service';
 
 import { mockUser } from '../../test/mocks/user.mock';
+import { ObjectID } from 'typeorm';
 
 describe('UserController', () => {
   let controller: UserController;
@@ -16,7 +17,8 @@ describe('UserController', () => {
       create: (createUserDto: CreateUserDto) =>
         Promise.resolve({ user: { ...mockUser, ...createUserDto } as User }),
       findAll: () => Promise.resolve([mockUser as User]),
-      findOne: (id: string) => Promise.resolve({ ...mockUser, id } as User),
+      findOne: (id: string) =>
+        Promise.resolve({ ...mockUser, id: id as unknown as ObjectID } as User),
       update: (_: string, updatedUser: Partial<UpdateUserDto>) =>
         Promise.resolve({
           ...mockUser,

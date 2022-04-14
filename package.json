@@ -5,7 +5,8 @@
   "scripts": {
     "prepare": "husky install",
     "test": "nx run-many --target=test --all",
-    "lint": "nx run-many --target=lint --all"
+    "lint": "nx run-many --target=lint --all",
+    "build:backend": "nx build backend"
   },
   "lint-staged": {
     "packages/**/*": "yarn lint",
