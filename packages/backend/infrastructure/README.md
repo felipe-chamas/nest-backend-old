@@ -1,7 +1,7 @@
 # Infrastructure
 
 These files setup the infrastructure for the backend application using Terraform.
-Some additional resources are created as part of the state management for the [Terraform backend](https://www.terraform.io/language/settings/backends) (state management)
+Some additional resources are created as part of the state management for the [Terraform backend](https://www.terraform.io/language/settings/backends) (state management).
 
 - S3 bucket to serve as Terraform backend
 - DynamoDB table to guarantee state locking and consistency checking
@@ -55,7 +55,12 @@ The NFT Storage component [is composed of](https://github.com/cloudposse/terrafo
 
 The webserver is a Docker container deployed on ECS
 
-The configuration files are based on [this example](https://github.com/terraform-aws-modules/terraform-aws-ecs)
+The configuration files are based on [this example](https://github.com/terraform-aws-modules/terraform-aws-ecs) and [this example](https://www.oneworldcoders.com/blog/using-terraform-to-provision-amazons-ecr-and-ecs-to-manage-containers-docker)
+
+- ECS to run docker containers
+- ECR to host docker images
+
+By default, the `us-east-1` region is used. If you need to change it, be sure to update the `Makefile` and default `vars.tf`
 
 ## Create the infrastructure
 
@@ -67,4 +72,10 @@ Parameters:
 
 ```
 ACCOUNT_ALIAS=myaccount DOMAIN_NAME=nft.example.com STAGE=develop make apply
+```
+
+## Deploy
+
+```
+make push
 ```

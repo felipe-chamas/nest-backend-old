@@ -22,6 +22,7 @@ endef
 ###################################################################################################
 
 export PYTHON=python3
+export REGION=us-east-1
 export PRINT_HELP_PYSCRIPT
 
 ###################################################################################################
@@ -67,6 +68,15 @@ output: ## get terraform output
 	( cd terraform; terraform workspace select $(STAGE) )
 	( cd terraform; terraform output )
 
+
+push: ## push Docker image to ECR
+	( docker build ../../.. -t backend )
+	( DOCKER_REPOSITORY_URL=$$(cd terraform; terraform output -raw repository_url); \
+		aws ecr get-login-password --region $(REGION) | docker login --username AWS --password-stdin $(DOCKER_REPOSITORY_URL); \
+		echo $$DOCKER_REPOSITORY_URL:backend; \
+		docker tag backend $$DOCKER_REPOSITORY_URL:backend; \
+		docker push $$DOCKER_REPOSITORY_URL:backend; \
+	)
 
 destroy: ## destroy terraform infrastructure
 	( cd terraform; terraform workspace select $(STAGE) )

@@ -11,7 +11,7 @@ resource "aws_ecs_task_definition" "webserver" {
 [
   {
     "name": "${var.namespace}-${terraform.workspace}-webserver",
-    "image": "${var.namespace}-${terraform.workspace}-webserver",
+    "image": "${aws_ecr_repository.ecr.repository_url}/backend:latest",
     "cpu": 0,
     "memory": 128,
     "logConfiguration": {

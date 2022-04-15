@@ -71,20 +71,15 @@ module "asg" {
   # Auto scaling group
   vpc_zone_identifier       = module.vpc.private_subnets
   health_check_type         = "EC2"
-  min_size                  = 0
+  min_size                  = 1
   max_size                  = 2
-  desired_capacity          = 0 # we don't need them for the example
+  desired_capacity          = 1
   wait_for_capacity_timeout = 0
 
   tags = [
     {
       key                 = "Environment"
       value               = terraform.workspace
-      propagate_at_launch = true
-    },
-    {
-      key                 = "Name"
-      value               = var.namespace
       propagate_at_launch = true
     },
   ]
