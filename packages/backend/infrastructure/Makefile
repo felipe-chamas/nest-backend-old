@@ -1,5 +1,6 @@
 .DEFAULT_GOAL := help
 .PHONY: update
+include .env
 
 ###################################################################################################
 ## SCRIPTS
@@ -61,7 +62,7 @@ init: ## initialize terraform backend state
 apply: ## updates terraform infrastructure
 	( make init )
 	( cd terraform; terraform workspace select $(STAGE) )
-	( cd terraform; terraform apply -var="account_alias=$(ACCOUNT_ALIAS)" -var="domain_name=$(DOMAIN_NAME)" )
+	( cd terraform; terraform apply -var="account_alias=$(ACCOUNT_ALIAS)" -var="api_domain_name=$(API_DOMAIN_NAME)" -var="nft_storage_domain_name=$(NFT_STORAGE_DOMAIN_NAME)" -var="mongo_atlas_cidr=$(MONGO_ATLAS_CIDR)"  -var="mongo_atlas_peer_vpc_id=$(MONGO_ATLAS_PEER_VPC_ID)" )
 
 
 output: ## get terraform output
@@ -69,10 +70,13 @@ output: ## get terraform output
 	( cd terraform; terraform output )
 
 
+build: ## build Docker image
+	( cd ../../..; docker build --platform linux/amd64 -t backend .)
+
+
 push: ## push Docker image to ECR
-	( docker build ../../.. -t backend )
 	( DOCKER_REPOSITORY_URL=$$(cd terraform; terraform output -raw repository_url); \
-		aws ecr get-login-password --region $(REGION) | docker login --username AWS --password-stdin $(DOCKER_REPOSITORY_URL); \
+		aws ecr get-login-password --region $(REGION) | docker login --username AWS --password-stdin $$DOCKER_REPOSITORY_URL; \
 		echo $$DOCKER_REPOSITORY_URL:backend; \
 		docker tag backend $$DOCKER_REPOSITORY_URL:backend; \
 		docker push $$DOCKER_REPOSITORY_URL:backend; \

@@ -55,27 +55,36 @@ The NFT Storage component [is composed of](https://github.com/cloudposse/terrafo
 
 The webserver is a Docker container deployed on ECS
 
-The configuration files are based on [this example](https://github.com/terraform-aws-modules/terraform-aws-ecs) and [this example](https://www.oneworldcoders.com/blog/using-terraform-to-provision-amazons-ecr-and-ecs-to-manage-containers-docker)
+The configuration files are based on [this example](https://github.com/LukeMwila/aws-apigateway-vpc-ecs-fargate/) and [this article](https://dev.to/kieranjen/ecs-fargate-service-auto-scaling-with-terraform-2ld)
 
-- ECS to run docker containers
 - ECR to host docker images
+- ECS to run docker containers
+- VPC that shields Docker containers from the internet
+- API Gateway to receive traffic from the internet
 
 By default, the `us-east-1` region is used. If you need to change it, be sure to update the `Makefile` and default `vars.tf`
 
+Since the webserver is inside a VPC, it needs to connect to Mongo Cloud through a Peer peer.
+
 ## Create the infrastructure
 
-Parameters:
+Setup a `.env` file with the following parameters:
 
 - `ACCOUNT_ALIAS` (See [why this is necessary](https://stackoverflow.com/questions/65838989/variables-may-not-be-used-here-during-terraform-init))
-- `DOMAIN_NAME` used on the NFT storage component
+- `NFT_STORAGE_DOMAIN_NAME` used on the NFT storage component
+- `API_DOMAIN_NAME` used as endpoint of the REST API
 - `STAGE` used to distinguish between environments
+- `MONGO_ATLAS_CIDR` used to connect to Mongo Atlas
+- `MONGO_ATLAS_PEER_VPC_ID` used to connect to Mongo Atlas Peer VPC
 
 ```
-ACCOUNT_ALIAS=myaccount DOMAIN_NAME=nft.example.com STAGE=develop make apply
-```
-
-## Deploy
-
-```
+make build
 make push
+make apply
 ```
+
+##### Manual setup: Create a Peering Connection on Mongo Cloud
+
+Follow [these steps](https://www.mongodb.com/blog/post/introducing-vpc-peering-for-mongodb-atlas) to allow ECS connect with Mongo Cloud
+
+##### Manual setup: Update DNS records for API Gateway

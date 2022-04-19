@@ -6,7 +6,7 @@ module "acm" {
   source  = "terraform-aws-modules/acm/aws"
   version = "~> 3.0"
 
-  domain_name = var.domain_name
+  domain_name = var.nft_storage_domain_name
 
   create_route53_records = false
 
@@ -27,7 +27,7 @@ module "cdn" {
   stage     = terraform.workspace
   name      = var.namespace
 
-  aliases = [var.domain_name]
+  aliases = [var.nft_storage_domain_name]
 
   acm_certificate_arn = module.acm.acm_certificate_arn
 

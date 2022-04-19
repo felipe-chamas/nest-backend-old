@@ -14,14 +14,21 @@ variable "events_queue_arn" {
   type = string
 }
 
-variable "instance_type" {
-  type    = string
-  default = "t2.micro"
+variable "mongo_atlas_cidr" {
+  type = string
 }
 
-variable "create_ecs" {
-  type    = bool
-  default = true
+variable "mongo_atlas_peer_vpc_id" {
+  type = string
+}
+
+variable "api_domain_name" {
+  type = string
+}
+
+variable "app_port" {
+  type    = number
+  default = 3000
 }
 
 variable "namespace" {
