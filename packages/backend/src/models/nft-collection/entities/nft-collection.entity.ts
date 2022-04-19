@@ -1,4 +1,4 @@
-import { Nft } from 'models/nft/entities/nft.entity';
+import { Nft } from '../../nft/entities/nft.entity';
 import {
   Column,
   Entity,

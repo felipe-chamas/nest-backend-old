@@ -13,10 +13,10 @@ contract ERC20Mock is ERC20 {
         string memory name,
         string memory symbol,
         uint8 decimals_,
-        uint256 _totalSupply
+        uint256 totalSupply_
     ) ERC20(name, symbol) {
         _decimals = decimals_;
-        _mint(msg.sender, _totalSupply);
+        _mint(msg.sender, totalSupply_);
     }
 
     // solhint-disable comprehensive-interface

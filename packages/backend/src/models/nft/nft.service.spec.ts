@@ -8,7 +8,7 @@ import {
   getRepository,
   Repository,
 } from 'typeorm';
-import { mockCreateNft } from '../../test/mocks/nft.mock';
+import { mockCreateNft, mockUpdateNft } from '../../test/mocks/nft.mock';
 import { NftCollection } from '../nft-collection/entities/nft-collection.entity';
 import { User } from '../user/entities/user.entity';
 import { Nft } from './entities/nft.entity';
@@ -72,7 +72,8 @@ describe('NftService', () => {
     const nft = neftRepo.create(mockCreateNft);
     await neftRepo.save(nft);
 
-    const result = await service.findOne(nft.id);
+    const id = nft.id as unknown as string;
+    const result = await service.findOne(id);
     expect(result).toEqual({ ...mockCreateNft, ...result });
   });
 
@@ -86,15 +87,17 @@ describe('NftService', () => {
     const nft = neftRepo.create(mockCreateNft);
     await neftRepo.save(nft);
 
-    const result = await service.update(nft.id, mockCreateNft);
+    const nftId = nft.id as unknown as string;
+    const result = await service.update(nftId, mockUpdateNft);
     expect(result).toEqual({ ...mockCreateNft, ...result });
   });
 
   it('should delete an nft', async () => {
     const nft = neftRepo.create(mockCreateNft);
     await neftRepo.save(nft);
+    const id = nft.id as unknown as string;
 
-    const result = await service.remove(nft.id);
+    const result = await service.remove(id);
     expect(result.id).toBeUndefined();
   });
 });

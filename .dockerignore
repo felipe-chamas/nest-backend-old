@@ -1,0 +1,44 @@
+# dependencies
+/node_modules
+
+# compiled output
+dist
+coverage
+
+# Common
+README.md
+CHANGELOG.md
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# misc
+/.sass-cache
+/connect.lock
+/coverage
+/libpeerconnection.log
+npm-debug.log
+yarn-error.log
+testem.log
+/typings
+
+
+# Requests
+*.http
+
+# Log files
+*.log
+*logs/*

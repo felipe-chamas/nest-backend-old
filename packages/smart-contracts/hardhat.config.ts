@@ -8,6 +8,7 @@ import 'solidity-coverage';
 import '@nomiclabs/hardhat-ethers';
 import '@nomiclabs/hardhat-waffle';
 import '@openzeppelin/hardhat-upgrades';
+import { privateKey } from './utils/network';
 
 import './tasks';
 
@@ -32,6 +33,13 @@ const config: HardhatUserConfig = {
         },
       },
     ],
+    settings: {
+      outputSelection: {
+        '*': {
+          '*': ['storageLayout'],
+        },
+      },
+    },
   },
   networks: {
     ropsten: {
@@ -44,10 +52,14 @@ const config: HardhatUserConfig = {
         mnemonic: MNEMONIC,
       },
     },
+    binanceTestnet: {
+      url: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
+      accounts: privateKey('binanceTestnet'),
+    },
   },
   gasReporter: {
-    enabled: process.env.REPORT_GAS !== undefined,
     currency: 'USD',
+    enabled: !!process.env.REPORT_GAS,
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY,

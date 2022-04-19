@@ -1,3 +1,4 @@
+import { NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -82,7 +83,17 @@ describe('UserService', () => {
 
   it('should fail to fetch a user', async () => {
     expect(await userRepo.findOne(mockUser.id)).toBeUndefined();
-    expect(await service.findOne(mockUser.id)).toBeUndefined();
+    const userId = mockUser.id as unknown as string;
+    expect(await service.findOne(userId)).toBeUndefined();
+  });
+
+  it('should throw an error when trying to fetch a user', async () => {
+    const userId = mockUser.id as unknown as string;
+    const user = await service.findOne(userId);
+    const error = () => {
+      throw new NotFoundException(`User with id ${userId} not found`);
+    };
+    if (!user) expect(error).toThrow();
   });
 
   it('should update a user', async () => {

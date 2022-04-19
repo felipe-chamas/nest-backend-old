@@ -8,6 +8,7 @@ import {
 } from '../../test/mocks/nft-collection.mock';
 import { NftCollection } from './entities/nft-collection.entity';
 import { CreateNftCollectionDto } from './dto/create-nft-collection.dto';
+import { ObjectID } from 'typeorm';
 
 describe('NftCollectionController', () => {
   let controller: NftCollectionController;
@@ -23,9 +24,9 @@ describe('NftCollectionController', () => {
       findAll: () => Promise.resolve([mockNftCollection as NftCollection]),
       findOne: (id: string) =>
         Promise.resolve({
-          collection: { name: mockNftCollection.name, id } as NftCollection,
-          nfts: mockNftCollection.nfts,
-        }),
+          ...mockNftCollection,
+          id: id as unknown as ObjectID,
+        } as NftCollection),
       update: (_: string, updatedNftCollection: Partial<NftCollection>) =>
         Promise.resolve({
           ...mockNftCollection,
@@ -62,12 +63,14 @@ describe('NftCollectionController', () => {
   });
 
   it('should fetch a nftCollection', async () => {
-    const result = await controller.findOne(mockNftCollection.id);
-    expect(result.collection.name).toEqual(mockNftCollection.name);
+    const id = mockNftCollection.id as unknown as string;
+    const result = await controller.findOne(id);
+    expect(result.name).toEqual(mockNftCollection.name);
   });
 
   it('should update a nftCollection', async () => {
-    const result = await controller.update(mockNftCollection.id, {
+    const id = mockNftCollection.id as unknown as string;
+    const result = await controller.update(id, {
       name: mockNftCollection.name,
     });
 
@@ -75,7 +78,8 @@ describe('NftCollectionController', () => {
   });
 
   it('should delete a nftCollection', async () => {
-    await controller.remove(mockNftCollection.id);
+    const id = mockNftCollection.id as unknown as string;
+    await controller.remove(id);
     expect(service.remove).toHaveBeenCalledWith(mockNftCollection.id);
   });
 });

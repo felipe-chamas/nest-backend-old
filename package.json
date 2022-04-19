@@ -5,7 +5,8 @@
   "scripts": {
     "prepare": "husky install",
     "test": "nx run-many --target=test --all",
-    "lint": "nx run-many --target=lint --all"
+    "lint": "nx run-many --target=lint --all",
+    "build:backend": "nx build backend"
   },
   "lint-staged": {
     "packages/**/*": "yarn lint",
@@ -18,7 +19,7 @@
     "@nestjs/core": "^8.0.0",
     "@nestjs/platform-express": "^8.0.0",
     "@nestjs/typeorm": "^8.0.3",
-    "aws-sdk": "^2.1110.0",
+    "aws-sdk": "^2.1115.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.13.2",
     "mongodb": "^4.4.1",

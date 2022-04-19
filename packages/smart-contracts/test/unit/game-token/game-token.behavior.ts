@@ -1,20 +1,21 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
+import { signERC2612Permit } from 'eth-permit';
 import { GameToken } from '../../../typechain';
 import { ONE_TOKEN } from '../../shared/constants';
+import { Roles } from '../../shared/types';
 
 export function shouldBehaveLikeGameToken() {
   context('Game Token', function () {
-    let OPERATOR_ROLE: string;
     let token: GameToken;
     let stranger: SignerWithAddress;
     let admin: SignerWithAddress;
     let operator: SignerWithAddress;
     let other: SignerWithAddress;
+    let user: SignerWithAddress;
 
     beforeEach(function () {
-      ({ OPERATOR_ROLE } = this.roles);
-      ({ admin, other, stranger, operator } = this.signers);
+      ({ admin, other, stranger, operator, user } = this.signers);
       token = this.contracts.gameToken;
     });
 
@@ -35,7 +36,7 @@ export function shouldBehaveLikeGameToken() {
     describe('when unpaused', function () {
       it('should not allow stranger to pause', async function () {
         await expect(token.connect(stranger).pause()).to.be.revertedWith(
-          `AccessControl: account ${stranger.address.toLowerCase()} is missing role ${OPERATOR_ROLE}`,
+          `AccessControl: account ${stranger.address.toLowerCase()} is missing role ${Roles.OPERATOR_ROLE}`,
         );
       });
 
@@ -67,6 +68,23 @@ export function shouldBehaveLikeGameToken() {
         await expect(token.connect(other).transferFrom(admin.address, other.address, ONE_TOKEN)).to.be.revertedWith(
           'Pausable: paused',
         );
+      });
+    });
+
+    context('permit', () => {
+      it('allows', async () => {
+        const permit = await signERC2612Permit(
+          admin,
+          token.address,
+          admin.address,
+          user.address,
+          ONE_TOKEN.toString(10),
+        );
+
+        await token.permit(admin.address, user.address, ONE_TOKEN, permit.deadline, permit.v, permit.r, permit.s);
+
+        await expect(token.allowance(admin.address, user.address)).eventually.to.eq(ONE_TOKEN);
+        await expect(token.nonces(admin.address)).eventually.to.eq(1);
       });
     });
   });

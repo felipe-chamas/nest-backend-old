@@ -4,12 +4,12 @@ import { deployACL } from '../../shared/deployers';
 import { shouldBehaveLikeACL } from './acl.behavior';
 
 async function aclFixture(signers: Signer[]): Promise<{ acl: ACL }> {
-  const [deployer, operator] = signers;
+  const [admin, operator] = signers;
 
-  const [deployerAddress, operatorAddress] = await Promise.all([deployer.getAddress(), operator.getAddress()]);
+  const [adminAddress, operatorAddress] = await Promise.all([admin.getAddress(), operator.getAddress()]);
 
   return {
-    acl: await deployACL(deployer, deployerAddress, operatorAddress),
+    acl: await deployACL(admin, { admin: adminAddress, operator: operatorAddress }),
   };
 }
 
