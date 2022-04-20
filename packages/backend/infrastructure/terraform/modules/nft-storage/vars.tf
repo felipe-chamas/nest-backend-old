@@ -2,7 +2,7 @@ variable "account_alias" {
   type = string
 }
 
-variable "domain_name" {
+variable "nft_storage_domain_name" {
   type = string
 }
 

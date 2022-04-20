@@ -1,5 +1,5 @@
 resource "aws_ecr_repository" "ecr" {
-  name = "${var.namespace}-${terraform.workspace}-ecr"
+  name                 = "${var.namespace}-${terraform.workspace}-ecr"
   image_tag_mutability = "MUTABLE"
 
   tags = {
