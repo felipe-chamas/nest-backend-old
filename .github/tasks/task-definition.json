@@ -6,9 +6,9 @@
             "image": "166126423048.dkr.ecr.us-east-1.amazonaws.com/backend-develop-ecr",  
             "portMappings": [
               {
-                "hostPort": 3333,
+                "hostPort": 3000,
                 "protocol": "tcp",
-                "containerPort": 3333
+                "containerPort": 3000
               }
             ],
             "essential": true,
