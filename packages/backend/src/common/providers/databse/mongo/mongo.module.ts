@@ -16,4 +16,8 @@ import { getConnectionOptions } from 'typeorm';
     }),
   ],
 })
-export class MongoDbProvider {}
+export class MongoDbProvider {
+  onModuleInit() {
+    logger.info('connected to mongodb');
+  }
+}

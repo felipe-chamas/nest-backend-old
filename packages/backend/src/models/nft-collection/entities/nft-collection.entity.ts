@@ -9,13 +9,22 @@ import {
 } from 'typeorm';
 
 @Entity()
+@Index(['contractAddress', 'tx'])
 export class NftCollection {
   @ObjectIdColumn()
-  id: string;
+  id: ObjectID;
 
   @Column()
   name: string;
 
-  @OneToMany(() => Nft, (nft) => nft.nftCollectionId, { eager: true })
+  @Column()
+  @Index()
+  contractAddress?: string;
+
+  @Column()
+  @Index()
+  tx?: string;
+
+  @OneToMany(() => Nft, (nft) => nft.nftCollectionId)
   nfts: Nft[];
 }
