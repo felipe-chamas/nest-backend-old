@@ -1,0 +1,34 @@
+{
+    "family": "cargafacil-api-task-stg",
+    "containerDefinitions": [
+        {
+            "name": "backend-develop-ecr-ctnr",
+            "image": "166126423048.dkr.ecr.us-east-1.amazonaws.com/backend-develop-ecr",  
+            "portMappings": [
+              {
+                "hostPort": 3000,
+                "protocol": "tcp",
+                "containerPort": 3000
+              }
+            ],
+            "essential": true,
+            "interactive": true,
+            "pseudoTerminal": true,
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "secretOptions": null,
+                "options": {
+                    "awslogs-group": "/ecs/backend-develop",
+                    "awslogs-region": "us-east-1",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            }
+        }
+    ],
+    "requiresCompatibilities": [
+      "EC2"
+    ],
+    "networkMode": "bridge",
+    "cpu": "1024",
+    "memory": "1024"
+  }

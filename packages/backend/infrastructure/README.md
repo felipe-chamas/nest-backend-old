@@ -34,12 +34,14 @@ These scripts were based on [this project](https://gist.github.com/afloesch/dc7d
 Follow their documentation to create a trigger with the following ParsiQL code
 
 ```
-stream _
-from MATIC_NFT_Transfer_Events
-where @contract == MATIC.address("0xMY_NFT_ADDRESS")
-
+stream NFTClaimMonitor
+from BSC_NFTClaim_TokenClaimed_Events
+where @contract == BSC.address("0xCONTRACT_ADDRESS")
 process
-  emit { @tokenId, @to, @from, @event, @block, @transaction }
+  let tx = @transaction.hash
+  let event = @event
+  let contractAddress = "0xCONTRACT_ADDRESS"
+  emit { tx, event, contractAddress }
 end
 ```
 
