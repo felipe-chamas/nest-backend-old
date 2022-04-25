@@ -7,12 +7,12 @@ export class User {
   id: ObjectID;
 
   @Column()
-  name: string;
+  name?: string;
 
   @Column()
   @Index({ unique: true })
-  email: string;
+  email?: string;
 
   @Column()
-  address?: string[] = [];
+  address: string[] = [];
 }

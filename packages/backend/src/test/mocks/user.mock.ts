@@ -12,6 +12,7 @@ export const mockUser = {
 export const mockCreateUser: CreateUserDto = {
   name: 'John Doe',
   email: 'joshn@email.com',
+  address: ['0x12345'],
 };
 
 export const mockUpdateUser: Partial<UpdateUserDto> = {

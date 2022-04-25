@@ -31,7 +31,7 @@ export class Nft {
   userId?: string;
 
   @Column({ unique: true })
-  nftCollectionId?: string;
+  nftCollectionId: string;
 
   @OneToOne(() => User, (user) => user.id)
   @JoinColumn()
