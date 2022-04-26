@@ -14,6 +14,13 @@
   },
   "private": true,
   "dependencies": {
+    "@nrwl/cli": "13.8.5",
+    "@nrwl/eslint-plugin-nx": "13.8.5",
+    "@nrwl/jest": "13.8.5",
+    "@nrwl/js": "13.8.5",
+    "@nrwl/linter": "13.8.5",
+    "@nrwl/tao": "13.8.5",
+    "@nrwl/workspace": "13.8.5",
     "@nestjs/common": "^8.0.0",
     "@nestjs/config": "^2.0.0",
     "@nestjs/core": "^8.0.0",
@@ -59,6 +66,6 @@
     "typescript": "~4.5.2"
   },
   "workspaces": [
-    "packages/**"
+    "packages/!(sdk)/**"
   ]
 }
