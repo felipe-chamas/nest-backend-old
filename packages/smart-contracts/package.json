@@ -1,6 +1,5 @@
 {
   "name": "hardhat-project",
-  "version": "0.0.1",
   "scripts": {
     "prepare": "hardhat typechain",
     "compile": "hardhat compile",

@@ -8,9 +8,8 @@ export default () => ({
     password: process.env.DB_PASSWORD,
   },
   sqs: {
-    queueUrl: process.env.AWS_SQS_QUEUE_URL,
-  },
-  blockchain: {
-    jsonRpcProvider: process.env.JSON_RPC_PROVIDER,
+    queueUrl:
+      process.env.AWS_SQS_QUEUE_URL ||
+      'https://sqs.us-east-1.amazonaws.com/166126423048/events-listener-develop-queue',
   },
 });

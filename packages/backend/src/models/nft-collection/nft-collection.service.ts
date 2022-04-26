@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindConditions, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateNftCollectionDto } from './dto/create-nft-collection.dto';
 import { UpdateNftCollectionDto } from './dto/update-nft-collection.dto';
 import { NftCollection } from './entities/nft-collection.entity';
@@ -24,30 +24,11 @@ export class NftCollectionService {
     return await this.nftCollectionRepo.find();
   }
 
-  async findOne(idOrConditions: string | FindConditions<NftCollection>) {
-    let collection: NftCollection;
-
-    switch (true) {
-      case typeof idOrConditions === 'string': {
-        collection = await this.nftCollectionRepo.findOne(
-          idOrConditions as string
-        );
-        break;
-      }
-      case typeof idOrConditions === 'object': {
-        collection = await this.nftCollectionRepo.findOne(
-          idOrConditions as FindConditions<NftCollection>
-        );
-        break;
-      }
-    }
+  async findOne(id: string) {
+    const collection = await this.nftCollectionRepo.findOne(id);
 
     if (!collection)
-      throw new NotFoundException(
-        `NftCollection with idOrConditions ${JSON.stringify(
-          idOrConditions
-        )} not found`
-      );
+      throw new NotFoundException(`NftCollection with id ${id} not found`);
 
     return collection;
   }

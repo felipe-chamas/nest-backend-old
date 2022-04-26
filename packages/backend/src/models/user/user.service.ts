@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindConditions, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
@@ -21,19 +21,8 @@ export class UserService {
     return await this.userRepo.find();
   }
 
-  async findOne(idOrConditions: string | FindConditions<User>) {
-    switch (idOrConditions) {
-      case typeof idOrConditions === 'string': {
-        return await this.userRepo.findOne(idOrConditions);
-      }
-      case typeof idOrConditions === 'object': {
-        return await this.userRepo.findOne(idOrConditions);
-      }
-    }
-  }
-
-  async findOneBy(conditions: FindConditions<User>) {
-    return await this.userRepo.findOne(conditions);
+  async findOne(id: string) {
+    return await this.userRepo.findOne(id);
   }
 
   async update(id: string, updatedUser: UpdateUserDto) {
