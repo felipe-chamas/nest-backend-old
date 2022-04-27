@@ -6,13 +6,13 @@ export const mockUser = {
   id: '624b3c3adb4b27a36fc4d450',
   name: 'John Doe',
   email: 'john@gmail.com',
-  address: ['123 Main St', 'Anytown', 'CA', '90210'],
+  account: '0x01',
 } as unknown as User;
 
 export const mockCreateUser: CreateUserDto = {
   name: 'John Doe',
   email: 'joshn@email.com',
-  address: ['0x12345'],
+  account: '0x12345',
 };
 
 export const mockUpdateUser: Partial<UpdateUserDto> = {

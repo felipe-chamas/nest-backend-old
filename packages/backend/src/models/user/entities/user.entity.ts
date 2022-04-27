@@ -1,7 +1,7 @@
 import { Column, Entity, Index, ObjectID, ObjectIdColumn } from 'typeorm';
 
 @Entity()
-@Index(['email'])
+@Index(['email', 'account'])
 export class User {
   @ObjectIdColumn()
   id: ObjectID;
@@ -14,5 +14,6 @@ export class User {
   email?: string;
 
   @Column()
-  address: string[] = [];
+  @Index({ unique: true })
+  account: string;
 }

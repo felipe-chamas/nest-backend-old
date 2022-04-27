@@ -1,15 +1,16 @@
-import { ethers } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
 import { ConfigService } from '@nestjs/config';
 import { Nft } from 'models/nft/entities/nft.entity';
 import { NftService } from 'models/nft/nft.service';
 import { getRepository } from 'typeorm';
 import { NftCollection } from 'models/nft-collection/entities/nft-collection.entity';
 import { NftCollectionService } from 'models/nft-collection/nft-collection.service';
-import { getMetadataFromRoot } from './token-claimed-logic';
 import { User } from 'models/user/entities/user.entity';
 import { UserService } from 'models/user/user.service';
 import { ParsiqEvent } from '../sqs.service';
 import { logger } from 'common/providers/logger';
+import { NftClaim } from 'models/nft-claim/entities/nft-claim.entity';
+import { NftClaimService } from 'models/nft-claim/nft-claim.service';
 
 const config = new ConfigService();
 
@@ -66,34 +67,34 @@ export default async function tokenClaimed(
   for (const log of tokenClaimedLogs) {
     const { account, merkleRoot, tokenId } = log.event.args;
 
-    logger.info(account, merkleRoot, tokenId);
+    logger.info({ account, merkleRoot, tokenId });
     const userRepo = getRepository(User, config.get<string>('database.dbName'));
     const nftRepo = getRepository(Nft, config.get<string>('database.dbName'));
+    const nftClaimRepo = getRepository(
+      NftClaim,
+      config.get<string>('database.dbName')
+    );
     const nftCollectionRepo = getRepository(
       NftCollection,
       config.get<string>('database.dbName')
     );
     const userService = new UserService(userRepo);
     const nftService = new NftService(nftRepo);
+    const nftClaimService = new NftClaimService(nftClaimRepo);
     const nftCollectionService = new NftCollectionService(nftCollectionRepo);
 
-    let user: User;
-    user = await userService.findOne({ address: [account] });
-    if (!user) {
-      user = (await userService.create({ address: [account] })).user;
-    }
-    logger.debug(user);
+    const [user, nftCollection, nftClaim] = await Promise.all([
+      userService.findOne({ account: account.toLowerCase() }),
+      nftCollectionService.findOne({ contractAddress }),
+      nftClaimService.findOne({ merkleRoot }),
+    ]);
+    logger.debug({ user, nftCollection, nftClaim });
 
-    const nftCollection = await nftCollectionService.findOne({
-      contractAddress,
-    });
-    logger.debug(nftCollection);
-
-    const meta = getMetadataFromRoot(merkleRoot);
+    const meta = nftClaim.metadata;
     const metadata = {
       name: meta.name,
       description: meta.description,
-      image: `${nftCollection.imageBaseUri}${meta.image}`,
+      image: meta.image,
       external_url: `${nftCollection.externalUrl}${tokenId}`,
       attributes: meta.attributes,
     };

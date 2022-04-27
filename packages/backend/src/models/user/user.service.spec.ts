@@ -76,6 +76,7 @@ describe('UserService', () => {
 
   it('should fetch a user', async () => {
     user = userRepo.create(mockCreateUser);
+    await userRepo.save(user);
     const userFound = await userRepo.findOne(user.id);
     const result = await service.findOne(user.id);
     expect(result).toEqual(userFound);

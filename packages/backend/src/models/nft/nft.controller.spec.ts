@@ -28,7 +28,7 @@ describe('NftController', () => {
           ...mockCreateNft,
           id: id as unknown as ObjectID,
         } as Nft),
-      update: (_: string, updatedNft: Partial<UpdateNftDto>) =>
+      update: (_: string, updatedNft: UpdateNftDto) =>
         Promise.resolve({
           ...mockNft,
           ...updatedNft,

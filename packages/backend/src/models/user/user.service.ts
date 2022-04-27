@@ -22,12 +22,14 @@ export class UserService {
   }
 
   async findOne(idOrConditions: string | FindConditions<User>) {
-    switch (idOrConditions) {
+    switch (true) {
       case typeof idOrConditions === 'string': {
-        return await this.userRepo.findOne(idOrConditions);
+        return await this.userRepo.findOne(idOrConditions as string);
       }
       case typeof idOrConditions === 'object': {
-        return await this.userRepo.findOne(idOrConditions);
+        return await this.userRepo.findOne(
+          idOrConditions as FindConditions<User>
+        );
       }
     }
   }

@@ -9,6 +9,6 @@ export class CreateUserDto {
   @IsString()
   name?: string;
 
-  @IsString({ each: true })
-  address: string[];
+  @IsString()
+  account: string;
 }

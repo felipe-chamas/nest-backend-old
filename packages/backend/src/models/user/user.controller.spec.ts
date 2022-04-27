@@ -44,10 +44,11 @@ describe('UserController', () => {
     expect(controller).toBeDefined();
   });
 
-  it('should create and user', async () => {
-    const result = await controller.create({
+  it('should create an user', async () => {
+    const result = await controller.upsert({
       name: 'John Doe',
       email: 'john@gmail.com',
+      account: '0x01',
     });
 
     expect(result).toEqual({ user: mockUser as User });

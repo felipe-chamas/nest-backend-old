@@ -10,6 +10,6 @@ export class UpdateUserDto {
   name: string;
 
   @IsOptional()
-  @IsString({ each: true })
-  address: string[];
+  @IsString()
+  account: string;
 }
