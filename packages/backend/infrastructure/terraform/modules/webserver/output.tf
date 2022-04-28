@@ -13,3 +13,7 @@ output "vpc_id" {
 output "vpc_cidr" {
   value = module.vpc_for_ecs_fargate.vpc_cidr
 }
+
+output "nat_gateway_ip" {
+  value = module.vpc_for_ecs_fargate.nat_gateway_ip
+}

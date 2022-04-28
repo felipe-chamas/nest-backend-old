@@ -10,14 +10,6 @@ resource "aws_vpc" "custom_vpc" {
 
 ### VPC Network Setup
 
-# Mongo Atlas VPC Peer
-
-resource "aws_route" "vpc_peer_route" {
-  route_table_id            = aws_vpc.custom_vpc.main_route_table_id
-  destination_cidr_block    = var.mongo_atlas_cidr
-  vpc_peering_connection_id = var.mongo_atlas_peer_vpc_id
-}
-
 # Create the private subnets
 resource "aws_subnet" "private_subnet" {
   count             = var.number_of_private_subnets

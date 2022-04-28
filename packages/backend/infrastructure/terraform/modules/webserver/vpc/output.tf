@@ -17,3 +17,7 @@ output "private_subnet_ids" {
 output "ecs_tasks_security_group_id" {
   value = aws_security_group.ecs_tasks.id
 }
+
+output "nat_gateway_ip" {
+  value = aws_eip.nat_gateway.public_ip
+}

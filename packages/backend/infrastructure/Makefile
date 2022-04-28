@@ -62,7 +62,7 @@ init: ## initialize terraform backend state
 apply: ## updates terraform infrastructure
 	( make init )
 	( cd terraform; terraform workspace select $(STAGE) )
-	( cd terraform; terraform apply -var="account_alias=$(ACCOUNT_ALIAS)" -var="api_domain_name=$(API_DOMAIN_NAME)" -var="nft_storage_domain_name=$(NFT_STORAGE_DOMAIN_NAME)" -var="mongo_atlas_cidr=$(MONGO_ATLAS_CIDR)"  -var="mongo_atlas_peer_vpc_id=$(MONGO_ATLAS_PEER_VPC_ID)" )
+	( cd terraform; terraform apply -var="account_alias=$(ACCOUNT_ALIAS)" -var="api_domain_name=$(API_DOMAIN_NAME)" -var="nft_storage_domain_name=$(NFT_STORAGE_DOMAIN_NAME)" )
 
 
 output: ## get terraform output

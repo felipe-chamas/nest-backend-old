@@ -16,9 +16,6 @@ module "nft-storage" {
 module "webserver" {
   source = "./modules/webserver"
 
-  mongo_atlas_cidr        = var.mongo_atlas_cidr
-  mongo_atlas_peer_vpc_id = var.mongo_atlas_peer_vpc_id
-
   events_queue_url      = module.events-listener.events_queue_url
   events_queue_arn      = module.events-listener.events_queue_arn
   nft_storage_url       = var.nft_storage_domain_name

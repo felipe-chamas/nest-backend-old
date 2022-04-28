@@ -1,10 +1,8 @@
 # VPC for ECS Fargate
 module "vpc_for_ecs_fargate" {
-  source                  = "./vpc"
-  namespace               = var.namespace
-  app_port                = var.app_port
-  mongo_atlas_cidr        = var.mongo_atlas_cidr
-  mongo_atlas_peer_vpc_id = var.mongo_atlas_peer_vpc_id
+  source    = "./vpc"
+  namespace = var.namespace
+  app_port  = var.app_port
 }
 
 # ECS cluster, task definition and service

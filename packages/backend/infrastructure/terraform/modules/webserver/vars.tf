@@ -14,14 +14,6 @@ variable "events_queue_arn" {
   type = string
 }
 
-variable "mongo_atlas_cidr" {
-  type = string
-}
-
-variable "mongo_atlas_peer_vpc_id" {
-  type = string
-}
-
 variable "api_domain_name" {
   type = string
 }

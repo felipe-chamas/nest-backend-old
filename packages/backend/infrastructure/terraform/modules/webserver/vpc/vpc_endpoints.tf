@@ -65,3 +65,21 @@ resource "aws_vpc_endpoint" "s3" {
     Environment = terraform.workspace
   }
 }
+
+# SQS
+resource "aws_vpc_endpoint" "sqs" {
+  vpc_id              = aws_vpc.custom_vpc.id
+  service_name        = "com.amazonaws.${var.region}.sqs"
+  vpc_endpoint_type   = "Interface"
+  subnet_ids          = aws_subnet.private_subnet.*.id
+  private_dns_enabled = false
+
+  security_group_ids = [
+    "${aws_security_group.ecs_tasks.id}",
+  ]
+
+  tags = {
+    Name        = "SQS VPC Endpoint Gateway - ${terraform.workspace}"
+    Environment = terraform.workspace
+  }
+}

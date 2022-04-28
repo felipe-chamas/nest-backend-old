@@ -57,11 +57,11 @@ The NFT Storage component [is composed of](https://github.com/cloudposse/terrafo
 
 The webserver is a Docker container deployed on ECS
 
-The configuration files are based on [this example](https://github.com/LukeMwila/aws-apigateway-vpc-ecs-fargate/) and [this article](https://dev.to/kieranjen/ecs-fargate-service-auto-scaling-with-terraform-2ld)
+The configuration files are based on [this example](https://github.com/LukeMwila/aws-apigateway-vpc-ecs-fargate/) and [this article](https://dev.to/kieranjen/ecs-fargate-service-auto-scaling-with-terraform-2ld). About VPCs, read [this](https://github.com/terraform-aws-modules/terraform-aws-vpc/pull/248/files) and [this](https://dev.betterdoc.org/infrastructure/2020/02/04/setting-up-a-nat-gateway-on-aws-using-terraform.html)
 
 - ECR to host docker images
 - ECS to run docker containers
-- VPC that shields Docker containers from the internet
+- VPC that shields Docker containers from the internet and allows access only to AWS services
 - API Gateway to receive traffic from the internet
 
 By default, the `us-east-1` region is used. If you need to change it, be sure to update the `Makefile` and default `vars.tf`
@@ -87,6 +87,6 @@ make apply
 
 ##### Manual setup: Create a Peering Connection on Mongo Cloud
 
-Follow [these steps](https://www.mongodb.com/blog/post/introducing-vpc-peering-for-mongodb-atlas) to allow ECS connect with Mongo Cloud
+Add `nat_gateway_ip` to Mongo Atlas IP Access List. See [here](https://levelup.gitconnected.com/part-2-deploy-and-secure-mongodb-on-atlas-4820d539a1dc#42ba)
 
 ##### Manual setup: Update DNS records for API Gateway
