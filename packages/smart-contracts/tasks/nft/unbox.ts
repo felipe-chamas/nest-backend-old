@@ -25,6 +25,7 @@ task(TASK_NFT_BOX_UNBOX, 'Unbox NFT Box')
     events
       .filter(x => x.transactionHash === tx.hash)
       .forEach(({ args }) => {
+        if (!args) return;
         for (let i = 0; i < args.nfts.length; i++) {
           const nft = args.nfts[i];
           console.log(`NFT: ${nft}`);

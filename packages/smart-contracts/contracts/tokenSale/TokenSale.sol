@@ -203,7 +203,7 @@ contract TokenSale is BaseContract, TokenSaleStorage {
         round.merkleRoot = merkleRoot;
     }
 
-    function setCustody(address custody) external onlyOperator {
+    function setCustody(address custody) external onlyAdmin {
         _setCustody(custody);
     }
 

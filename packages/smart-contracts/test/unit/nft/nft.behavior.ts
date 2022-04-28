@@ -6,16 +6,17 @@ import { AddressZero } from '../../shared/constants';
 import { Roles } from '../../shared/types';
 import { getTransferEvent } from '../../shared/utils';
 
-export function shouldBehaveLikeNFT() {
+export function shouldBehaveLikeNFT(burnEnabled: boolean) {
   context('NFT', function () {
     let nft: NFT;
     let stranger: SignerWithAddress;
     let other: SignerWithAddress;
     let operator: SignerWithAddress;
+    let user: SignerWithAddress;
 
     beforeEach(function () {
       ({ nft } = this.contracts);
-      ({ stranger, other, operator } = this.signers);
+      ({ stranger, other, operator, user } = this.signers);
     });
 
     context('Basic', () => {
@@ -44,6 +45,35 @@ export function shouldBehaveLikeNFT() {
         );
       });
     });
+
+    if (burnEnabled) {
+      context('burn', () => {
+        let tokenId: BigNumber;
+        beforeEach(async () => {
+          const tx = await nft.connect(operator).mint(user.address);
+          const event = await getTransferEvent(tx, nft as unknown as ERC721Upgradeable);
+          tokenId = event.tokenId;
+        });
+
+        context('when operator burns token', () => {
+          it('burns', async () => {
+            await expect(nft.connect(operator).burn(tokenId))
+              .to.emit(nft, 'Transfer')
+              .withArgs(user.address, AddressZero, tokenId);
+
+            await expect(nft.ownerOf(tokenId)).to.be.revertedWith(`ERC721: owner query for nonexistent token`);
+          });
+        });
+
+        context('when stranger burns token', () => {
+          it('reverts', async () => {
+            await expect(nft.connect(stranger).burn(tokenId)).to.be.eventually.rejectedWith(
+              `AccessControl: account ${stranger.address.toLowerCase()} is missing role ${Roles.MINTER_ROLE}`,
+            );
+          });
+        });
+      });
+    }
 
     context('base token URI', () => {
       it('should allow operator to change base token URI', async () => {

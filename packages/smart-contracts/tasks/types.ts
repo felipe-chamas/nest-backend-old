@@ -14,6 +14,7 @@ export type NFTConstructor = BaseConstructor & {
   symbol: string;
   baseUri: string;
   maxTokenSupply: string;
+  burnEnabled: boolean;
 };
 export type TokenSaleConstructor = BaseConstructor & {
   /// Vesting period (in seconds)

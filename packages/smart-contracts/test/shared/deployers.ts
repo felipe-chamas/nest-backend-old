@@ -56,6 +56,7 @@ export async function deployGameToken(
     name = 'Test',
     symbol = 'TST',
     supply = ethers.utils.parseEther('100000').toString(),
+    silent,
   }: AtLeast<GameTokenConstructor, 'admin' | 'acl'>,
 ) {
   const address = await hre.run(TASK_DEPLOY_GAME_TOKEN, {
@@ -64,6 +65,7 @@ export async function deployGameToken(
     symbol,
     supply,
     acl,
+    silent,
   });
 
   return GameToken__factory.connect(address, deployer);
@@ -83,6 +85,8 @@ export async function deployNFT(
     symbol = 'TNFT',
     baseUri = 'ipfs://',
     maxTokenSupply = MAX_UINT256.toString(10),
+    burnEnabled,
+    silent,
   }: AtLeast<NFTConstructor, 'acl'>,
 ) {
   const nft = await hre.run(TASK_DEPLOY_NFT, {
@@ -90,7 +94,9 @@ export async function deployNFT(
     name,
     symbol,
     maxTokenSupply: maxTokenSupply,
+    burnEnabled,
     baseUri,
+    silent,
   });
 
   return NFT__factory.connect(nft, deployer);
@@ -116,10 +122,11 @@ export async function deployNFTBox(
   return NFTBox__factory.connect(nft, deployer);
 }
 
-export async function deployNFTClaim(deployer: Signer, { acl, nft }: NFTClaimConstructor) {
+export async function deployNFTClaim(deployer: Signer, { acl, nft, silent }: NFTClaimConstructor) {
   const nftClaim = await hre.run(TASK_DEPLOY_NFT_CLAIM, {
     acl,
     nft,
+    silent,
   });
 
   return NFTClaim__factory.connect(nftClaim, deployer);

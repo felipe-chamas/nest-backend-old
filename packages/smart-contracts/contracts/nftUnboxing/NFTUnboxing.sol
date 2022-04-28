@@ -9,7 +9,6 @@ import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.
 
 import "../BaseContract.sol";
 import "../nft/INFT.sol";
-import "./INFTBox.sol";
 import "./VRFConsumerBaseV2Upgradeable.sol";
 import "./NFTUnboxingStorage.sol";
 
@@ -27,7 +26,7 @@ contract NFTUnboxing is VRFConsumerBaseV2Upgradeable, ReentrancyGuardUpgradeable
     constructor() initializer {}
 
     function initialize(
-        INFTBox nftBox,
+        INFT nftBox,
         uint16 requestConfirmations,
         uint64 subscriptionId,
         address vrfCoordinator,

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.12;
 
-import "./INFTBox.sol";
+import "../nft/INFT.sol";
 
 abstract contract NFTUnboxingStorage {
     uint32 internal constant _CALLBACK_GAS_LIMIT = 40_000;
@@ -10,7 +10,7 @@ abstract contract NFTUnboxingStorage {
     // For a list of available gas lanes on each network,
     // see https://docs.chain.link/docs/vrf-contracts/#configurations
     bytes32 internal _keyHash;
-    INFTBox internal _nftBox;
+    INFT internal _nftBox;
     // Your subscription ID.
     uint64 internal _subscriptionId;
     uint16 internal _requestConfirmations;

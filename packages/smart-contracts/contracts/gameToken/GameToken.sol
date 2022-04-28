@@ -31,7 +31,7 @@ contract GameToken is ERC20BurnableUpgradeable, PausableUpgradeable, ERC20Permit
         _pause();
     }
 
-    function unpause() external onlyOperator {
+    function unpause() external onlyAdmin {
         _unpause();
     }
 

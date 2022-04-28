@@ -11,9 +11,9 @@ async function nftClaimFixture(signers: Signer[]) {
 
   const [deployerAddress, operatorAddress] = await Promise.all([deployer.getAddress(), operator.getAddress()]);
 
-  const acl = await deployACL(deployer, { admin: deployerAddress, operator: operatorAddress });
-  const nft = await deployNFT(deployer, { acl: acl.address });
-  const nftClaim = await deployNFTClaim(deployer, { acl: acl.address, nft: nft.address });
+  const acl = await deployACL(deployer, { admin: deployerAddress, operator: operatorAddress, silent: true });
+  const nft = await deployNFT(deployer, { acl: acl.address, silent: true });
+  const nftClaim = await deployNFTClaim(deployer, { acl: acl.address, nft: nft.address, silent: true });
 
   await acl.grantRole(Roles.MINTER_ROLE, nftClaim.address);
 

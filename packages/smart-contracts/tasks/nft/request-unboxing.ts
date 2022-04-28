@@ -1,6 +1,6 @@
 import { task, types } from 'hardhat/config';
 
-export const TASK_NFT_BOX_REQUEST_UNBOXING = 'tx:nft-box-request-unboxing';
+export const TASK_NFT_BOX_REQUEST_UNBOXING = 'tx:request-nft-unboxing';
 
 task(TASK_NFT_BOX_REQUEST_UNBOXING, 'Request NFT Box Unboxing')
   .addParam('nftUnboxing', 'NFT Unboxing Contract Address', undefined, types.string)
@@ -20,7 +20,7 @@ task(TASK_NFT_BOX_REQUEST_UNBOXING, 'Request NFT Box Unboxing')
     const events = await contract.queryFilter(contract.filters.UnboxingRequested(), receipt.blockNumber);
     events
       .filter(x => x.transactionHash === tx.hash)
-      .forEach(({ args }) => console.log(`Request ID: ${args.requestId}`));
+      .forEach(({ args }) => console.log(`Request ID: ${args!.requestId}`));
   });
 
 export {};

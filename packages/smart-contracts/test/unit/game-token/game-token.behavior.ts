@@ -69,6 +69,30 @@ export function shouldBehaveLikeGameToken() {
           'Pausable: paused',
         );
       });
+
+      context('when admin calls unpause()', () => {
+        it('works', async () => {
+          await token.connect(admin).unpause();
+
+          await expect(token.paused()).eventually.to.be.false;
+        });
+      });
+
+      context('when operator calls unpause()', () => {
+        it('fails', async () => {
+          await expect(token.connect(operator).unpause()).to.be.revertedWith(
+            `AccessControl: account ${operator.address.toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`,
+          );
+        });
+      });
+
+      context('when stranger calls unpause()', () => {
+        it('fails', async () => {
+          await expect(token.connect(stranger).unpause()).to.be.revertedWith(
+            `AccessControl: account ${stranger.address.toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`,
+          );
+        });
+      });
     });
 
     context('permit', () => {

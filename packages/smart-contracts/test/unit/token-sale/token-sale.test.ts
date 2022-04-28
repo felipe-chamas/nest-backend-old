@@ -10,7 +10,7 @@ import { shouldBehaveLikeTokenSale } from './token-sale.behavior';
 async function tokenSaleFixture(signers: Signer[], custody: string) {
   const [deployer, operator] = signers;
   const [deployerAddress, operatorAddress] = await Promise.all([deployer.getAddress(), operator.getAddress()]);
-  const acl = await deployACL(deployer, { admin: deployerAddress, operator: operatorAddress });
+  const acl = await deployACL(deployer, { admin: deployerAddress, operator: operatorAddress, silent: true });
 
   const gameToken = await deployGameToken(deployer, { acl: acl.address, admin: deployerAddress });
   const erc20 = await deployERC20();
@@ -21,6 +21,7 @@ async function tokenSaleFixture(signers: Signer[], custody: string) {
     custody,
     gameToken: gameToken.address,
     paymentToken: erc20.address,
+    silent: true,
   });
 
   const godModeTokenSale = await deployGodModeTokenSale();

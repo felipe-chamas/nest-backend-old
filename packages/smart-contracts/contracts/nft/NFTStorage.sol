@@ -7,4 +7,5 @@ abstract contract NFTStorage {
     string internal _baseTokenURI;
     CountersUpgradeable.Counter internal _tokenIdCounter;
     uint256 internal _maxTokenSupply;
+    bool internal _burnEnabled;
 }

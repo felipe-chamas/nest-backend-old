@@ -15,11 +15,11 @@ async function gameTokenFixture(signers: Signer[]): Promise<{ gameToken: GameTok
   const [deployer, operator] = signers;
   const [deployerAddress, operatorAddress] = await Promise.all([deployer.getAddress(), operator.getAddress()]);
 
-  const acl = await deployACL(deployer, { admin: deployerAddress, operator: operatorAddress });
+  const acl = await deployACL(deployer, { admin: deployerAddress, operator: operatorAddress, silent: true });
 
   return {
     acl,
-    gameToken: await deployGameToken(deployer, { admin: deployerAddress, acl: acl.address }),
+    gameToken: await deployGameToken(deployer, { admin: deployerAddress, acl: acl.address, silent: true }),
     mockToken: await deployMockERC20(deployer, {}),
   };
 }

@@ -9,7 +9,7 @@ async function aclFixture(signers: Signer[]): Promise<{ acl: ACL }> {
   const [adminAddress, operatorAddress] = await Promise.all([admin.getAddress(), operator.getAddress()]);
 
   return {
-    acl: await deployACL(admin, { admin: adminAddress, operator: operatorAddress }),
+    acl: await deployACL(admin, { admin: adminAddress, operator: operatorAddress, silent: true }),
   };
 }
 
