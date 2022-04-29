@@ -5,15 +5,26 @@ import {
 } from 'ethers';
 import { TypedDataSigner } from '@ethersproject/abstract-signer';
 
+/**
+ * The file of this export is generated automatically by
+ * src/generate-helper-types.ts
+ * It contains such types as:
+ * - ContractName: 'ACL' | 'GameToken' | ...
+ * - EventName: 'RoleRevoked' | 'RoleGranted' | ...
+ * - EventSignature 'RoleRevoked(address,address,bytes32)' | ...
+ */
+export {
+  ContractName,
+  EventName,
+  EventSignature,
+} from './typechain/helpers';
+
 
 /** Default Ethers Signer + support for signing typed messaged */
 export type Signer = EthersSigner & TypedDataSigner
 
 export type Address = string;
 export type AddressLike = Address | AccountId;
-
-export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
-export type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
 export interface ERC20AllowancePermitStrict {
   owner: AccountId;

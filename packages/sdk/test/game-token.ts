@@ -3,6 +3,7 @@ import {
   Address,
   GameToken,
   typechain,
+  Roles,
 } from '../';
 
 import {
@@ -291,10 +292,10 @@ describe('game-token functionality', () => {
       .to.eventually.rejectedWith(Error, ' is missing role ');
 
     const grantRoleReply = await adminAcl
-      .grantRole(anon.address, 'Operator');
+      .grantRole(anon.address, Roles.Admin);
     await expect(grantRoleReply.wait()).to.eventually.fulfilled;
 
-    const pauseReply = await anonGameToken.pauseToken();
+    const pauseReply = await gameTokenServiceAsOperator.pauseToken();
     await expect(pauseReply.wait()).to.eventually.fulfilled;
 
     await expect(anonGameToken.isTokenPaused())

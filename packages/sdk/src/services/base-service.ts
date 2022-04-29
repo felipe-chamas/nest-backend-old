@@ -1,7 +1,10 @@
 import { ethers } from 'ethers';
 import { AccountId } from 'caip';
 import { Address, AddressLike, Signer } from '../types';
-import { AccountsNotOnTheSameChainError, GeneralError } from '../errors';
+import {
+  AccountsNotOnTheSameChainError,
+  ErrorCodes, GeneralError,
+} from '../errors';
 import { CHAIN_STANDARD } from '../constants';
 import { ContractResolver } from '../contract-resolver';
 
@@ -16,6 +19,12 @@ export interface BaseServiceParams {
 export class BaseService {
 
   constructor(protected readonly params: BaseServiceParams) {}
+
+  protected get provider() {
+    if (!this.params.signer.provider)
+      throw new GeneralError(ErrorCodes.signer_does_not_have_provider_attached);
+    return this.params.signer.provider;
+  }
 
   protected isAccountFromSignerChain(accountId: AccountId) {
     return accountId.chainId.reference === this.params.signerChainId;

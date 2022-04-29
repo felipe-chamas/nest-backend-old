@@ -77,9 +77,52 @@ Revoke role:
 ```
 
 
+## Utils
+`fetchEvents` - method fetches events from specified transaction.
+As a result it return array of objects with properties equal to
+event named arguments.
+```
+const transaction = await gameTokenService
+  .transfer(anon.address, transferAmount);
+await transaction.wait();
+// fetch Transfer events by transaction hash
+const events = await utils.fetchEvents(
+  transaction.hash,
+  gameTokenAddress,
+  'GameToken',
+  'Transfer',
+);
+// check that only single transfer event was returned
+expect(events).to.have.lengthOf(1);
+// check event properties
+const event = events[0];
+expect(event.to.address).to.equal(anon.address);
+expect(event.from.address).to.equal(admin.address);
+expect(event.value.toNumber()).to.equal(transferAmount);
+```
+The type of `contractName` and `eventName` extends string and contains
+every possible contract/event names. If not existing event is specified,
+error returned.
+
+If `eventName` was not specified, every event that is from specified contract
+will be returned
+
+
+`createAccountIdFromAddress` - helper method to create
+address of [caip](https://www.npmjs.com/package/caip) format.
+
 
 ## GameToken
-...
+`GameToken` is a service to interact with GameToken(ERC20) contract.
+It contains basic operations to get balance, transfer, get contract metadata,
+manage allowance.
+Additionaly it supports creating off-chain permits with `createAllowancePermit`
+and then submitting permits with `submitAllowancePermit`.
+Usecase of off-chain permits is as following: a person who wants to transfer
+GameTokens to someone, create a permit(signs it with metamask or wallet) without
+sending a transaction to blockchain(to transaction fee).
+Instead permit is sent by email of any other off-chain method to the receiver.
+The receiver than submits permit(pays transaction fee), thus changes allowance.
 
 
 

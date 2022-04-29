@@ -7,6 +7,9 @@ export const errorCodeDescriptions = {
   service_was_not_initialized_properly:
     'Service was not initialized properly',
   provided_signature_is_not_valid: 'Provided signature is not valid',
+  signer_does_not_have_provider_attached:
+    "Signer's `provider` property is not valid",
+  not_supported_event: 'Event is not supported',
 } as const;
 
 

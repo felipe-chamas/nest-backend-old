@@ -1,6 +1,6 @@
 import { BaseService, BaseServiceParams } from './base-service';
 import { Utils } from './utils';
-import { GeneralError } from '../errors';
+import { ErrorCodes, GeneralError } from '../errors';
 import { ACL } from '../typechain';
 import { Address, AddressLike } from '../types';
 import { ethers } from 'ethers';
@@ -24,6 +24,20 @@ const roleList = Object.keys(roleHashes) as Role[];
 export function isRoleExist(role: string) {
   return typeof roleHashes[role as Role] !== 'undefined';
 }
+
+const hashToRoleMap: { [key in string]: Role } = Object.fromEntries(
+  Object.entries(roleHashes).map(([role, hash]) => [hash, role as Role]),
+);
+
+export function parseRole(roleHash: string): Role {
+  if (!hashToRoleMap[roleHash])
+    throw new GeneralError(
+      ErrorCodes.role_not_exist,
+      `No role exists for provided role hash: ${roleHash}`,
+    );
+  return hashToRoleMap[roleHash];
+}
+
 
 export class AccessControl extends BaseService {
 
