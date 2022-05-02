@@ -64,7 +64,7 @@ contract NFTClaim is BaseContract {
         uint256 tokens
     ) internal view returns (bool) {
         if (!_merkleRoots[merkleRoot]) return false;
-        if (_claimedRoots[_msgSender()][merkleRoot]) return false;
+        if (_claimedRoots[account][merkleRoot]) return false;
 
         bytes32 leaf = _getMerkleLeaf(account, tokens);
 

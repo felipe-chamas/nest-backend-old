@@ -85,6 +85,30 @@ export function shouldBehaveLikeNFTClaim() {
       });
     });
 
+    context('when one proof is reused multiple times', () => {
+      beforeEach('correctly claim tokens for the first time as a user', async () => {
+        await expect(nftClaim.connect(user).claim(root, userProof, user.address, 2))
+          .to.emit(nftClaim, 'TokenClaimed')
+          .withArgs(user.address, root, 0)
+          .emit(nftClaim, 'TokenClaimed')
+          .withArgs(user.address, root, 1);
+      });
+      context('when token is claimed second time as a user', () => {
+        it('reverts', async () => {
+          await expect(nftClaim.connect(user).claim(root, userProof, user.address, 2)).to.revertedWith(
+            'ClaimingNotAllowed()',
+          );
+        });
+      });
+      context('when token claimed second time as a stranger', () => {
+        it('reverts', async () => {
+          await expect(nftClaim.connect(stranger).claim(root, userProof, user.address, 2)).to.revertedWith(
+            'ClaimingNotAllowed()',
+          );
+        });
+      });
+    });
+
     context('when stranger claims tokens', () => {
       it('reverts', async () => {
         await expect(nftClaim.connect(stranger).claim(root, userProof, stranger.address, 2)).to.revertedWith(
