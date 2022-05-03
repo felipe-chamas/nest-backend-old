@@ -5,3 +5,4 @@ export * from './03_nft';
 export * from './04_token_sale';
 export * from './05_nft_claim';
 export * from './06_nft_unboxing';
+export * from './07_splitter';

@@ -1,6 +1,7 @@
 export type BaseConstructor = { silent: boolean };
 export type ERC20MockConstructor = { name: string; symbol: string; decimals: number; supply: string };
 export type ACLConstructor = BaseConstructor & { admin: string; operator: string };
+export type SplitterConstructor = BaseConstructor;
 export type GameTokenConstructor = BaseConstructor & {
   admin: string;
   name: string;

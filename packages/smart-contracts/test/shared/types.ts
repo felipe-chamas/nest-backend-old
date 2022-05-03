@@ -5,6 +5,7 @@ import { ethers } from 'hardhat';
 import {
   AccessControllable,
   ACL,
+  Splitter,
   ERC20Mock,
   ERC20TokenRecoverable,
   GameToken,
@@ -30,6 +31,7 @@ declare module 'mocha' {
 export interface Contracts {
   mockToken: ERC20Mock;
   acl: ACL;
+  splitter: Splitter;
   nft: NFT;
   gameToken: GameToken;
   recoverable: ERC20TokenRecoverable;
