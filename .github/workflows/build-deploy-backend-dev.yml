@@ -30,7 +30,7 @@ jobs:
                MONGODB_URI=${{ secrets.MONGODB_URI_DEV }}
                TYPEORM_CONNECTION=${{ secrets.TYPEORM_CONNECTION_DEV }}
                TYPEORM_URL=${{ secrets.TYPEORM_URL_DEV }}
-               TYPEORM_ENTITIES=${{ secrets.TYPEORM_ENTITIES)_DEV }}
+               TYPEORM_ENTITIES=${{ secrets.TYPEORM_ENTITIES_DEV }}
                TYPEORM_LOGGING=${{ secrets.TYPEORM_LOGGING_DEV }}
                AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
                AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
