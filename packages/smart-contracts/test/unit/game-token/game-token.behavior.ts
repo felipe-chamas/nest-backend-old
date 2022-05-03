@@ -1,8 +1,9 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
 import { signERC2612Permit } from 'eth-permit';
+import { ethers } from 'hardhat';
 import { GameToken } from '../../../typechain';
-import { ONE_TOKEN } from '../../shared/constants';
+import { AddressZero, ONE_TOKEN } from '../../shared/constants';
 import { Roles } from '../../shared/types';
 
 export function shouldBehaveLikeGameToken() {
@@ -91,6 +92,119 @@ export function shouldBehaveLikeGameToken() {
           await expect(token.connect(stranger).unpause()).to.be.revertedWith(
             `AccessControl: account ${stranger.address.toLowerCase()} is missing role 0x0000000000000000000000000000000000000000000000000000000000000000`,
           );
+        });
+      });
+    });
+    context('batched transfers', () => {
+      const BATCH_SIZE = 5;
+      context('transferBatch', () => {
+        context('when sender holds enough tokens', () => {
+          it('works', async () => {
+            const signers = (await ethers.getSigners()).slice(1, BATCH_SIZE + 1);
+            const payees = signers.map(x => ({ account: x.address, amount: ONE_TOKEN }));
+
+            await expect(() => token.transferBatch(payees))
+              .to.emit(token, 'Transfer')
+              .withArgs(admin.address, payees[0].account, payees[0].amount)
+              .to.emit(token, 'Transfer')
+              .withArgs(admin.address, payees[1].account, payees[1].amount)
+              .to.emit(token, 'Transfer')
+              .withArgs(admin.address, payees[2].account, payees[2].amount)
+              .to.emit(token, 'Transfer')
+              .withArgs(admin.address, payees[3].account, payees[3].amount)
+              .to.emit(token, 'Transfer')
+              .withArgs(admin.address, payees[4].account, payees[4].amount)
+              .changeTokenBalances(
+                token,
+                [admin, ...signers],
+                [-ONE_TOKEN * BigInt(BATCH_SIZE), ...payees.map(x => x.amount)],
+              );
+          });
+        });
+
+        context('when sender does not have enough tokens', () => {
+          it('reverts', async () => {
+            await expect(
+              token.transferBatch([{ account: user.address, amount: ONE_TOKEN * 1_000_000n }]),
+            ).to.be.revertedWith(`ERC20: transfer amount exceeds balance`);
+          });
+        });
+
+        context('when sender sends tokens to zero address', () => {
+          it('reverts', async () => {
+            await expect(token.transferBatch([{ account: AddressZero, amount: ONE_TOKEN }])).to.be.revertedWith(
+              `ERC20: transfer to the zero address`,
+            );
+          });
+        });
+      });
+
+      context('transferFromBatch', () => {
+        context('when allowance is enough', () => {
+          beforeEach(async () => {
+            await token.approve(user.address, await token.balanceOf(admin.address));
+          });
+
+          context('when token holder has enough tokens', () => {
+            it('works', async () => {
+              const signers = (await ethers.getSigners()).slice(1, BATCH_SIZE + 1);
+              const payees = signers.map(x => ({ account: x.address, amount: ONE_TOKEN }));
+
+              await expect(() => token.connect(user).transferFromBatch(admin.address, payees))
+                .to.emit(token, 'Transfer')
+                .withArgs(admin.address, payees[0].account, payees[0].amount)
+                .to.emit(token, 'Transfer')
+                .withArgs(admin.address, payees[1].account, payees[1].amount)
+                .to.emit(token, 'Transfer')
+                .withArgs(admin.address, payees[2].account, payees[2].amount)
+                .to.emit(token, 'Transfer')
+                .withArgs(admin.address, payees[3].account, payees[3].amount)
+                .to.emit(token, 'Transfer')
+                .withArgs(admin.address, payees[4].account, payees[4].amount)
+                .changeTokenBalances(
+                  token,
+                  [admin, ...signers],
+                  [-ONE_TOKEN * BigInt(BATCH_SIZE), ...payees.map(x => x.amount)],
+                );
+            });
+          });
+
+          context('when holder does not have enough tokens', () => {
+            beforeEach(async () => {
+              await token.approve(user.address, ONE_TOKEN * 1_000_000n);
+            });
+
+            it('reverts', async () => {
+              await expect(
+                token.transferBatch([{ account: user.address, amount: ONE_TOKEN * 1_000_000n }]),
+              ).to.be.revertedWith(`ERC20: transfer amount exceeds balance`);
+            });
+          });
+
+          context('when sender sends tokens to zero address', () => {
+            it('reverts', async () => {
+              await expect(token.transferBatch([{ account: AddressZero, amount: ONE_TOKEN }])).to.be.revertedWith(
+                `ERC20: transfer to the zero address`,
+              );
+            });
+          });
+        });
+
+        context('when allowance is not enough', () => {
+          beforeEach(async () => {
+            await token.approve(user.address, ONE_TOKEN);
+          });
+          context('when token holder has enough tokens', () => {
+            it('reverts', async () => {
+              const payees = (await ethers.getSigners())
+                .slice(0, BATCH_SIZE)
+                .map(x => ({ account: x.address, amount: ONE_TOKEN }));
+
+              await expect(token.connect(user).transferFromBatch(admin.address, payees)).to.be.revertedWith(
+                `ERC20: insufficient allowance`,
+              );
+            });
+          });
         });
       });
     });
