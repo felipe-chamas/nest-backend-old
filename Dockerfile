@@ -1,10 +1,10 @@
 # Base #
 #####################
 FROM node:16-alpine AS base
-
-USER node
-
-WORKDIR /home/node/app
+USER $user
+RUN mkdir -p /usr/src/app
+RUN mkdir /usr/src/app/logs
+WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Production dependencies #
@@ -24,7 +24,7 @@ RUN yarn install --production=false --frozen-lockfile --ignore-scripts && yarn c
 ########################
 FROM base AS builder
 ENV NODE_ENV=development
-COPY --from=dependencies --chown=node:node /home/node/app/node_modules ./node_modules
+COPY --from=dependencies --chown=node:node /usr/src/app/node_modules ./node_modules
 COPY --chown=node:node . .
 RUN yarn run build:backend
 
@@ -32,9 +32,9 @@ RUN yarn run build:backend
 ###########################
 FROM base AS production
 ENV NODE_ENV=production
-COPY --from=production-dependencies --chown=node:node /home/node/app/node_modules ./node_modules
-COPY --from=builder --chown=node:node /home/node/app/dist/packages/backend ./dist
-COPY --from=builder --chown=node:node /home/node/app/.env ./
+COPY --from=production-dependencies --chown=node:node /usr/src/app/node_modules ./node_modules
+COPY --from=builder --chown=node:node /usr/src/app/dist/packages/backend ./dist
+COPY --from=builder --chown=node:node /usr/src/app/.env ./
 
 USER node
 EXPOSE 3000
