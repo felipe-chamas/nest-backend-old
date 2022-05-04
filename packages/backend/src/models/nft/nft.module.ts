@@ -1,17 +1,14 @@
 import { Module } from '@nestjs/common';
-import { NftService } from './nft.service';
-import { NftController } from './nft.controller';
+import { NftService } from './services/nft.service';
+import { NftController } from './controllers/nft.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Nft } from './entities/nft.entity';
-import { NftCollectionService } from 'models/nft-collection/nft-collection.service';
-import { NftCollection } from 'models/nft-collection/entities/nft-collection.entity';
+import { Nft } from '../../common/entities/nft.entity';
+import { NftCollection, NftCollectionService } from 'models/nft-collection';
 
 @Module({
   controllers: [NftController],
-  providers: [NftCollectionService, NftService],
-  imports: [
-    TypeOrmModule.forFeature([NftCollection]),
-    TypeOrmModule.forFeature([Nft]),
-  ],
+  providers: [NftService, NftCollectionService],
+  imports: [TypeOrmModule.forFeature([Nft, NftCollection])],
+  exports: [NftService],
 })
 export class NftModule {}

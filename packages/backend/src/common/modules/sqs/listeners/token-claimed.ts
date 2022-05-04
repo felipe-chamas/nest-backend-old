@@ -1,16 +1,16 @@
 import { BigNumber, ethers } from 'ethers';
 import { ConfigService } from '@nestjs/config';
-import { Nft } from 'models/nft/entities/nft.entity';
-import { NftService } from 'models/nft/nft.service';
+
 import { getRepository } from 'typeorm';
-import { NftCollection } from 'models/nft-collection/entities/nft-collection.entity';
-import { NftCollectionService } from 'models/nft-collection/nft-collection.service';
-import { User } from 'models/user/entities/user.entity';
-import { UserService } from 'models/user/user.service';
+
 import { ParsiqEvent } from '../sqs.service';
 import { logger } from 'common/providers/logger';
 import { NftClaim } from 'models/nft-claim/entities/nft-claim.entity';
 import { NftClaimService } from 'models/nft-claim/nft-claim.service';
+import { NftCollection, NftCollectionService } from 'models/nft-collection';
+import { UserService } from 'models/user/services';
+import { Nft, NftService } from 'models/nft';
+import { User } from 'common/entities';
 
 const config = new ConfigService();
 
@@ -84,7 +84,7 @@ export default async function tokenClaimed(
     const nftCollectionService = new NftCollectionService(nftCollectionRepo);
 
     const [user, nftCollection, nftClaim] = await Promise.all([
-      userService.findOne({ account: account.toLowerCase() }),
+      userService.find({ account: account.toLowerCase() }),
       nftCollectionService.findOne({ contractAddress }),
       nftClaimService.findOne({ merkleRoot }),
     ]);
@@ -101,9 +101,9 @@ export default async function tokenClaimed(
 
     const nft = await nftService.create({
       metadata,
-      userId: user.id.toString(),
-      tokenId: tokenId.toString(),
-      nftCollectionId: nftCollection.id.toString(),
+      userId: user.id,
+      tokenId: tokenId,
+      nftCollectionId: nftCollection.id,
     });
     logger.debug(nft);
   }

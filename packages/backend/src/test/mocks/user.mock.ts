@@ -1,6 +1,6 @@
 import { UpdateUserDto } from '../../models/user/dto/update-user.dto';
 import { CreateUserDto } from '../../models/user/dto/create-user.dto';
-import { User } from '../../models/user/entities/user.entity';
+import { User } from '../../common/entities/user.entity';
 
 export const mockUser = {
   id: '624b3c3adb4b27a36fc4d450',
@@ -12,6 +12,9 @@ export const mockUser = {
 export const mockCreateUser: CreateUserDto = {
   name: 'John Doe',
   email: 'joshn@email.com',
+  password: '12345678@Abc',
+  isAdmin: false,
+  address: [],
   account: '0x12345',
 };
 

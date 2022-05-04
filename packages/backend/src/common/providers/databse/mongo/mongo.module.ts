@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { logger } from 'common/providers/logger';
 import { getConnectionOptions } from 'typeorm';
@@ -6,12 +7,15 @@ import { getConnectionOptions } from 'typeorm';
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
-      useFactory: async () =>
+      inject: [ConfigService],
+      useFactory: async (config: ConfigService) =>
         Object.assign(await getConnectionOptions(), {
           useNewUrlParser: true,
           useCreateIndex: true,
           useUnifiedTopology: true,
           autoLoadEntities: true,
+          synchronize:
+            config.get<string>('env') === 'development' ? true : false,
         }),
     }),
   ],

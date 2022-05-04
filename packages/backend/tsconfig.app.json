@@ -6,7 +6,14 @@
     "types": ["node"],
     "emitDecoratorMetadata": true,
     "target": "es2015",
-    "baseUrl": "./src"
+    "baseUrl": "./src",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "paths": {
+      "@*": ["src/*"],
+      "@models/*": ["src/models/*"],
+      "@common/*": ["src/common/*"]
+    }
   },
   "exclude": ["**/*.spec.ts", "**/*.test.ts"],
   "include": ["**/*.ts"]

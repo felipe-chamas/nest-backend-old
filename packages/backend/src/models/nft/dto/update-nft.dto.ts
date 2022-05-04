@@ -1,15 +1,22 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { IsObject, IsOptional, IsString } from 'class-validator';
+import { User } from 'common/entities';
+import { NftCollection } from 'common/entities/nft-collection.entity';
+
 import { Metadata } from '../interface';
 
 export class UpdateNftDto {
+  @ApiProperty()
   @IsOptional()
   @IsString()
-  nftCollectionId: string;
+  nftCollectionId: NftCollection['id'];
 
+  @ApiProperty()
   @IsOptional()
   @IsString()
-  userId: string;
+  userId: User['id'];
 
+  @ApiProperty()
   @IsOptional()
   @IsObject()
   metadata: Metadata;

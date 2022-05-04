@@ -1,5 +1,5 @@
 import { CreateNftCollectionDto } from '../../models/nft-collection/dto/create-nft-collection.dto';
-import { NftCollection } from '../../models/nft-collection/entities/nft-collection.entity';
+import { NftCollection } from '../../common/entities/nft-collection.entity';
 
 export const mockNftCollection = {
   id: '624b40189c5293c6f75945f1',

@@ -1,26 +1,43 @@
 import { Module } from '@nestjs/common';
-import { GloablConfigModule } from 'common/providers/config/config.module';
-import { SqsModule } from 'common/modules/sqs/sqs.module';
-import { NftCollectionModule } from 'models/nft-collection/nft-collection.module';
-import { NftModule } from 'models/nft/nft.module';
+import { SqsModule } from 'common/modules';
+import {
+  GloablConfigModule,
+  logger,
+  MongoDbProvider,
+  RedisClient,
+} from 'common/providers';
+import {
+  NftCollectionModule,
+  NftModule,
+  OrderHistoryModule,
+  OrderModule,
+  UserModule,
+} from 'models';
 import { NftClaimModule } from 'models/nft-claim/nft-claim.module';
-import { MongoDbProvider } from '../common/providers/databse/mongo/mongo.module';
-
-import { UserModule } from '../models/user/user.module';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { AppController } from './controllers/app.controller';
+import { AppService } from './services/app.service';
 
 @Module({
   imports: [
     GloablConfigModule,
     MongoDbProvider,
+    SqsModule,
     UserModule,
     NftModule,
     NftCollectionModule,
+    OrderModule,
+    OrderHistoryModule,
     NftClaimModule,
-    SqsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule {
+  public async onModuleInit() {
+    RedisClient.on('ready', () => {
+      logger.info('Redis client is ready');
+    });
+    RedisClient.on('error', (err) => logger.error(`Redis error: ${err}`));
+    await RedisClient.connect();
+  }
+}

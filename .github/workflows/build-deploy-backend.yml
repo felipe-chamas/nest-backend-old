@@ -13,6 +13,7 @@ on:
         description: Deploy Production
         required: false
 
+
 jobs:
 
   Build:
@@ -63,7 +64,6 @@ jobs:
           docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REPOSITORY:$IMAGE_TAG
 
-
   DeployProduction:
      name: Deploy Production
      #if: github.event.ref == 'refs/heads/'
@@ -83,6 +83,14 @@ jobs:
        - name: Login to Amazon ECR
          id: login-ecr
          uses: aws-actions/amazon-ecr-login@v1
+   
+       - name: Fill in the new image ID in the Amazon ECS task definition
+         id: task-def
+         uses: aws-actions/amazon-ecs-render-task-definition@v1
+         with:
+           task-definition: .github/tasks/task-definition.json
+           container-name: ${{ secrets.CONTAINER_NAME }}
+           image: "${{ secrets.REGISTRY_NAME }}:${{ env.RELEASE }}"
 
        - uses: actions/checkout@v2
        - id: install-aws-cli

@@ -16,21 +16,31 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     const { method, url } = request;
     const status = exception.getStatus();
+    const validationError = exception.getResponse();
 
     logger.log({
       level: 'error',
       message: `${method} ${url}: Response type: Error ${status}`,
+      response: exception.message,
       errorInfo: {
         status,
+        validationError,
         timestamp: new Date().toISOString(),
         path: url,
       },
     });
 
-    response.status(status).json({
+    if (typeof validationError === 'object') {
+      return response.status(status).json(validationError);
+    }
+
+    const errorResponse = {
       statusCode: status,
+      error: exception.message,
       timestamp: new Date().toISOString(),
       path: url,
-    });
+    };
+
+    response.status(status).json(errorResponse);
   }
 }
