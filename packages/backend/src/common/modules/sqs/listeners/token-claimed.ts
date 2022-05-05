@@ -1,9 +1,9 @@
-import { BigNumber, ethers } from 'ethers';
+import { ethers } from 'ethers';
 import { ConfigService } from '@nestjs/config';
 
 import { getRepository } from 'typeorm';
 
-import { ParsiqEvent } from '../sqs.service';
+import { parseLogs, ParsiqEvent } from '../sqs.service';
 import { logger } from 'common/providers/logger';
 import { NftClaim } from 'models/nft-claim/entities/nft-claim.entity';
 import { NftClaimService } from 'models/nft-claim/nft-claim.service';
@@ -13,40 +13,6 @@ import { Nft, NftService } from 'models/nft';
 import { User } from 'common/entities';
 
 const config = new ConfigService();
-
-const TokenClaimedABI = [
-  'event TokenClaimed(address indexed account, bytes32 indexed merkleRoot, uint256 tokenId)',
-];
-const TransferABI = [
-  'event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)',
-];
-
-function parseLogs(logs: ethers.providers.Log[]): Array<{
-  event: ethers.utils.LogDescription;
-  address: string;
-}> {
-  const iTokenClaimed = new ethers.utils.Interface(TokenClaimedABI);
-  const iTransfer = new ethers.utils.Interface(TransferABI);
-  return logs
-    .map((log) => {
-      let event: ethers.utils.LogDescription;
-      try {
-        event = iTokenClaimed.parseLog(log);
-        // eslint-disable-next-line no-empty
-      } catch (err) {}
-      if (!event) {
-        try {
-          event = iTransfer.parseLog(log);
-          // eslint-disable-next-line no-empty
-        } catch (err) {}
-      }
-      return {
-        event,
-        address: log.address,
-      };
-    })
-    .filter((x) => x.event);
-}
 
 export default async function tokenClaimed(
   parsiqEvent: ParsiqEvent
@@ -85,7 +51,7 @@ export default async function tokenClaimed(
 
     const [user, nftCollection, nftClaim] = await Promise.all([
       userService.find({ account: account.toLowerCase() }),
-      nftCollectionService.findOne({ contractAddress }),
+      nftCollectionService.findOneBy({ contractAddress }),
       nftClaimService.findOne({ merkleRoot }),
     ]);
     logger.debug({ user, nftCollection, nftClaim });

@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import {
+  FindConditions,
   FindOneOptions,
   getMongoRepository,
   ObjectID,
@@ -32,47 +33,8 @@ export class NftService {
     return nft;
   }
 
-  // async findOne(idOrNft: string | FindOneOptions<Nft>) {
-  //   let nft: Nft;
-
-  //   switch (true) {
-  //     case typeof idOrNft === 'string': {
-  //       nft = await this.nftRepo.findOne(idOrNft as string);
-  //       break;
-  //     }
-  //     case typeof idOrNft === 'object': {
-  //       nft = await this.nftRepo.findOne(idOrNft as FindOneOptions<Nft>);
-  //       break;
-  //     }
-  //   }
-  //   if (!nft)
-  //     throw new NotFoundException(`Nft ${JSON.stringify(idOrNft)} not found`);
-
-  //   return nft;
-  // }
-
-  // async update(idOrNft: string | Nft, updateNftDto: UpdateNftDto) {
-  //   let nft: Nft;
-
-  //   switch (true) {
-  //     case typeof idOrNft === 'string': {
-  //       nft = await this.nftRepo.findOne(idOrNft as string);
-  //       if (!nft)
-  //         throw new NotFoundException(`Nft with id ${idOrNft} not found`);
-  //       break;
-  //     }
-  //     case typeof idOrNft === 'object': {
-  //       nft = idOrNft as Nft;
-  //       break;
-  //     }
-  //   }
-
-  //   const newNft = { ...nft, ...updateNftDto };
-  //   return await this.nftRepo.save(newNft);
-  // }
-
-  async find(options?: FindOneOptions<Nft>) {
-    const nft = await this.nftRepo.findOne(options);
+  async findOneBy(conditions: FindConditions<Nft>) {
+    const nft = await this.nftRepo.findOne(conditions);
 
     if (!nft) throw new NotFoundException(`Nft not found`);
 

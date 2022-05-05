@@ -6,12 +6,7 @@ const env = process.env.NODE_ENV || 'development';
 
 const loggerOptions: winston.LoggerOptions = {
   level: 'info',
-  format: combine(
-    timestamp({
-      format: 'YYYY-MM-DD HH:mm:ss A',
-    }),
-    json()
-  ),
+  format: combine(timestamp(), json()),
   transports: [
     new winston.transports.File({
       filename: `logs/error.log`,

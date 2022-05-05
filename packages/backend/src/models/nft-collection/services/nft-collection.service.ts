@@ -24,29 +24,21 @@ export class NftCollectionService {
     return await this.nftCollectionRepo.find();
   }
 
-  async findOne(idOrConditions: string | FindConditions<NftCollection>) {
-    let collection: NftCollection;
-
-    switch (true) {
-      case typeof idOrConditions === 'string': {
-        collection = await this.nftCollectionRepo.findOne(
-          idOrConditions as string
-        );
-        break;
-      }
-      case typeof idOrConditions === 'object': {
-        collection = await this.nftCollectionRepo.findOne(
-          idOrConditions as FindConditions<NftCollection>
-        );
-        break;
-      }
-    }
-
+  async findOneBy(conditions: FindConditions<NftCollection>) {
+    const collection = await this.nftCollectionRepo.findOne(conditions);
     if (!collection)
       throw new NotFoundException(
-        `NftCollection with idOrConditions ${JSON.stringify(
-          idOrConditions
-        )} not found`
+        `NftCollection with conditions ${JSON.stringify(conditions)} not found`
+      );
+
+    return collection;
+  }
+
+  async findOne(id: string) {
+    const collection = await this.nftCollectionRepo.findOne(id);
+    if (!collection)
+      throw new NotFoundException(
+        `NftCollection with id ${JSON.stringify(id)} not found`
       );
 
     return collection;

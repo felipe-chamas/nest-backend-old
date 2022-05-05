@@ -38,14 +38,14 @@ export class NftController {
     @Param('nftCollectionSlug') nftCollectionSlug: string,
     @Param('tokenId') tokenId: string
   ) {
-    const nftCollection = await this.nftCollectionService.findOne({
+    const nftCollection = await this.nftCollectionService.findOneBy({
       slug: nftCollectionSlug,
     });
     const nftCollectionId = nftCollection.id.toString();
-    const nft = await this.nftService.findOne({
+    const nft = await this.nftService.findOneBy({
       nftCollectionId,
       tokenId,
-    } as any);
+    });
     return nft.metadata;
   }
 

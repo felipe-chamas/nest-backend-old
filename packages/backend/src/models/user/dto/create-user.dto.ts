@@ -20,12 +20,12 @@ export class CreateUserDto {
   @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
     message: 'password too weak',
   })
-  password: string;
+  password?: string;
 
   @ApiProperty()
   @IsOptional()
   @IsString()
-  name: string;
+  name?: string;
 
   @ApiProperty()
   @IsOptional()
@@ -34,7 +34,7 @@ export class CreateUserDto {
 
   @IsOptional()
   @IsBoolean()
-  isAdmin: boolean;
+  isAdmin?: boolean;
 
   @IsString()
   account: string;

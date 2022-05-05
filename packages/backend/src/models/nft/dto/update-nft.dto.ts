@@ -9,15 +9,15 @@ export class UpdateNftDto {
   @ApiProperty()
   @IsOptional()
   @IsString()
-  nftCollectionId: NftCollection['id'];
+  nftCollectionId?: NftCollection['id'];
 
   @ApiProperty()
   @IsOptional()
   @IsString()
-  userId: User['id'];
+  userId?: User['id'];
 
   @ApiProperty()
   @IsOptional()
   @IsObject()
-  metadata: Metadata;
+  metadata?: Metadata;
 }
