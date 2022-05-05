@@ -15,7 +15,6 @@ import { ObjectID } from 'typeorm';
 import { UserService } from '../services/user.service';
 
 import { UserDto } from '../dto/user.dto';
-import { Address } from '../dto/address.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 
 import { CurrentUser } from '../decorators';
@@ -46,15 +45,6 @@ export class UserController {
   @Patch(':id')
   update(@Param('id') id: ObjectID, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.update(id, updateUserDto);
-  }
-
-  @UseGuards(AuthGuard)
-  @Patch(':id')
-  updateAddress(
-    @Param('id') id: ObjectID,
-    @Body() ...updateUserDto: Address[]
-  ) {
-    return this.userService.updateAddress(id, ...updateUserDto);
   }
 
   @UseGuards(AuthGuard)

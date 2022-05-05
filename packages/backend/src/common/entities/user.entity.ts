@@ -9,7 +9,6 @@ import {
   ObjectIdColumn,
   OneToMany,
 } from 'typeorm';
-import { Address } from '../../models/user/dto/address.dto';
 
 @Entity()
 @Index(['email', 'account'])
@@ -28,9 +27,6 @@ export class User {
 
   @Column()
   isAdmin: boolean;
-
-  @Column()
-  address?: Address[] = [];
 
   @Column()
   @Index({ unique: true })

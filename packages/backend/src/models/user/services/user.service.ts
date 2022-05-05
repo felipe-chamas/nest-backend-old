@@ -10,7 +10,6 @@ import {
   Repository,
 } from 'typeorm';
 
-import { Address } from '../dto/address.dto';
 import { CreateUserDto } from '../dto/create-user.dto';
 
 import { UpdateUserDto } from '../dto/update-user.dto';
@@ -90,11 +89,6 @@ export class UserService {
 
     Object.assign(user, updatedUser);
     return await this.userRepo.save(user);
-  }
-
-  async updateAddress(id: ObjectID, ...address: Address[]) {
-    const user = await this.findOne(id);
-    user.address = [...user.address, ...address];
   }
 
   async remove(id: ObjectID) {

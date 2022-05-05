@@ -7,7 +7,6 @@ import {
   Matches,
   MinLength,
 } from 'class-validator';
-import { Address } from './address.dto';
 
 export class CreateUserDto {
   @ApiProperty()
@@ -26,11 +25,6 @@ export class CreateUserDto {
   @IsOptional()
   @IsString()
   name?: string;
-
-  @ApiProperty()
-  @IsOptional()
-  @IsString({ each: true })
-  address?: Address[];
 
   @IsOptional()
   @IsBoolean()
