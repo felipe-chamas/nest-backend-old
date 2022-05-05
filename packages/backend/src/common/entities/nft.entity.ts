@@ -27,7 +27,7 @@ export class Nft {
   metadata: Metadata;
 
   @Column()
-  @Index({ unique: true })
+  @Index()
   userId?: User['id'];
 
   @Column()

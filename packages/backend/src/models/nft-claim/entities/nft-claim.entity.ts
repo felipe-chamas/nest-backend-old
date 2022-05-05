@@ -16,6 +16,6 @@ export class NftClaim {
   @Column()
   metadata: Metadata;
 
-  @Column({ unique: true })
+  @Column()
   nftCollectionId: string;
 }
