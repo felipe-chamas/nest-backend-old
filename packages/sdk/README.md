@@ -125,6 +125,20 @@ Instead permit is sent by email of any other off-chain method to the receiver.
 The receiver than submits permit(pays transaction fee), thus changes allowance.
 
 
+## NFT
+`NFT` is a service to interact with NFT(ERC721) contract.
+It contains basic operations to get balance, transfer, get contract metadata,
+manage allowance.
+
+## NFTClaim
+`NFTClaim` is a service to create nft claiming (meaning to make a gift for a user)
+and to create claim proofs (user who were gifted nft proofs to become nft's owner)
+
+see [commends](https://github.com/falco-gg/blockchain/blob/main/packages/sdk/src/services/nft-claim.ts) for more info
+see [tests](https://github.com/falco-gg/blockchain/blob/main/packages/sdk/test/nft-claim.test.ts) for usecases
+
+
+
 
 ### Development
 

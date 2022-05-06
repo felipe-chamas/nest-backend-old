@@ -44,11 +44,38 @@ export interface ERC20AllowancePermitBroad {
   splitSignature?: Signature;
 }
 
-export interface ERC20MetaInfo {
+export interface TokenBaseMetaInfo {
   name: string;
-  owner: AccountId;
   symbol: string;
+  owner: AccountId;
+}
+
+export interface ERC20MetaInfo extends TokenBaseMetaInfo {
   decimals: number;
   totalSupply: BigNumber;
 }
 
+export interface ERC721MetaInfo extends TokenBaseMetaInfo {
+  maxTokenSupply: BigNumber;
+}
+
+
+export interface PaginationParams {
+  fromIndex: BigNumberish,
+  /**
+   * including `toIndex` item
+   */
+  toIndex: BigNumberish,
+}
+
+
+export interface NFTClaimProof {
+  merkleRoot: string;
+  provingSequence: string[];
+  claim: NFTClaimData;
+}
+
+export interface NFTClaimData {
+  accountId: AccountId,
+  tokenCount: BigNumber,
+}

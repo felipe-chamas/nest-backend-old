@@ -63,7 +63,7 @@ describe('utils service functionality', () => {
           admin: admin.address,
           name: 'Test',
           symbol: 'test',
-          supply: 10000,
+          supply: '10000',
           acl: aclAddress,
         },
       );

@@ -1,4 +1,5 @@
 export const errorCodeDescriptions = {
+  input_validation_error: 'Input validation error',
   role_not_exist: 'Provided role does not exist',
   accounts_not_on_the_same_chain:
     'AccountIds are related to different chain ids',
@@ -10,6 +11,7 @@ export const errorCodeDescriptions = {
   signer_does_not_have_provider_attached:
     "Signer's `provider` property is not valid",
   not_supported_event: 'Event is not supported',
+  nft_claim_error: 'NFT claim is not valid',
 } as const;
 
 

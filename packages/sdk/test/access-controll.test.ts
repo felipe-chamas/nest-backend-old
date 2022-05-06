@@ -3,7 +3,7 @@ import {
   AccessControl, Role, ErrorCodes, Roles,
 } from '../';
 
-import { expect, runDeployTask } from './utils';
+import { expect, runDeployTask, wait } from './utils';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import * as hre from 'hardhat';
 
@@ -70,14 +70,14 @@ describe('tests of access-control service', () => {
     it('should renonce role', async () => {
       const transaction = await aclServiceAsOperator
         .renounceRole(operator.address, Roles.Operator);
-      expect(transaction.wait()).to.eventually.be.fulfilled;
-      expect(aclServiceAsOperator.listByRole(Roles.Operator))
-        .to.eventually.equal(0);
+      await expect(transaction.wait()).to.eventually.be.fulfilled;
+      await expect(aclServiceAsOperator.listByRole(Roles.Operator))
+        .to.eventually.have.lengthOf(0);
     });
 
     it('should validate signer against address to renounce', async () => {
       await expect(
-        aclServiceAsAdmin.renounceRole(operator.address, Roles.Operator),
+        wait(aclServiceAsAdmin.renounceRole(operator.address, Roles.Operator)),
       )
         .to.eventually.be.rejectedWith(GeneralError, '')
         .with.property('errorCode', ErrorCodes.renounce_only_self);

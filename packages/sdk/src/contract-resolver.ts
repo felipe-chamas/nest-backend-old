@@ -11,5 +11,9 @@ export class ContractResolver {
     typechain.GameToken__factory.connect(address, this.signer);
   getNFT = (address: Address) =>
     typechain.NFT__factory.connect(address, this.signer);
+  getNFTClaim = (address: Address) =>
+    typechain.NFTClaim__factory.connect(address, this.signer);
+  getNFTUnbox = (address: Address) =>
+    typechain.NFTUnboxing__factory.connect(address, this.signer);
 
 }

@@ -18,7 +18,7 @@ describe('game-token functionality', () => {
 
   const gameTokenName = 'Game Token';
   const gameTokenSymbol = 'gt';
-  const gameTokenSupply = 123345;
+  const gameTokenSupply = '123345';
 
   let admin: SignerWithAddress;
   let operator: SignerWithAddress;
@@ -114,7 +114,7 @@ describe('game-token functionality', () => {
     it('should get balance', async () => {
       let reply = await gameTokenServiceAsAdmin.getBalanceOf(admin.address);
       const getBalanceOfAdmin = reply.toNumber();
-      expect(getBalanceOfAdmin).to.equal(gameTokenSupply);
+      expect(getBalanceOfAdmin).to.equal(+gameTokenSupply);
       reply = await gameTokenServiceAsAdmin.getBalanceOf(operator.address);
       expect(reply.toNumber()).to.equal(0);
     });
@@ -131,7 +131,7 @@ describe('game-token functionality', () => {
       const operatorBalance = await gameTokenServiceAsAdmin
         .getBalanceOf(operator.address);
       expect(adminBalance.toNumber())
-        .to.equal(gameTokenSupply - amountToTransfer);
+        .to.equal(+gameTokenSupply - amountToTransfer);
       expect(operatorBalance.toNumber())
         .to.equal(amountToTransfer);
 
@@ -158,7 +158,7 @@ describe('game-token functionality', () => {
         .getAllowance(admin.address, anon.address);
       expect(allowanceReply.toNumber()).to.equal(approvedAmount);
       // check balane of admin
-      const balanceLeft = gameTokenSupply - amountToSend;
+      const balanceLeft = +gameTokenSupply - amountToSend;
       balanceReply = await gameTokenServiceAsAnon
         .getBalanceOf(admin.address);
       expect(balanceReply.toNumber()).to.equal(balanceLeft);
@@ -256,7 +256,7 @@ describe('game-token functionality', () => {
         .getAllowance(admin.address, anon.address);
       expect(allowanceReply.toNumber()).to.equal(expectedAllowance);
 
-      const expectedBalance = gameTokenSupply - amountToBurn;
+      const expectedBalance = +gameTokenSupply - amountToBurn;
       const balanceReply = await gameTokenServiceAsAnon
         .getBalanceOf(admin.address);
       expect(balanceReply.toNumber()).to.equal(expectedBalance);
@@ -273,7 +273,7 @@ describe('game-token functionality', () => {
       // check all values of it
       expect(metaInfo.symbol).to.equal(gameTokenSymbol);
       expect(metaInfo.name).to.equal(gameTokenName);
-      expect(metaInfo.totalSupply.toNumber()).to.equal(gameTokenSupply);
+      expect(metaInfo.totalSupply.toNumber()).to.equal(+gameTokenSupply);
       expect(metaInfo.decimals)
         .to.equal(await gameTokenContractAsAdmin.decimals());
     });

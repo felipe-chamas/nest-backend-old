@@ -1,6 +1,10 @@
 import { AddressLike, Signer } from './types';
 import { ContractResolver } from './contract-resolver';
-import { Utils, AccessControl, BaseServiceParams, GameToken } from './services';
+import {
+  Utils, AccessControl, BaseServiceParams,
+  GameToken, NFT, NFTUnbox, NFTClaim,
+} from './services';
+import { AccountId } from 'caip';
 
 
 export async function createSdk(signer: Signer) {
@@ -20,6 +24,14 @@ export async function createSdk(signer: Signer) {
       new AccessControl(aclAddress, utils, params),
     createGameToken: (gameTokenAddress: AddressLike) =>
       new GameToken(gameTokenAddress, utils, params)._setup(),
+    createNFT: (nftAccountId: AccountId) =>
+      new NFT(nftAccountId, utils, params)._setup(),
+    createNFTClaim: (nftClaimAccountId: AccountId) =>
+      new NFTClaim(nftClaimAccountId, params),
+    createNFTUnbox: (nftUnboxAccountId: AccountId) =>
+      new NFTUnbox(nftUnboxAccountId, params),
   };
 }
+
+export type SDK = Awaited<ReturnType<typeof createSdk>>;
 
