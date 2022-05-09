@@ -48,9 +48,6 @@ export default async function transfer(
       ? userTo
       : await userService.create({ account: to });
     logger.debug({ userTo, nftCollection });
-    if (!userTo) {
-      userTo = await userService.create({ account: to });
-    }
 
     const nft = await nftService.findOneBy({
       tokenId: tokenId,
