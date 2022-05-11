@@ -76,8 +76,6 @@ Setup a `.env` file with the following parameters:
 - `NFT_STORAGE_DOMAIN_NAME` used on the NFT storage component
 - `API_DOMAIN_NAME` used as endpoint of the REST API
 - `STAGE` used to distinguish between environments
-- `MONGO_ATLAS_CIDR` used to connect to Mongo Atlas
-- `MONGO_ATLAS_PEER_VPC_ID` used to connect to Mongo Atlas Peer VPC
 
 ```
 make build
