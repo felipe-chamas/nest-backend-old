@@ -15,9 +15,19 @@ variable "app_count" {
   default = 2
 }
 
-variable "fargate_cpu" {
+variable "total_cpu" {
   type    = number
   default = 1024
+}
+
+variable "total_memory" {
+  type    = number
+  default = 3072
+}
+
+variable "fargate_cpu" {
+  type    = number
+  default = 768
 }
 
 variable "fargate_memory" {
@@ -27,6 +37,21 @@ variable "fargate_memory" {
 
 variable "app_port" {
   type = number
+}
+
+variable "redis_cpu" {
+  type    = number
+  default = 256
+}
+
+variable "redis_memory" {
+  type    = number
+  default = 1024
+}
+
+variable "redis_port" {
+  type = number
+  default = 6379
 }
 
 variable "private_subnet_ids" {

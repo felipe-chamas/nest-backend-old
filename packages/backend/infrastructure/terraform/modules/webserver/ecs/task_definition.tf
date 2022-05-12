@@ -4,8 +4,8 @@ resource "aws_ecs_task_definition" "main" {
   execution_role_arn       = aws_iam_role.main_ecs_tasks.arn
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  cpu                      = var.fargate_cpu
-  memory                   = var.fargate_memory
+  cpu                      = var.total_cpu
+  memory                   = var.total_memory
   container_definitions = jsonencode([
     {
       name : "${var.namespace}-${terraform.workspace}-ecs-container",
@@ -40,6 +40,28 @@ resource "aws_ecs_task_definition" "main" {
         {
           name : "NFT_STORAGE_URL",
           value : var.nft_storage_url
+        }
+      ]
+    },
+    {
+      name : "${var.namespace}-${terraform.workspace}-redis-container",
+      image : "${var.namespace}-${terraform.workspace}-redis-ecr",
+      cpu : var.redis_cpu,
+      memory : var.redis_memory,
+      networkMode : "awsvpc",
+      logConfiguration : {
+        logDriver : "awslogs",
+        options : {
+          awslogs-region : var.region,
+          awslogs-group : "${var.namespace}-${terraform.workspace}-log-group"
+          awslogs-stream-prefix : "logs-redis"
+        }
+      },
+      portMappings : [
+        {
+          protocol : "tcp",
+          containerPort : var.redis_port,
+          hostPort : var.redis_port
         }
       ]
     }
