@@ -46,7 +46,7 @@ jobs:
         with:
           task-definition: task-definition.json
           container-name: ${{ env.CONTAINER_NAME }}
-          image: ${{ env.REGISTRY_NAME }}:${{ env.IMAGE_TAG }}
+          image: ${{ env.ECR_REGISTRY }}/${{ env.REGISTRY_NAME }}:${{ env.IMAGE_TAG }}
       - name: Shutdown cluster
         run: aws ecs update-service --desired-count 0 --cluster "${{ env.CLUSTER_NAME }}" --service "${{ env.SERVICE_NAME }}"
         shell: bash
