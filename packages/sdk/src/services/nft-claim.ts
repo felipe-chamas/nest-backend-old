@@ -1,67 +1,82 @@
-import { BaseService, BaseServiceParams } from './base-service';
-import { NFTClaim as NFTClaimTypechain } from '../typechain';
-import { Address } from '../types';
+import { NFTClaim as NFTClaimContract } from '../typechain';
+import { BytesLike, ContractTransaction } from 'ethers';
 import { AccountId } from 'caip';
+import MerkleTree from 'merkletreejs';
+
 import {
   createNFTClaimMerkleTree,
   createNFTClaimMerkleTreeLeaf,
 } from '../../scripts/utils';
-import { BytesLike, ContractTransaction, ethers } from 'ethers';
-import {
-  NFTClaimProof,
-  NFTClaimData,
-} from '../types';
+import { NFTClaimProof, NFTClaimData, Signer } from '../types';
 import { ErrorCodes, GeneralError } from '../errors';
-import MerkleTree from 'merkletreejs';
+import { SignerUtils } from '../signer-utils';
+import { ContractResolver } from '../contract-resolver';
 
 
 export type CreateClaimProofParams = {
   claimData: NFTClaimData,
-} & ({
   merkleTree: MerkleTree,
-} | {
-  merkleTreeLeaves: string[],
-})
+}
 
 
-export class NFTClaim extends BaseService {
-
-  private readonly nftClaimContract: NFTClaimTypechain;
-  private readonly nftClaimAddress: Address;
-  private readonly chainIdAsANumber: number;
+/**
+ * Class provides functionality related to claiming nfts.
+ *
+ * @remarks
+ * `NFTClaim` might be used to make gifts for users.
+ * {@link NFTClaim} does both things:
+ * {@link NFTClaim.createAndSubmitMerkleTreeFromClaims | creating a gift}
+ * by the manager or operator and
+ * {@link NFTClaim.createAndSubmitClaimProof | claiming a gift} by the end user.
+ */
+export class NFTClaim {
+  private readonly signerUtils: SignerUtils;
+  private readonly nftClaimContract: NFTClaimContract;
 
   constructor(
-    nftClaimAddressLike: AccountId,
-    baseParams: BaseServiceParams,
+    signerUtils: SignerUtils,
+    nftClaimContract: NFTClaimContract,
   ) {
-    super(baseParams);
-    this.nftClaimAddress = this.parseAddress(nftClaimAddressLike);
-    this.nftClaimContract = this.params.contractResolver
-      .getNFTClaim(this.nftClaimAddress);
-    const chainId = this.params.signerChainId;
-    this.chainIdAsANumber = parseInt(chainId);
-    if (this.chainIdAsANumber.toString() !== chainId)
+    this.signerUtils = signerUtils;
+    this.nftClaimContract = nftClaimContract;
+  }
+
+  static async create(
+    signer: Signer,
+    nftClaimContractAccountId: AccountId,
+  ) {
+    const signerUtils = new SignerUtils(signer);
+    const nftClaimContract = new ContractResolver(signer).resolve(
+      'NFTClaim',
+      await signerUtils.parseAddress(nftClaimContractAccountId),
+    );
+    return new NFTClaim(signerUtils, nftClaimContract);
+  }
+
+  /**
+   * Returns chain id as a number.
+   *
+   * @throws {@link GeneralError | nft_claim_error}
+   * If chain id in not parsable number.
+   */
+  private async getChainIdAsANumber() {
+    const chainId = await this.signerUtils.getSignerChainId();
+    const result = parseInt(chainId);
+    if (result.toString() !== chainId)
       throw new GeneralError(
         ErrorCodes.nft_claim_error,
         `chain Id ${chainId} can not be transformed to number`,
       );
+    return result;
   }
 
-
   /**
-   *
-   * Initialize Claims section
-   *
-   */
-
-  /**
-   *
+   * @remarks
    * This method is a first step(generation) in two step
    * process to create new nft claims(in a form of gifts, free nfts)
    * and include them in the system.
-   *
    * In the second step the result of the first step is submitted to
-   * the blockchain. Or use `this.createAndSubmitClaimProof` to markel
+   * the blockchain. Or use `this.createAndSubmitClaimProof` to make
    * second step automatic.
    *
    *
@@ -72,27 +87,38 @@ export class NFTClaim extends BaseService {
    * In addition its required to publish merkleTree.getLeaves() for others
    * to be able to generate claim proofs.
    *
+   * @remarks
    * Listen for 'MerkleRootAdded' event on 'NFTClaim' contract
    *
    */
-  createMerkleTreeFromClaims(claims: NFTClaimData[]) {
+  async createMerkleTreeFromClaims(claims: NFTClaimData[]) {
+    const addresses = await Promise.all(
+      claims.map(x => this.signerUtils.parseAddress(x.accountId)),
+    );
+    const claimList = claims.map((x, idx) => ({
+      tokens: x.tokenCount.toNumber(),
+      account: addresses[idx],
+    }));
     return createNFTClaimMerkleTree(
-      this.chainIdAsANumber,
-      this.nftClaimAddress,
-      claims.map(x => ({
-        tokens: x.tokenCount.toNumber(),
-        account: this.parseAddress(x.accountId),
-      })),
+      await this.getChainIdAsANumber(),
+      this.nftClaimContract.address,
+      claimList,
     );
   }
 
-  async submitNewMerkleRoot(root: BytesLike) {
-    return await this.nftClaimContract.addMerkleRoot(root);
-  }
+  /**
+   * Submits merkle root created with {@link createMerkleTreeFromClaims}.
+   */
+  submitNewMerkleRoot = async (root: BytesLike) =>
+    await this.nftClaimContract.addMerkleRoot(root);
 
   /**
+   * Creates and submits merkle tree claims in single call.
+   *
+   * @remarks
    * Simple wrapper around `createMerkleTreeFromClaims` and
    * `submitNewMerkleRoot` that merges both function in a single call
+   *
    * @returns array of: 1st is merkleTree from `createMerkleTreeFromClaims`
    * call and 2nd is transaction of submitting new merkle tree from call
    * to `submitNewMerkleRoot`
@@ -103,7 +129,7 @@ export class NFTClaim extends BaseService {
     merkleTree: MerkleTree,
     submitRootTransaction: ContractTransaction,
   ]> {
-    const tree = this.createMerkleTreeFromClaims(claims);
+    const tree = await this.createMerkleTreeFromClaims(claims);
     const transaction = await this.submitNewMerkleRoot(tree.getHexRoot());
     return [tree, transaction];
   }
@@ -119,6 +145,7 @@ export class NFTClaim extends BaseService {
    *
    * Creates claim proof.
    *
+   * @remarks
    * Claims have already been created and submitted to the blockchain
    * with the help of `this.createAndSubmitMerkleTreeFromClaims`.
    * And `merkleTree` or just its `leaves`(array of string) have been published.
@@ -137,72 +164,61 @@ export class NFTClaim extends BaseService {
    * @param params.merkleTree pass in merkle tree that is associated with
    * give-away/gifiting program or pass just `merkleTreeLeavea`.
    *
+   * @remarks
    * Listen for 'TokenClaimed' event on 'NFTClaim' contract.
    *
    */
-  createClaimProof(params: CreateClaimProofParams): NFTClaimProof {
+  async createClaimProof(params: CreateClaimProofParams) {
     const provingLeaf = createNFTClaimMerkleTreeLeaf(
-      this.chainIdAsANumber,
-      this.nftClaimAddress,
-      this.parseAddress(params.claimData.accountId),
+      await this.getChainIdAsANumber(),
+      this.nftClaimContract.address,
+      await this.signerUtils.parseAddress(params.claimData.accountId),
       params.claimData.tokenCount.toNumber(),
     );
-    let merkleTree: MerkleTree;
-    if ('merkleTree' in params)
-      merkleTree = params.merkleTree;
-    else if ('merkleTreeLeaves' in params)
-      merkleTree = new MerkleTree(
-        params.merkleTreeLeaves,
-        ethers.utils.keccak256,
-        { sort: true },
-      );
-    if (!merkleTree) throw new GeneralError(
-      ErrorCodes.nft_claim_error,
-      'merkle tree or its leaves were not provided',
-    );
-    const provingSequence = merkleTree.getHexProof(provingLeaf);
-    return {
-      merkleRoot: merkleTree.getHexRoot(),
-      claim: params.claimData, provingSequence,
+    const provingSequence = params.merkleTree.getHexProof(provingLeaf);
+    const result: NFTClaimProof = {
+      merkleRoot: params.merkleTree.getHexRoot(),
+      claim: params.claimData,
+      provingSequence,
     };
+    return result;
   }
 
   /**
-   * Validates if proof is valid acording to the blockchain.
+   * Check if proof will be acceped by the blockchain.
+   *
+   * @remarks
    * Use it before submitting the proof to not loose extra fee for
-   * gas in case proof is not valid
+   * gas in case proof is not valid.
    */
-  isClaimProofAllowed(proof: NFTClaimProof) {
-    return this.nftClaimContract.isClaimAllowed(
+  isClaimProofAllowed = async (proof: NFTClaimProof) =>
+    this.nftClaimContract.isClaimAllowed(
       proof.merkleRoot,
       proof.provingSequence,
-      this.parseAddress(proof.claim.accountId),
+      await this.signerUtils.parseAddress(proof.claim.accountId),
       proof.claim.tokenCount,
     );
-  }
 
   /**
-   * Submits claim to the blockchain. Listen for event
+   * Submits claim to the blockchain.
    */
-  async submitClaimProof(proof: NFTClaimProof) {
-    return await this.nftClaimContract.claim(
+  submitClaimProof = async (proof: NFTClaimProof) =>
+    await this.nftClaimContract.claim(
       proof.merkleRoot,
       proof.provingSequence,
-      this.parseAddress(proof.claim.accountId),
+      await this.signerUtils.parseAddress(proof.claim.accountId),
       proof.claim.tokenCount,
     );
-  }
 
   /**
-   * This method wraps the whole process of claim proof creation,
-   * validation, submission in a single call
+   * Creates and submits claim proof in a single call.
    */
   async createAndSubmitClaimProof(params: CreateClaimProofParams) {
-    const proof = this.createClaimProof(params);
+    const proof = await this.createClaimProof(params);
     const isProofValid = await this.isClaimProofAllowed(proof);
     if (!isProofValid) throw new GeneralError(
       ErrorCodes.nft_claim_error,
-      'Claim was created but is not accepted by contract as valid',
+      'Claim was created but is not accepted by contract as valid.',
     );
     return await this.submitClaimProof(proof);
   }

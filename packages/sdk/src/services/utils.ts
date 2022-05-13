@@ -1,25 +1,20 @@
-import { AccountId, ChainId } from 'caip';
+import { AccountId } from 'caip';
 import { ethers } from 'ethers';
-
-import { BaseService } from './base-service';
-import {
-  Address, EventName, ContractName,
-  AddressLike,
-} from '../types';
-import { CHAIN_STANDARD } from '../constants';
-import * as typechain from '../typechain';
 import { Interface } from 'ethers/lib/utils';
 import { JsonFragment } from '@ethersproject/abi';
-import { ErrorCodes, GeneralError } from '../errors';
 
+import { EventName, ContractName, Signer } from '../types';
+import * as typechain from '../typechain';
+import { ErrorCodes, GeneralError } from '../errors';
+import { parseRole } from './access-control';
+import { SignerUtils } from '../signer-utils';
 // File of this import is generated with src/generate-helper-types.ts
 import { wrapFetchEventsWithEventTypes } from '../typechain/helpers';
-import { parseRole } from './access-control';
 
 
 export type FetchEventsFunctionBase = (
   transactionHash: string,
-  contractAddress: AddressLike,
+  contractAddress: AccountId,
   contractName: ContractName,
   eventName: EventName,
 ) => Promise<Array<unknown>>
@@ -48,7 +43,8 @@ for (const [factoryName, factory] of Object.entries(typechain)) {
   ) continue;
   const eventAbis = (factory.abi as Array<JsonFragment>)
     .filter(x => x.type === 'event');
-  const eventNames = eventAbis.map(x => x.name).filter(x => x);
+  const eventNames = eventAbis.map(x => x.name)
+    .filter((x): x is string => typeof x === 'string');
   const eventsInterface = new ethers.utils.Interface(eventAbis);
   const contractName = factoryName.replace('__factory', '');
   const eventSignatures = Object.keys(eventsInterface.events);
@@ -64,34 +60,46 @@ for (const [factoryName, factory] of Object.entries(typechain)) {
 }
 
 
-export class Utils extends BaseService {
+/**
+ * Provides utils functionality related to data stored on blockchain.
+ */
+export class Utils {
+  private readonly signerUtils: SignerUtils;
 
-  createAccountIdFromAddress(address: Address): AccountId {
-    const validatedAddress = this.parseAddress(address);
-    return new AccountId({
-      address: validatedAddress,
-      chainId: new ChainId({
-        namespace: CHAIN_STANDARD,
-        reference: this.params.signerChainId,
-      }),
-    });
+  private constructor(signerUtils: SignerUtils) {
+    this.signerUtils = signerUtils;
   }
 
-  private _fetchEvents: FetchEventsFunctionBase = async (
+  static async create(
+    signer: Signer,
+  ) {
+    const signerUtils = new SignerUtils(signer);
+    return new Utils(signerUtils);
+  }
+
+  /**
+   * @returns The list of events.
+   *
+   * @remarks
+   * This method is a base for fetching events.
+   *
+   * @see {@link fetchEvents}.
+   */
+  private fetchEventsNoTypeSupport: FetchEventsFunctionBase = async (
     transactionHash: string,
-    contractAddress: AddressLike,
+    contractAddress: AccountId,
     contractName: ContractName,
     eventName: EventName,
   ) => {
-    const receipt = await this.provider
+    const receipt = await this.signerUtils.getProvider()
       .getTransactionReceipt(transactionHash);
     let rawEvents = receipt.logs;
     // filter by contract address
-    const contractAddressAsString = this.parseAddress(contractAddress);
+    const contractAddressAsString = await this.signerUtils
+      .parseAddress(contractAddress);
     rawEvents = rawEvents.filter(x => x.address === contractAddressAsString);
 
-    const eventsDetails: EventsDetailsPerContractName =
-      eventsDetailsPerContractNameMap.get(contractName);
+    const eventsDetails = eventsDetailsPerContractNameMap.get(contractName);
     if (!eventsDetails)
       throw new GeneralError(
         ErrorCodes.not_supported_event,
@@ -130,34 +138,70 @@ export class Utils extends BaseService {
           'abi event argument length is not equal to ' +
           `actual event argument length for event ${eventName}`,
         );
-      const resultItem: unknown = {};
+      const resultItem: { [key: string]: unknown } = {};
       const argumentDescriptionsFromAbi = eventAbi.inputs || [];
-      argumentDescriptionsFromAbi.forEach((argument, idx) => {
+      for (const [idx, argument] of argumentDescriptionsFromAbi.entries()) {
         if (!argument.name) throw new GeneralError(
           ErrorCodes.not_supported_event,
           `event ${contractName}:${eventName} ` +
           `does not have name for n-th(${idx}) argument`,
         );
         let value: unknown = event.args[idx];
-        if (argument.type === 'address')
-          value = this.createAccountIdFromAddress(value as string);
-        if (argument.name.match(/Role|role/)) {
+        if (argument.type === 'address') {
+          value = await this.signerUtils
+            .createAccountIdFromAddress(value as string);
+        } else if (argument.name.match(/Role|role/)) {
           value = parseRole(value as string);
+        } else if (argument.type === 'address[]') {
+          value = await Promise.all(
+            (value as string[]).map(
+              x => this.signerUtils.createAccountIdFromAddress(x),
+            ),
+          );
         }
         resultItem[argument.name] = value;
-      });
+      }
       result.push(resultItem);
     }
     return result;
   };
 
   /**
-   * _fetchEvents method does not provide type support for events returned
-   * However type support is added with autogenerated wrapper that includes
-   * all possible overrides of _fetchEvents with for all possible
-   * combinations of `eventName`, `contractName` arguments
+   *
+   * @returns list of objects each describes the list of named arguments of the
+   * requested events.
+   *
+   * @remarks
+   * Fetches events from specified transaction. As a result it
+   * return array of objects with properties equal to event named arguments.
+   *
+   * @remarks
+   * If the contract of name `contractName` does not have the event of
+   * name `eventName`, typescript going to show the error.
+   *
+   *
+   * @param transactionHash
+   * defines what transaction should be search for events.
+   *
+   * @param contractName
+   * defines the contract of interest. Only events from
+   * this contract will be included in the result. Autocomplete supported for
+   * all of the existing contracts. {@link ContractName}
+   *
+   * @param contractAddress
+   * defines where contract of name `contractName` is deployed to.
+   *
+   * @param eventName
+   * defines specific event to look for {@link EventName}.
+   *
+   * @remarks
+   * The type of `params.contractName` and `params.eventName` extends string and
+   * contains every possible contract/event names.
+   * If not existing event is specified, error returned.
+   *
    */
-  /***/
-  fetchEvents = wrapFetchEventsWithEventTypes(this._fetchEvents.bind(this));
+  fetchEvents = wrapFetchEventsWithEventTypes(
+    this.fetchEventsNoTypeSupport.bind(this),
+  );
 
 }

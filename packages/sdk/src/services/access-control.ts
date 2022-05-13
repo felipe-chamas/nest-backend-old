@@ -1,34 +1,45 @@
-import { BaseService, BaseServiceParams } from './base-service';
-import { Utils } from './utils';
+import { AccountId } from 'caip';
+import { BigNumberish, ethers } from 'ethers';
+
 import { ErrorCodes, GeneralError } from '../errors';
-import { ACL } from '../typechain';
-import { Address, AddressLike } from '../types';
-import { ethers } from 'ethers';
+import { ACL as ACLContract } from '../typechain';
+import { PaginationParams, Signer } from '../types';
+import { listAsyncItemsWithPagination } from '../utils';
+import { ContractResolver } from '../contract-resolver';
+import { SignerUtils } from '../signer-utils';
 
 
-export const roleHashes = {
+/**
+ * Mapping of `Role` to hashes.
+ *
+ * @remarks
+ * Hash is a value used in contract to describe the role.
+ */
+const roleHashes = {
   Admin: ethers.constants.HashZero,
   Operator: ethers.utils.keccak256(ethers.utils.toUtf8Bytes('OPERATOR_ROLE')),
   Owner: ethers.utils.keccak256(ethers.utils.toUtf8Bytes('OWNER_ROLE')),
   Minter: ethers.utils.keccak256(ethers.utils.toUtf8Bytes('MINTER_ROLE')),
 };
 
+/**
+ * Enum of all the possible roles.
+ */
 export type Role = keyof typeof roleHashes;
 
-export const Roles = Object.fromEntries(
-  Object.keys(roleHashes).map(x => [x, x]),
-) as { [key in Role]: key };
+/**
+ * Mapping of hashes to `Role`s.
+ */
+export const hashToRoleMap = Object.fromEntries(
+  Object.entries(roleHashes)
+    .map(([role, hash]) => [hash, role as Role]),
+) as { [key in string]: Role };
 
-const roleList = Object.keys(roleHashes) as Role[];
-
-export function isRoleExist(role: string) {
-  return typeof roleHashes[role as Role] !== 'undefined';
-}
-
-const hashToRoleMap: { [key in string]: Role } = Object.fromEntries(
-  Object.entries(roleHashes).map(([role, hash]) => [hash, role as Role]),
-);
-
+/**
+ * Returns `Role` that is correspondend to hash `roleHash`.
+ *
+ * @throws {@link GeneralError} if such role does not exist.
+ */
 export function parseRole(roleHash: string): Role {
   if (!hashToRoleMap[roleHash])
     throw new GeneralError(
@@ -38,116 +49,151 @@ export function parseRole(roleHash: string): Role {
   return hashToRoleMap[roleHash];
 }
 
+/**
+ * Checks if the string `role` is one of existing roles.
+ */
+export function isRoleExist(role: string) {
+  return typeof roleHashes[role as Role] !== 'undefined';
+}
 
-export class AccessControl extends BaseService {
+/**
+ * Returns hash related to `role`.
+ */
+export function getRoleHashWithThrow(role: Role): string {
+  if (!isRoleExist(role))
+    throw new GeneralError(
+      ErrorCodes.role_not_exist,
+      `Provided role: ${role} does not exist.` +
+      `Select one of ${roleList.join(',')}`,
+    );
+  return roleHashes[role];
+}
 
-  private readonly aclContract: ACL;
-  private readonly aclAddress: Address;
 
-  constructor(
-    aclAddress: AddressLike,
-    private readonly utils: Utils,
-    baseParams: BaseServiceParams,
+/**
+ * Object of existing roles.
+ */
+export const Roles = Object.fromEntries(
+  Object.keys(roleHashes).map(x => [x, x]),
+) as { [key in Role]: key };
+
+
+/**
+ * List of existing roles.
+ */
+export const roleList = Object.keys(roleHashes) as Role[];
+
+/**
+ * Provide operations related to roles management.
+ */
+export class AccessControl {
+  private readonly signerUtils: SignerUtils;
+  private readonly aclContract: ACLContract;
+
+  private constructor(
+    signerUtils: SignerUtils,
+    aclContract: ACLContract,
   ) {
-    super(baseParams);
-    this.aclAddress = this.parseAddress(aclAddress);
-    this.aclContract = this.params.contractResolver.getACL(this.aclAddress);
+    this.signerUtils = signerUtils;
+    this.aclContract = aclContract;
   }
 
-  private getRoleHashWithThrow(role: Role): string {
-    if (!isRoleExist(role))
-      throw new GeneralError(
-        'role_not_exist',
-        `Provided role: ${role} does not exist.` +
-        `Select one of ${roleList.join(',')}`,
-      );
-    return roleHashes[role];
+  static async create(
+    signer: Signer,
+    aclContractAccountId: AccountId,
+  ) {
+    const signerUtils = new SignerUtils(signer);
+    const aclContract = new ContractResolver(signer).resolve(
+      'ACL',
+      await signerUtils.parseAddress(aclContractAccountId),
+    );
+    return new AccessControl(signerUtils, aclContract);
   }
 
-  async hasRole(address: AddressLike, role: Role) {
-    const roleHash = this.getRoleHashWithThrow(role);
+  async hasRole(who: AccountId, role: Role) {
+    const roleHash = getRoleHashWithThrow(role);
     const result = await this.aclContract.hasRole(
       roleHash,
-      this.parseAddress(address),
+      await this.signerUtils.parseAddress(who),
     );
     return result;
   }
 
   /**
-   * Add `role` to `address`
+   * Add `role` to `who`.
    */
-  async grantRole(address: AddressLike, role: Role) {
-    const roleHash = this.getRoleHashWithThrow(role);
+  async grantRole(who: AccountId, role: Role) {
+    const roleHash = getRoleHashWithThrow(role);
     const transaction = await this.aclContract.grantRole(
       roleHash,
-      this.parseAddress(address),
+      await this.signerUtils.parseAddress(who),
     );
     return transaction;
   }
 
   /**
-   * Remove `role` from `address`
+   * Removes `role` from `who`.
    */
-  async revokeRole(address: AddressLike, role: Role) {
-    const roleHash = this.getRoleHashWithThrow(role);
+  async revokeRole(who: AccountId, role: Role) {
+    const roleHash = getRoleHashWithThrow(role);
     const transaction = await this.aclContract.revokeRole(
       roleHash,
-      this.parseAddress(address),
+      await this.signerUtils.parseAddress(who),
     );
     return transaction;
   }
 
   /**
-   * Remove role from itself. `address` should be a `signer`.
+   * Removes role from itself. `who` should be a `signer`.
+   *
+   * @throws {@link GeneralError | renounce_only_self}
+   * If signer tries to renounce other than own account id.
    */
-  async renounceRole(address: AddressLike, role: Role) {
-    const addressStr = this.parseAddress(address);
-    if (this.params.signerAddress !== addressStr)
+  async renounceRole(who: AccountId, role: Role) {
+    const whoAddress = await this.signerUtils.parseAddress(who);
+    const signerAddress = await this.signerUtils.signer.getAddress();
+    if (signerAddress !== whoAddress)
       throw new GeneralError(
-        'renounce_only_self',
-        'signerAddress !== address to renounce role from' +
-        `renounce is called with addess ${address}` +
-        `by signer with address ${this.params.signerAddress}`,
+        ErrorCodes.renounce_only_self,
+        `signer ${signerAddress} can not renounce ${whoAddress}`,
       );
-    const roleHash = this.getRoleHashWithThrow(role);
+    const roleHash = getRoleHashWithThrow(role);
     const transaction = await this.aclContract.renounceRole(
       roleHash,
-      addressStr,
+      whoAddress,
     );
     return transaction;
   }
 
   /**
-   * Return `nth`(n-th) member with specified `role`.
-   * If there is not n-th member, return `null`.
+   * @returns `n-th` member with specified {@link Role}.
    */
-  async getNthRoleMember(
+  getNthRoleMember = async (
     role: Role,
-    nth: number,
-  ) {
-    const roleHash = this.getRoleHashWithThrow(role);
-    const reply = await this.aclContract.getRoleMemberCount(roleHash);
-    const totalRoleMemberCount = reply.toNumber();
-    if (nth >= totalRoleMemberCount)
-      return null;
-    const memberAddress = await this.aclContract.getRoleMember(roleHash, nth);
-    return this.utils.createAccountIdFromAddress(memberAddress);
-  }
+    nth: BigNumberish,
+  ) =>
+     this.signerUtils.createAccountIdFromAddress(
+      await this.aclContract.getRoleMember(
+        getRoleHashWithThrow(role),
+        nth,
+      ),
+    );
 
   /**
-   * list all addresses assosiated with `role`
+   * @returns how many addresses are assosiated with a role `role`.
    */
-  async listByRole(role: Role) {
-    const roleHash = this.getRoleHashWithThrow(role);
-    const reply = await this.aclContract.getRoleMemberCount(roleHash);
-    const roleCount = reply.toNumber();
-    const members: Address[] = [];
-    for (let i = 0; i < roleCount; i++) {
-      const member = await this.aclContract.getRoleMember(roleHash, i);
-      members.push(member);
-    }
-    const result = members.map(x => this.utils.createAccountIdFromAddress(x));
-    return result;
-  }
+  getRoleMemberCount = (role: Role) =>
+    this.aclContract.getRoleMemberCount(getRoleHashWithThrow(role));
+
+  /**
+   * @returns all members assosiated with {@link Role}.
+   */
+  listByRole = async (role: Role, params?: PaginationParams) =>
+   listAsyncItemsWithPagination(
+     () => this.getRoleMemberCount(role),
+     async (index) => this.getNthRoleMember(role, index),
+     params,
+   );
 
 }
+

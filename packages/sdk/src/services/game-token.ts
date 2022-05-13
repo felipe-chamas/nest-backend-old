@@ -1,145 +1,233 @@
-import { BaseService, BaseServiceParams } from './base-service';
-import { Utils } from './utils';
-import { GameToken as GameTokenImpl } from '../typechain';
-import {
-  Address, AddressLike, ERC20AllowancePermitBroad,
-  ERC20AllowancePermitStrict,
-} from '../types';
 import { BigNumber, BigNumberish, ethers, Signature } from 'ethers';
+import { AccountId } from 'caip';
+
+import { GameToken as GameTokenContract } from '../typechain';
+import { ERC20SignedApproval, Signer } from '../types';
 import { ERC20MetaInfo } from '../types';
-import { GeneralError } from '../errors';
+import { SignerUtils } from '../signer-utils';
+import { ContractResolver } from '../contract-resolver';
 
-export class GameToken extends BaseService {
+/**
+ * Object is used to create approval
+ */
+const APPROVAL_MESSAGE_TYPES_DEFINITION = {
+  Permit: [
+    { name: 'owner', type: 'address' },
+    { name: 'spender', type: 'address' },
+    { name: 'value', type: 'uint256' },
+    { name: 'nonce', type: 'uint256' },
+    { name: 'deadline', type: 'uint256' },
+  ],
+};
 
-  private readonly gameTokenContract: GameTokenImpl;
-  private readonly gameTokenAddress: Address;
-  private _tokenMetaInfo?: ERC20MetaInfo;
 
+/**
+ * Class provides functionality related to management of GameToken ERC20.
+ *
+ * @remarks
+ * It contains basic operations to get balance, transfer, get contract metadata,
+ * manage allowance.
+ *
+ * @remarks
+ * Token metadata is cached then provided
+ * with getter {@link GameToken.tokenMetaInfo}.
+ *
+ * @remarks
+ * Class contains pausable state managment. If contract is paused,
+ * some operations are not allowed.
+ *
+ *
+ * @remarks
+ * Provides functionality to use {@link https://docs.openzeppelin.com/contracts/4.x/api/token/erc20#ERC20Permit | off-chain approval}.
+ * Use {@link GameToken.createSignedApproval | to create off-chain approval}
+ * and then {@link GameToken.submitSignedApproval | to submit off-chain aproval}.
+ *
+ * @remarks
+ * Usecase of off-chain approvals is as following: a person who wants to transfer
+ * GameTokens to someone, create a approval(signs it with metamask or wallet) without
+ * sending a transaction to blockchain(to transaction fee).
+ * Instead approval is sent by email of any other off-chain method to the receiver.
+ * The receiver than submits approval(pays transaction fee), thus changes allowance.
+ *
+ * @example
+ * Using off-chain approval to allow another account `spender` to use own token.
+ * ```
+ * const gameToken = await GameToken.create(signer, gameTokenAccoundId);
+ * const offChainApproval = await gameToken.createSignedApproval(
+ *   spender,
+ *   12345,
+ *   deadline: Math.round(Date.now()/1000)+60x60,
+ * )
+ * // send `offChainApproval` to second side off-chain(via email);
+ * // `sender`'s side:
+ * const gameToken = await GameToken.create(spenderSigner, gameTokenAccoundId);
+ * async submitSignedApproval(offChainApproval)
+ * // allowance to spend tokens by `spender` is altered.
+ * ```
+ */
+export class GameToken {
 
-  constructor(
-    gameTokenAddressLike: AddressLike,
-    private readonly utils: Utils,
-    baseParams: BaseServiceParams,
+  private readonly signerUtils: SignerUtils;
+  private readonly gameTokenContract: GameTokenContract;
+  readonly tokenMetaInfo: ERC20MetaInfo;
+
+  private constructor(
+    signerUtils: SignerUtils,
+    gameTokenContract: GameTokenContract,
+    tokenMetaInfo: ERC20MetaInfo,
   ) {
-    super(baseParams);
-    this.gameTokenAddress = this.parseAddress(gameTokenAddressLike);
-    this.gameTokenContract = this.params.contractResolver
-      .getGameToken(this.gameTokenAddress);
+    this.signerUtils = signerUtils;
+    this.gameTokenContract = gameTokenContract;
+    this.tokenMetaInfo = tokenMetaInfo;
   }
 
-  async _setup() {
-    this._tokenMetaInfo = await this.fetchTokenMetaInfo();
-    return this;
+  static async create(
+    signer: Signer,
+    gameTokenContractAccountId: AccountId,
+  ) {
+    const signerUtils = new SignerUtils(signer);
+    const gameTokenContract = new ContractResolver(signer).resolve(
+      'GameToken',
+      await signerUtils.parseAddress(gameTokenContractAccountId),
+    );
+    const [symbol, name, decimals, totalSupply] = await Promise.all([
+      gameTokenContract.symbol(),
+      gameTokenContract.name(),
+      gameTokenContract.decimals(),
+      gameTokenContract.totalSupply(),
+    ]);
+    const metaInfo: ERC20MetaInfo = {
+      symbol,
+      name,
+      decimals,
+      totalSupply,
+    };
+    return new GameToken(
+      signerUtils,
+      gameTokenContract,
+      metaInfo,
+    );
   }
 
+  /**
+   * Returns balance of `who`.
+   */
+  getBalanceOf = async (who: AccountId) =>
+    this.gameTokenContract.balanceOf(await this.signerUtils.parseAddress(who));
 
-  getBalanceOf(address: AddressLike) {
-    return this.gameTokenContract.balanceOf(this.parseAddress(address));
-  }
+  /**
+   * Transfers own `amount` tokens to `to`.
+   */
+  transfer = async (to: AccountId, amount: BigNumberish) =>
+    await this.gameTokenContract.transfer(
+      await this.signerUtils.parseAddress(to),
+      amount,
+    );
 
+  /**
+   * Burns own `amount` tokens.
+   */
+  burnToken = async (amount: BigNumberish) =>
+    await this.gameTokenContract.burn(amount);
+
+  /**
+   * Allows `spender` to spend own `amount` tokens.
+   */
+  approve = async (spender: AccountId, amount: BigNumberish) =>
+    await this.gameTokenContract.approve(
+      await this.signerUtils.parseAddress(spender),
+      amount,
+    );
+
+  /**
+   * Addes up `amount` to current value of how much `spender` is
+   * allowed to spend of own tokens.
+   */
+  increaseAllowance = async (spender: AccountId, amount: BigNumberish) =>
+    await this.gameTokenContract.increaseAllowance(
+      await this.signerUtils.parseAddress(spender),
+      amount,
+    );
+
+  /**
+   * Subtracts `amount` from current value of how much `spender` is
+   * allowed to spend of own tokens.
+   */
+  decreaseAllowance = async (spender: AccountId, amount: BigNumberish) =>
+    await this.gameTokenContract.decreaseAllowance(
+      await this.signerUtils.parseAddress(spender),
+      amount,
+    );
+
+  /**
+   * Returns how much tokens of `owner` can be spend by a `spender`.
+   */
+  getAllowance = async (owner: AccountId, spender: AccountId) =>
+    this.gameTokenContract.allowance(
+      await this.signerUtils.parseAddress(owner),
+      await this.signerUtils.parseAddress(spender),
+    );
 
   /**
    *
-   * Management of own tokens
+   * Returns nonce of `who`.
+   *
+   * @remarks
+   * Nonce is used to create off-chain approvals.
+   *
+   * @see {@link GameToken.createSignedApproval}.
    *
    */
-
-  /** transfer own tokens `amount` to `toAddress` */
-  async transfer(toAddress: AddressLike, amount: BigNumberish) {
-    return await this.gameTokenContract.transfer(
-      this.parseAddress(toAddress),
-      amount,
-    );
-  }
-
-  /** Burn tokens owned by `sender` */
-  async burnToken(amount: BigNumberish) {
-    return await this.gameTokenContract.burn(amount);
-  }
-
-
-  async approve(spender: AddressLike, amount: BigNumberish) {
-    return await this.gameTokenContract.approve(
-      this.parseAddress(spender),
-      amount,
-    );
-  }
-
-  async increaseAllowance(spender: AddressLike, amount: BigNumberish) {
-    return await this.gameTokenContract.increaseAllowance(
-      this.parseAddress(spender),
-      amount,
-    );
-  }
-
-  async decreaseAllowance(spender: AddressLike, amount: BigNumberish) {
-    return await this.gameTokenContract.decreaseAllowance(
-      this.parseAddress(spender),
-      amount,
-    );
-  }
-
-  /** Get how much tokens of `owner` can be used by a `spender` */
-  getAllowance(owner: AddressLike, spender: AddressLike) {
-    return this.gameTokenContract.allowance(
-      this.parseAddress(owner),
-      this.parseAddress(spender),
-    );
-  }
+  private getNonceOf = async (who: AccountId) =>
+    this.gameTokenContract.nonces(await this.signerUtils.parseAddress(who));
 
   /**
    *
-   * Management of others tokens by allowance mechanism,
-   * meaning person who calls these methods should be allowed
-   * to spend `owners` tokens.
-   * Owner should use methods: `approve`, `permit`, etc to set allowance
-   * for spender
+   * Return own nonce.
+   *
+   * @remarks
+   * See {@link getNonceOf}.
    *
    */
-
-  getNonceOf(owner: AddressLike) {
-    return this.gameTokenContract.nonces(this.parseAddress(owner));
+  private async getOwnNonce() {
+    const ownAccountId = await this.signerUtils.createAccountIdFromAddress(
+      await this.signerUtils.signer.getAddress(),
+    );
+    return this.getNonceOf(ownAccountId);
   }
-
-  getOwnNonce() {
-    return this.getNonceOf(this.params.signerAddress);
-  }
-
-  private readonly PERMIT_MESSAGE_TYPES_DEFINITION = {
-    Permit: [
-      { name: 'owner', type: 'address' },
-      { name: 'spender', type: 'address' },
-      { name: 'value', type: 'uint256' },
-      { name: 'nonce', type: 'uint256' },
-      { name: 'deadline', type: 'uint256' },
-    ],
-  };
 
   /**
-   * Create an object of type `ERC20AllowancePermit` that
-   * should be submitted to contract with a help of
-   * `submitAllowancePermit` method. You can create permit to use
-   * your owntokens. There is no way to create permit to use other's tokens
+   *
+   * Create an object of type {@link ERC20SignedApproval}.
+   *
+   * @remarks
+   * Returned object should be passed to {@link submitSignedApproval}
+   *
+   * @remarks
+   * Owner can only create approval to use owner's tokens.
+   * There is no way to create approval to use other's tokens
    * that you are allowed to use.
+   *
    * @param deadline is seconds from epoch until this allowancePermit is valid
-   * ex: deadline = Math.round(Date.now()/1000)+60*60 - meaning anyone
-   * will be able to submit this permit for 1 hour(60*60 seconds)
+   * ex: deadline = Math.round(Date.now()/1000)+60x60 - meaning anyone
+   * will be able to submit this approval for 1 hour(60x60 seconds)
+   *
    */
-  async createAllowancePermit(
-    spender: AddressLike,
+  async createSignedApproval(
+    spender: AccountId,
     amount: BigNumberish,
     deadline: BigNumberish,
   ) {
-    const ownerAddress = this.params.signerAddress;
-    const spenderAddress = this.parseAddress(spender);
+    const ownerAddress = await this.signerUtils.signer.getAddress();
+    const spenderAddress = await this.signerUtils.parseAddress(spender);
     const value = BigNumber.from(amount);
-    const signature = await this.params.signer._signTypedData({
+    const signature = await this.signerUtils.signer._signTypedData({
       name: this.tokenMetaInfo.name,
       version: '1',
-      chainId: this.params.signerChainId,
-      verifyingContract: this.gameTokenAddress,
+      chainId: await this.signerUtils.getSignerChainId(),
+      verifyingContract: this.gameTokenContract.address,
     },
-    this.PERMIT_MESSAGE_TYPES_DEFINITION,
+    APPROVAL_MESSAGE_TYPES_DEFINITION,
     {
       owner: ownerAddress,
       spender: spenderAddress,
@@ -147,36 +235,29 @@ export class GameToken extends BaseService {
       nonce: await this.getOwnNonce(),
       deadline,
     });
-    const result: ERC20AllowancePermitStrict = {
-      owner: this.utils.createAccountIdFromAddress(ownerAddress),
-      spender: this.utils.createAccountIdFromAddress(spenderAddress),
+    const result: ERC20SignedApproval = {
+      owner: await this.signerUtils
+        .createAccountIdFromAddress(ownerAddress),
+      spender: await this.signerUtils
+        .createAccountIdFromAddress(spenderAddress),
       amount: BigNumber.from(amount),
       deadline: BigNumber.from(deadline),
       signature,
-      splitSignature: ethers.utils.splitSignature(signature),
     };
     return result;
   }
 
-  async submitAllowancePermit(
-    permit: ERC20AllowancePermitBroad | ERC20AllowancePermitStrict,
-  ) {
-    const ownerAddress = this.parseAddress(permit.owner);
-    const spenderAddress = this.parseAddress(permit.spender);
-    const amount = BigNumber.from(permit.amount);
-    const deadline = BigNumber.from(permit.deadline);
-    // check is signature valid
-    let signature: Signature | null = null;
-    if (permit.signature) {
-      signature = ethers.utils.splitSignature(permit.signature);
-    } else if (permit.splitSignature) {
-      signature = permit.splitSignature;
-    }
-    if (!signature)
-      throw new GeneralError(
-        'provided_signature_is_not_valid',
-        'permit contains invalid signature',
-      );
+  /**
+   * Submits {@link ERC20SignedApproval} to blockchain.
+   */
+  async submitSignedApproval(approval: ERC20SignedApproval) {
+    const ownerAddress = await this.signerUtils.parseAddress(approval.owner);
+    const spenderAddress = await this.signerUtils
+      .parseAddress(approval.spender);
+    const amount = BigNumber.from(approval.amount);
+    const deadline = BigNumber.from(approval.deadline);
+    const signature: Signature = ethers.utils
+      .splitSignature(approval.signature);
     return await this.gameTokenContract.permit(
       ownerAddress,
       spenderAddress,
@@ -188,101 +269,75 @@ export class GameToken extends BaseService {
     );
   }
 
-
   /**
-   * transfer owners token `amount` to `toAddress`. Sender should be
-   * allowed to spend these tokens
+   * Transfers owners token `amount` to `to`.
+   *
+   * @remarks
+   * Sender should be allowed to spend these tokens
    */
-  async transferFrom(
-    fromAddress: AddressLike,
-    toAddress: AddressLike,
+  transferFrom = async (
+    fromAddress: AccountId,
+    to: AccountId,
     amount: BigNumberish,
-  ) {
-    return await this.gameTokenContract.transferFrom(
-      this.parseAddress(fromAddress),
-      this.parseAddress(toAddress),
+  ) =>
+    await this.gameTokenContract.transferFrom(
+      await this.signerUtils.parseAddress(fromAddress),
+      await this.signerUtils.parseAddress(to),
       amount,
     );
-  }
 
   /**
-   * `sender` should be allowed to burn `owner's` token using
-   * methods: `increaseAllowance`, `approve`, `permit`
+   * Burns tokens from `owner`
+   *
+   * @remarks
+   * `sender` should be allowed to burn `owner's` token using methods:
+   * - {@link increaseAllowance}
+   * - {@link approve}
+   * - {@link submitSignedApproval}
    */
-  async burnTokenFrom(owner: AddressLike, amount: BigNumberish) {
-    return await this.gameTokenContract.burnFrom(
-      this.parseAddress(owner),
+  burnTokenFrom = async (owner: AccountId, amount: BigNumberish) =>
+    await this.gameTokenContract.burnFrom(
+      await this.signerUtils.parseAddress(owner),
       amount,
     );
-  }
-
 
   /**
-   *
-   * Token pausable state managment. If contract is paused,
-   * some operations are not allowed.
-   *
+   * Moves GameToken contract to paused state.
    */
-
-  /** Move GameToken contract to paused state. */
   pauseToken = () => this.gameTokenContract.pause();
 
-  /** Check if GameToken contract is in paused state. */
+  /**
+   * Checks if GameToken contract is in paused state.
+   */
   isTokenPaused = () => this.gameTokenContract.paused();
 
-  /** Move GameToken contract to unpaused state. */
+  /**
+   * Moves GameToken contract to unpaused state.
+   */
   unpauseToken = () => this.gameTokenContract.unpause();
 
-
   /**
-   * If someone sent `transfer`/`transferFrom` etc. to address
-   * of gameToken contract itself, Only `Admin` can recover it by
-   * providing related information. There should be enough tokens
-   * on contract's balance. `Admin` might use any `amount`. The only
-   * limitation is getBalanceOf(contract) should contain such `amount`.
+   * Recovers miss-transfer.
+   *
+   * @remarks
+   * If someone sent {@link transfer}/{@link transferFrom} etc. to address
+   * of gameToken contract itself, Only {@link Roles | Admin} can recover it by
+   * providing related information.
+   *
+   * @remarks
+   * There should be enough tokens on contract's balance.
+   * `Admin` might use any `amount`. The only limitation is
+   * getBalanceOf(contract) should contain such `amount`.
    */
-  async recover(
-    addressOfTokenToRecover: AddressLike,
-    whoSentAddress: AddressLike,
+  recover = async (
+    addressOfTokenToRecover: AccountId,
+    whoSentAddress: AccountId,
     amount: BigNumberish,
-  ) {
-    return await this.gameTokenContract.recover(
-      this.parseAddress(addressOfTokenToRecover),
-      this.parseAddress(whoSentAddress),
+  ) =>
+    await this.gameTokenContract.recover(
+      await this.signerUtils.parseAddress(addressOfTokenToRecover),
+      await this.signerUtils.parseAddress(whoSentAddress),
       amount,
     );
-  }
-
-
-  /**
-   *
-   * Token metadata is cached on init then provided
-   * with getter `tokenMetaInfo`.
-   *
-   */
-
-  /***/
-  public get tokenMetaInfo(): ERC20MetaInfo {
-    if (!this._tokenMetaInfo)
-      throw new GeneralError(
-        'service_was_not_initialized_properly',
-        'No tokenMetaInfo was found. Probably GameToken' +
-        'Service was not initialized. See `_init` method',
-      );
-    return this._tokenMetaInfo;
-  }
-
-  /***/
-  private async fetchTokenMetaInfo(): Promise<ERC20MetaInfo> {
-    const owner = await this.gameTokenContract.owner();
-    const ownerAccountId = this.utils.createAccountIdFromAddress(owner);
-    return {
-      symbol: await this.gameTokenContract.symbol(),
-      name: await this.gameTokenContract.name(),
-      owner: ownerAccountId,
-      decimals: await this.gameTokenContract.decimals(),
-      totalSupply: await this.gameTokenContract.totalSupply(),
-    };
-  }
 
 }

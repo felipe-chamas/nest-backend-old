@@ -1,31 +1,46 @@
-import { BaseService, BaseServiceParams } from './base-service';
-import { Address } from '../types';
 import { AccountId } from 'caip';
-import type { NFTUnboxing } from '../typechain';
-import { ErrorCodes, GeneralError } from '../errors';
 import { BigNumberish } from 'ethers';
 
-export class NFTUnbox extends BaseService {
+import type { NFTUnboxing as NFTUnboxingContract } from '../typechain';
+import { ErrorCodes, GeneralError } from '../errors';
+import { SignerUtils } from '../signer-utils';
+import { Signer } from '../types';
+import { ContractResolver } from '../contract-resolver';
 
-  private readonly contract: NFTUnboxing;
-  private readonly contractAddress: Address;
 
-  constructor(
-    nftUnboxContractAccountId: AccountId,
-    baseParams: BaseServiceParams,
+/**
+ * Class provides functionality for unboxing nfts.
+ */
+export class NFTUnbox {
+  private readonly signerUtils: SignerUtils;
+  private readonly unboxContract: NFTUnboxingContract;
+
+  private constructor(
+    signerUtils: SignerUtils,
+    unboxContract: NFTUnboxingContract,
   ) {
-    super(baseParams);
-    this.contractAddress = this.parseAddress(nftUnboxContractAccountId);
-    this.contract = this.params.contractResolver
-      .getNFTUnbox(this.contractAddress);
+    this.signerUtils = signerUtils;
+    this.unboxContract = unboxContract;
   }
 
+  static async create(signer: Signer, nftUnboxingAccountId: AccountId) {
+    const signerUtils = new SignerUtils(signer);
+    const unboxContract = new ContractResolver(signer).resolve(
+      'NFTUnboxing',
+      await signerUtils.parseAddress(nftUnboxingAccountId),
+    );
+    return new NFTUnbox(signerUtils, unboxContract);
+  }
+
+  /**
+   * Requests unboxing.
+   */
   requestUnboxing = async (boxId: BigNumberish) =>
-    await this.contract.requestUnboxing(boxId);
+    await this.unboxContract.requestUnboxing(boxId);
 
   /**
    * @param nftAccountIdsToMint is a list of account ids that might be
-   * mind during unboxing process.
+   * minted during unboxing process.
    *
    * @param tokenCountsToMint is a lint of numbers corresponding of how
    * many of each token from `nftAccountIdsToMint` should be mint
@@ -39,27 +54,41 @@ export class NFTUnbox extends BaseService {
   ) {
     if (nftAccountIdsToMint.length !== tokenCountsToMint.length)
       throw new GeneralError(
-        ErrorCodes.input_validation_error,
+        ErrorCodes.unboxing_error,
         `nfts length: ${nftAccountIdsToMint.length} !== ` +
         `token counts: ${tokenCountsToMint}.`,
       );
-    return this.contract.completeUnboxing(
+    return this.unboxContract.completeUnboxing(
       requestId,
-      nftAccountIdsToMint.map(x => this.parseAddress(x)),
+      await Promise.all(
+        nftAccountIdsToMint.map(x => this.signerUtils.parseAddress(x)),
+      ),
       tokenCountsToMint,
     );
   }
 
+  /**
+   * Returns unbox request id by `boxId`.
+   */
   getRequestIdByBoxId = (boxId: BigNumberish) =>
-    this.contract.getRequestId(boxId);
+    this.unboxContract.getRequestId(boxId);
 
+  /**
+   * Returns box id by unbox `requestId`.
+   */
   getBoxIdByRequestId = (requestId: BigNumberish) =>
-    this.contract.getTokenId(requestId);
+    this.unboxContract.getTokenId(requestId);
 
+  /**
+   * Returns unboxed random by `boxId`.
+   */
   getGeneratedRandomByBoxId = (boxId: BigNumberish) =>
-    this.contract.getRandomResultByTokenId(boxId);
+    this.unboxContract.getRandomResultByTokenId(boxId);
 
+  /**
+   * Returns unbox random by unbox `requestId`.
+   */
   getGeneratedRandomByRequestId = (requestId: BigNumberish) =>
-    this.contract.getRandomResultByRequestId(requestId);
+    this.unboxContract.getRandomResultByRequestId(requestId);
 
 }

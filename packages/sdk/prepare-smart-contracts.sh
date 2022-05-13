@@ -15,4 +15,16 @@ set -e
 rm -rf src/typechain cache artifacts tasks scripts
 cp -r node_modules/@blockchain/smart-contracts/typechain src/typechain
 cp -r node_modules/@blockchain/smart-contracts/{cache,artifacts,tasks,scripts} .
-ts-node generate-helper-types.ts
+# remove BaseContract because it is not used and overlaps by name
+# with ethers BaseContract
+#
+# remove contract files
+rm src/typechain/BaseContract.ts
+rm src/typechain/factories/BaseContract__factory.ts
+# remove contract mentions
+sed -i "s/^export type { BaseContract }.*$//" src/typechain/index.ts
+sed -i "s/^export { BaseContract__factory }.*$//" src/typechain/index.ts
+# remove hardhad definition file
+rm src/typechain/hardhat.d.ts
+
+ts-node --project tsconfig.hardhat.json generate-helper-types.ts

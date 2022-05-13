@@ -1,12 +1,13 @@
 {
   "name": "@falco-gg/blockchain-sdk",
-  "version": "0.5.0",
+  "version": "0.6.1",
   "types": "./dist/sdk.d.ts",
   "main": "./dist/sdk.js",
   "files": [
     "dist/sdk.js",
     "dist/sdk.d.ts",
-    "dist/sdk.js.map"
+    "dist/sdk.js.map",
+    "docs"
   ],
   "scripts": {
     "hardhat": "hardhat --tsconfig tsconfig.hardhat.json",
@@ -15,10 +16,12 @@
     "test": "yarn hardhat test",
     "lint": "eslint .",
     "contracts": "./prepare-smart-contracts.sh",
-    "prepublishOnly": "run-s lint contracts build test version-patch",
+    "prepublishOnly": "run-s lint contracts build test version-patch build-docs",
     "version-patch": "npm version patch",
     "preversion": "git diff --quiet HEAD || (echo 'git repository has uncommited chages'; exit 1)",
-    "postversion": "git add . && git commit -m \"up sdk version\" && git push"
+    "postversion": "git add . && git commit -m \"up sdk version\" && git push",
+    "build-docs": "typedoc --tsconfig tsconfig.typedoc.json --cleanOutputDir --includeVersion --categorizeByGroup --excludePrivate --disableSources src/index.ts",
+    "view-docs": "yarn build-docs && http-server -o docs"
   },
   "devDependencies": {
     "@blockchain/smart-contracts": "link:../smart-contracts",
@@ -50,6 +53,7 @@
     "ethereum-waffle": "^3.4.4",
     "ethers": "^5.6.2",
     "hardhat": "^2.9.3",
+    "http-server": "^14.1.0",
     "merkletreejs": "^0.2.31",
     "npm-run-all": "^4.1.5",
     "rimraf": "^3.0.2",
@@ -63,6 +67,7 @@
     "solc": "^0.8.13",
     "ts-node": "^10.7.0",
     "typechain": "^8.0.0",
+    "typedoc": "^0.22.15",
     "typescript": "^4.6.3"
   }
 }

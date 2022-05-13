@@ -4,6 +4,29 @@
 
 This repository contains a set of tools to interract with [smart contracts](https://github.com/falco-gg/blockchain/tree/main/packages/smart-contracts)
 
+### View Documentation
+
+Documentation is compiled as a static html site and put into the package
+at path: `@falco-gg/blockchain-sdk/docs`.
+
+You may view it by running any static html serve tool.
+
+Ex: [serve](https://www.npmjs.com/package/serve).
+
+Install the `serve` package if you do not have already:
+
+```
+nmp i -g serve
+```
+
+Serve docs with it:
+```
+serve node_modules/@falco-gg/blockchain-sdk/docs
+```
+
+Then open your [browser](http://localhost:3000) to view documenation.
+
+
 ### Install
 
 Install it with [npm](https://www.npmjs.com/package/@falco-gg/blockchain-sdk)
@@ -34,110 +57,66 @@ const signer = new ethers.Wallet(
 );
 ```
 
-After Signer is created, create sdk instance:
+After {@link Signer} is created, pass it to {@link SDK}:
 ```
-import { createSdk } from '@falco-gg/blockchain-sdk';
+import { SDK } from '@falco-gg/blockchain-sdk';
 ...
-const sdk = await createSdk(signer);
+const sdk = new SDK(signer);
 ```
-If you need to relogin user, you should create sdk instance again with another signer corresponding to new user.
+> If signer is provided via the wallet which allow to switch accounts, no new instance of sdk should be created on address-switch because signer keeps track of the last account that was switched to.
 
-Having sdk created, there are several services each related to group of contracts. For instance `AccessControl`.
+> If network is switch(ex from mainnet to testnet) and provider supports switching, no new instance of sdk should be created because signer keeps track of a new account even while switching to a new network. 
 
-## AccessControl
+### Address representation
+
+To describe addresses on chain(accounts or smart-contracts) [caip standard](https://www.npmjs.com/package/caip) is used.
+It allowes program to check if provided address is located on the same network and the rest of the system.
+
+Ex. if you want to transfer tokens to someone, you specify receiving address
+in caip format:
+```
+  const receiver = new caip.AccountId({
+    chainId: {
+      namespace: 'eip155', // 'eip155' means that its is EVM compitable chain
+      reference: '1'       // '1' stands for Ethereum mainnet
+    },
+    address: '0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb'
+  });
+  //// shorthand
+  // const receiver = caip.AccountId.parse('eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb');
+
+  transfer(receiver, 12345); // by providing `AccountId` and not plain `Address`(string), the program can validate your intentions.
+  
+```
+
+### Services
+
+Having sdk created, there are several services each related to set of contracts:
+- {@link AccessControl} - Manages roles in the system.
+- {@link Utils} - Helper methods not related to any secific contract. {@link Utils.fetchEvents | fetching events emitter by the transaction}.
+- {@link GameToken} - Manages GameToken(in game fungable currency).
+- {@link NFT} - Manages Generic(in game non fungable tokens).
+- {@link NFTClaim} - Creates claims for nfts. Claiming nfts.
+- {@link NFTUnbox} - Unboxing nfts(from another nft called sealed box that drops random nfts used in the game).
+
+Other useful exports:
+- {@link SignerUtils} - helps to manage `caip.AccountId` transformation, validation.
+
+
+To create a service, call corresponding factory method on sdk instance:
+For examle lets {@link NFT.listOwnTokens | list own nfts}.
+```
+const helmetNFTAccountId = AccountId.parse("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb");
+const helmetNFT = await sdk.nft(aclAddress); // nft that manages
+const ownNftsFirstPage = await helmetNFT.listOwnTokens(
+  { limit: 10, offset: 0 } // optional. This is how {@link PaginationParams | pagination} is done.
+)
+```
+> If account is changed through the wallet, you do not need to recreate a service, because {@link Signer} always stores the most recent activated account.
+
+> If network is switched, you have to recreate used services, because smart-contracts are located on different addresses in different network.
 
 `AccesControl` service is managiring roles and access on the system.
-
-Create instance of it with:
-```
-const accessControl = sdk.createAccessControl(aclAddress); // aclAddress is very important here. It's address of access control main contract on blockchain
-```
-
-For instance you can grant role:
-```
-it('should grand role', async () => {
-  const [signer1] = await hre.ethers.getSigners();
-  const transaction = await aclServiceAsAdmin
-    .grantRole(signer1.address, 'Operator');
-  await expect(transaction.wait()).to.eventually.be.fulfilled;
-  const operators = await aclServiceAsAdmin.listByRole('Operator');
-  expect(operators).to.be.ofSize(2);
-});
-```
-
-Revoke role:
-```
-  it('should revoke role', async () => {
-    const transaction = await aclServiceAsAdmin
-      .revokeRole(operator.address, 'Operator');
-    await expect(transaction.wait()).to.eventually.be.fulfilled;
-    await expect(aclServiceAsAdmin.listByRole('Operator'))
-      .to.eventually.have.lengthOf(0);
-  });
-```
-
-
-## Utils
-`fetchEvents` - method fetches events from specified transaction.
-As a result it return array of objects with properties equal to
-event named arguments.
-```
-const transaction = await gameTokenService
-  .transfer(anon.address, transferAmount);
-await transaction.wait();
-// fetch Transfer events by transaction hash
-const events = await utils.fetchEvents(
-  transaction.hash,
-  gameTokenAddress,
-  'GameToken',
-  'Transfer',
-);
-// check that only single transfer event was returned
-expect(events).to.have.lengthOf(1);
-// check event properties
-const event = events[0];
-expect(event.to.address).to.equal(anon.address);
-expect(event.from.address).to.equal(admin.address);
-expect(event.value.toNumber()).to.equal(transferAmount);
-```
-The type of `contractName` and `eventName` extends string and contains
-every possible contract/event names. If not existing event is specified,
-error returned.
-
-If `eventName` was not specified, every event that is from specified contract
-will be returned
-
-
-`createAccountIdFromAddress` - helper method to create
-address of [caip](https://www.npmjs.com/package/caip) format.
-
-
-## GameToken
-`GameToken` is a service to interact with GameToken(ERC20) contract.
-It contains basic operations to get balance, transfer, get contract metadata,
-manage allowance.
-Additionaly it supports creating off-chain permits with `createAllowancePermit`
-and then submitting permits with `submitAllowancePermit`.
-Usecase of off-chain permits is as following: a person who wants to transfer
-GameTokens to someone, create a permit(signs it with metamask or wallet) without
-sending a transaction to blockchain(to transaction fee).
-Instead permit is sent by email of any other off-chain method to the receiver.
-The receiver than submits permit(pays transaction fee), thus changes allowance.
-
-
-## NFT
-`NFT` is a service to interact with NFT(ERC721) contract.
-It contains basic operations to get balance, transfer, get contract metadata,
-manage allowance.
-
-## NFTClaim
-`NFTClaim` is a service to create nft claiming (meaning to make a gift for a user)
-and to create claim proofs (user who were gifted nft proofs to become nft's owner)
-
-see [commends](https://github.com/falco-gg/blockchain/blob/main/packages/sdk/src/services/nft-claim.ts) for more info
-see [tests](https://github.com/falco-gg/blockchain/blob/main/packages/sdk/test/nft-claim.test.ts) for usecases
-
-
 
 
 ### Development

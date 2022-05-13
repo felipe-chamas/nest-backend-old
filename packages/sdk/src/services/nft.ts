@@ -1,195 +1,259 @@
-import { BaseService, BaseServiceParams } from './base-service';
-import { Utils } from './utils';
-import { NFT as NFTTypechain } from '../typechain';
-import {
-  Address, AddressLike,
-  PaginationParams,
-} from '../types';
-import { BigNumberish, ethers } from 'ethers';
-import { ERC721MetaInfo } from '../types';
-import { GeneralError } from '../errors';
-import { listAsyncItemsWithPagination } from '../utils';
 import { AccountId } from 'caip';
+import { BigNumberish, ethers } from 'ethers';
 
-export class NFT extends BaseService {
+import { NFT as NFTContract } from '../typechain';
+import { PaginationParams, Signer } from '../types';
+import { ERC721MetaInfo } from '../types';
+import { listAsyncItemsWithPagination } from '../utils';
+import { SignerUtils } from '../signer-utils';
+import { ContractResolver } from '../contract-resolver';
 
-  private readonly nftContract: NFTTypechain;
-  private readonly nftAddress: Address;
-  private _tokenMetaInfo?: ERC721MetaInfo;
-
+/**
+ * Provides functionality to manage NFT ERC721 token.
+ *
+ * @remarks
+ * NFTs are used as in game items or sealed boxes.
+ *
+ * @remarks
+ * It contains basic operations to ming tokens, get balance,
+ * transfer, get contract metadata, manage allowance.
+ */
+export class NFT {
+  private readonly signerUtils: SignerUtils;
+  private readonly nftContract: NFTContract;
+  readonly tokenMetaInfo: ERC721MetaInfo;
 
   constructor(
-    nftAddressLike: AccountId,
-    private readonly utils: Utils,
-    baseParams: BaseServiceParams,
+    signerUtils: SignerUtils,
+    nftContract: NFTContract,
+    tokenMetaInfo: ERC721MetaInfo,
   ) {
-    super(baseParams);
-    this.nftAddress = this.parseAddress(nftAddressLike);
-    this.nftContract = this.params.contractResolver
-      .getNFT(this.nftAddress);
+    this.signerUtils = signerUtils;
+    this.nftContract = nftContract;
+    this.tokenMetaInfo = tokenMetaInfo;
   }
 
-  async _setup() {
-    this._tokenMetaInfo = await this.fetchTokenMetaInfo();
-    return this;
+
+  static async create(signer: Signer, nftContractAccountId: AccountId) {
+    const signerUtils = new SignerUtils(signer);
+    const nftContract = new ContractResolver(signer).resolve(
+      'NFT',
+      await signerUtils.parseAddress(nftContractAccountId),
+    );
+    const [symbol, name, maxTokenSupply] = await Promise.all([
+      nftContract.symbol(),
+      nftContract.name(),
+      nftContract.getMaxTokenSupply(),
+    ]);
+    const metaInfo: ERC721MetaInfo = {
+      name,
+      symbol,
+      maxTokenSupply,
+    };
+    return new NFT(signerUtils, nftContract, metaInfo);
   }
 
-  getBalance = (owner: AccountId) =>
-    this.nftContract.balanceOf(this.parseAddress(owner));
+  /**
+   * @returns Amount of tokens owned by the `owner`.
+   */
+  getBalance = async (owner: AccountId) =>
+    this.nftContract.balanceOf(
+      await this.signerUtils.parseAddress(owner),
+    );
 
-  getOwnBalance = () =>
-    this.nftContract.balanceOf(this.params.signerAddress);
+  /**
+   * @returns amount of own tokens.
+   */
+  getOwnBalance = async () =>
+    this.nftContract.balanceOf(
+      await this.signerUtils.signer.getAddress(),
+    );
 
-
+  /**
+   * @returns the owner of token `tokenId`.
+   */
   getOwnerOfToken = async (tokenId: BigNumberish) =>
-    this.utils.createAccountIdFromAddress(
+    this.signerUtils.createAccountIdFromAddress(
       await this.nftContract.ownerOf(tokenId),
     );
 
-
+  /**
+   * Mint token to `to`.
+   */
   mintToken = async (to: AccountId) =>
-    await this.nftContract.mint(this.parseAddress(to));
+    await this.nftContract.mint(
+      await this.signerUtils.parseAddress(to),
+    );
 
+  /**
+   * Burns own token `tokenId`.
+   *
+   * @remarks
+   * Only a {@link Roles | Minter} can burn tokens.
+   */
   burnToken = async (tokenId: BigNumberish) =>
     await this.nftContract.burn(tokenId);
 
-
+  /**
+   * Sets token's base uri.
+   */
   setBaseTokenURI = async (baseTokenURI: string) =>
     await this.nftContract.setBaseTokenURI(baseTokenURI);
 
+  /**
+   * Returns token's base uri.
+   */
   getBaseTokenURI = () => this.nftContract.getBaseTokenURI();
 
-
+  /**
+   * Sets `tokenId`s uri.
+   */
   setTokenURI = async (tokenId: BigNumberish, tokenURI: string) =>
     await this.nftContract.setTokenURI(tokenId, tokenURI);
 
-  getTokenURI = (tokenId: BigNumberish) => this.nftContract.tokenURI(tokenId);
-
+  /**
+   * Returns `tokenId`s uri.
+   */
+  getTokenURI = (tokenId: BigNumberish) =>
+    this.nftContract.tokenURI(tokenId);
 
   /**
-   * return `boolean` saying if `operator` could
-   * operate(transfer, burn) token `tokenId`
+   * Checks if `operator` is approved to operate `tokenId`.
    */
   isApprovedOrOwner = async (operator: AccountId, tokenId: BigNumberish) =>
-    this.nftContract.isApprovedOrOwner(this.parseAddress(operator), tokenId);
+    this.nftContract.isApprovedOrOwner(
+      await this.signerUtils.parseAddress(operator),
+      tokenId,
+    );
 
+  /**
+   * Allows `operator` to operate `tokenId`.
+   */
   approveOperator = async (operator: AccountId, tokenId: BigNumberish) =>
-    await this.nftContract.approve(this.parseAddress(operator), tokenId);
+    await this.nftContract.approve(
+      await this.signerUtils.parseAddress(operator),
+      tokenId,
+    );
 
+  /**
+   * Disallows anyone to operate `tokenId`.
+   */
   unapproveOperator = async (tokenId: BigNumberish) =>
     await this.nftContract.approve(ethers.constants.AddressZero, tokenId);
 
-  // returns operator that allowed to manage token `tokenId`
+  /**
+   * Returns operator that allowed to manage `tokenId`.
+   */
   getApprovedOperator = async (tokenId: BigNumberish) =>
-    this.utils.createAccountIdFromAddress(
+    this.signerUtils.createAccountIdFromAddress(
       await this.nftContract.getApproved(tokenId),
     );
 
-
-  async toggleApprovedOperatorForAllTokens(
+  /**
+   * Allows/disallows `operator` to operate on all of own tokens.
+   */
+  toggleApprovedOperatorForAllTokens = async (
     operator: AccountId,
     isAllowedToOperate: boolean,
-  ) {
-    return await this.nftContract.setApprovalForAll(
-      this.parseAddress(operator),
+  ) =>
+    await this.nftContract.setApprovalForAll(
+      await this.signerUtils.parseAddress(operator),
       isAllowedToOperate,
     );
-  }
 
-  isOperatorApprovedForAllTokens(
+  /**
+   * Checks if `operator` is allowed to operate `tokenOwner`s tokens.
+   */
+  isOperatorApprovedForAllTokens = async (
     tokensOwner: AccountId,
     operator: AccountId,
-  ) {
-    return this.nftContract.isApprovedForAll(
-      this.parseAddress(tokensOwner),
-      this.parseAddress(operator),
+  ) =>
+    this.nftContract.isApprovedForAll(
+      await this.signerUtils.parseAddress(tokensOwner),
+      await this.signerUtils.parseAddress(operator),
     );
-  }
-
 
   /**
-   * expect that service `signer` is allowed to operate
-   * token `tokenId`
+   * Transfer own token `tokenId` to `to`.
+   *
+   * @remarks
+   * Expect that service `signer` is allowed to operate
+   * token `tokenId`.
    */
-  transfer = (to: AccountId, tokenId: BigNumberish) =>
+  transfer = async (to: AccountId, tokenId: BigNumberish) =>
     this.transferFrom(
-      this.params.signerAddress,
-      this.parseAddress(to),
+      await this.signerUtils.createAccountIdFromAddress(
+        await this.signerUtils.signer.getAddress(),
+      ),
+      to,
       tokenId,
     );
 
-
-  async transferFrom(
-    fromAddress: AddressLike,
-    toAddress: AddressLike,
+  /**
+   * Transfers token `tokenId` from `from` to `to`.
+   */
+  transferFrom = async (
+    from: AccountId,
+    to: AccountId,
     tokenId: BigNumberish,
-  ) {
-    return await this.nftContract.transferFrom(
-      this.parseAddress(fromAddress),
-      this.parseAddress(toAddress),
+  ) =>
+     await this.nftContract.transferFrom(
+      await this.signerUtils.parseAddress(from),
+      await this.signerUtils.parseAddress(to),
       tokenId,
     );
-  }
-
 
   /**
-   *
-   * Token metadata is cached on init then provided
-   * with getter `tokenMetaInfo`.
-   *
+   * Enumerable operations.
    */
-
-  /***/
-  public get tokenMetaInfo(): ERC721MetaInfo {
-    if (!this._tokenMetaInfo)
-      throw new GeneralError(
-        'service_was_not_initialized_properly',
-        'No tokenMetaInfo was found. Probably NFT' +
-        'Service was not initialized. See `_setup` method',
-      );
-    return this._tokenMetaInfo;
-  }
-
-  /***/
-  private async fetchTokenMetaInfo(): Promise<ERC721MetaInfo> {
-    const [owner, symbol, name, maxTokenSupply] = await Promise.all([
-      this.nftContract.getOwner(),
-      this.nftContract.symbol(),
-      this.nftContract.name(),
-      this.nftContract.getMaxTokenSupply(),
-    ]);
-    const ownerAccountId = this.utils.createAccountIdFromAddress(owner);
-    return {
-      symbol,
-      name,
-      owner: ownerAccountId,
-      maxTokenSupply,
-    };
-  }
-
 
   /**
-   * Enumerable operations
+   * Returns the amount on token in existance.
    */
-
-  /***/
   getTokenTotalSupply = () => this.nftContract.totalSupply();
 
+  /**
+   * @returns Token by index.
+   *
+   * @remarks
+   * It includes all existing token. Not limited to any owner.
+   */
   getTokenByIndex = (index: BigNumberish) =>
     this.nftContract.tokenByIndex(index);
 
+  /**
+   * @returns Paginated list of tokens.
+   *
+   * @remarks
+   * It includes all existing token. Not limited to any owner.
+   */
   listAllTokens = (params?: PaginationParams) => listAsyncItemsWithPagination(
     () => this.getTokenTotalSupply(),
     (index: BigNumberish) => this.getTokenByIndex(index),
     params,
   );
 
-  getTokenOfOwnerByIndex = (owner: AccountId, index: BigNumberish) =>
-    this.nftContract.tokenOfOwnerByIndex(this.parseAddress(owner), index);
+  /**
+   * @returns `owner`'s token by `index`.
+   */
+  getTokenOfOwnerByIndex = async (owner: AccountId, index: BigNumberish) =>
+    this.nftContract.tokenOfOwnerByIndex(
+      await this.signerUtils.parseAddress(owner),
+      index,
+    );
 
-  getOwnTokenByIndex = (index: BigNumberish) =>
-    this.nftContract.tokenOfOwnerByIndex(this.params.signerAddress, index);
+  /**
+   * @returns Own token by index.
+   */
+  getOwnTokenByIndex = async (index: BigNumberish) =>
+    this.nftContract.tokenOfOwnerByIndex(
+      await this.signerUtils.signer.getAddress(),
+      index,
+    );
 
+  /**
+   * @returns Paginated list of `owner`'s token.
+   */
   listTokensByOwner = (owner: AccountId, params?: PaginationParams) =>
     listAsyncItemsWithPagination(
       () => this.getBalance(owner),
@@ -197,9 +261,15 @@ export class NFT extends BaseService {
       params,
     );
 
-  listOwnTokens = (params?: PaginationParams) => this.listTokensByOwner(
-    this.utils.createAccountIdFromAddress(this.params.signerAddress),
-    params,
-  );
+  /**
+   * @returns paginated list of own tokens.
+   */
+  listOwnTokens = async (params?: PaginationParams) =>
+    this.listTokensByOwner(
+      await this.signerUtils.createAccountIdFromAddress(
+        await this.signerUtils.signer.getAddress(),
+      ),
+      params,
+    );
 
 }

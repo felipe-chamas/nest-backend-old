@@ -24,14 +24,15 @@ const esconfig = {
         semi: [2, 'always'],
         quotes: [2, 'single', { avoidEscape: true }],
         'quote-props': [2, 'as-needed'],
-        'max-len': [2, { code: 80 }],
+        'max-len': [2, { code: 80, ignoreComments: true }],
         'object-curly-spacing': [2, 'always'],
         'comma-dangle': [2, 'always-multiline'],
         'no-multi-spaces': 2,
         'no-multiple-empty-lines': 2,
         'no-trailing-spaces': 2,
         'no-unused-vars': 0,
-        '@typescript-eslint/no-unused-vars': [2],
+        '@typescript-eslint/no-unused-vars': 2,
+        '@typescript-eslint/no-empty-interface': 0,
     },
 };
 

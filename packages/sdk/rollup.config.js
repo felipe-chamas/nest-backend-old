@@ -17,7 +17,7 @@ export default defineConfig([
     },
     plugins: [
       del({ targets: ['dist/*'], hook: 'buildStart' }),
-      typescript({ tsconfig: './tsconfig.sdk.json' }),
+      typescript({ tsconfig: './tsconfig.json' }),
       nodeResolve(),
       commonjs(),
       uglify(),

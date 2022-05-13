@@ -1,7 +1,11 @@
-export * from './base-service';
-export * from './utils';
-export * from './access-control';
-export * from './game-token';
-export * from './nft';
-export * from './nft-claim';
-export * from './nft-unbox';
+export { Utils } from './utils';
+
+export { GameToken } from './game-token';
+
+export { AccessControl } from './access-control';
+
+export { NFT } from './nft';
+
+export { NFTClaim } from './nft-claim';
+
+export { NFTUnbox } from './nft-unbox';
