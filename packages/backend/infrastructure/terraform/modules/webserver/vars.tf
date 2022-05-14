@@ -32,3 +32,8 @@ variable "region" {
   type    = string
   default = "us-east-1"
 }
+
+variable "mongodb_uri" {
+  type        = string
+  sensitive   = true
+}

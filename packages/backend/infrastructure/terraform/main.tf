@@ -21,6 +21,7 @@ module "webserver" {
   nft_storage_url       = var.nft_storage_domain_name
   nft_storage_s3_bucket = module.nft-storage.nft_storage_s3_bucket
   api_domain_name       = var.api_domain_name
+  mongodb_uri           = var.mongodb_uri
 
   depends_on = [
     module.events-listener

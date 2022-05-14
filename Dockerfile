@@ -34,7 +34,7 @@ FROM base AS production
 ENV NODE_ENV=production
 COPY --from=production-dependencies --chown=node:node /usr/src/app/node_modules ./node_modules
 COPY --from=builder --chown=node:node /usr/src/app/dist/packages/backend ./dist
-COPY --from=builder --chown=node:node /usr/src/app/.env ./
+COPY --from=builder --chown=node:node /usr/src/app/ormconfig.js ./
 
 USER node
 EXPOSE 3000

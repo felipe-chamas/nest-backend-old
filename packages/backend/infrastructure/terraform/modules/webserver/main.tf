@@ -18,6 +18,7 @@ module "ecs" {
   events_queue_arn      = var.events_queue_arn
   nft_storage_url       = var.nft_storage_url
   nft_storage_s3_bucket = var.nft_storage_s3_bucket
+  mongodb_uri           = var.mongodb_uri
 
   vpc_id = module.vpc_for_ecs_fargate.vpc_id
   # Service

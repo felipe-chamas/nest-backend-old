@@ -1,3 +1,21 @@
+resource "random_string" "random" {
+  length           = 16
+}
+
+resource "aws_secretsmanager_secret" "secret_variables" {
+   name = "backend-secret-variables"
+}
+
+resource "aws_secretsmanager_secret_version" "secret_variables_version" {
+  secret_id = aws_secretsmanager_secret.secret_variables.id
+  secret_string = <<EOF
+    {
+      "mongodb_uri": "${var.mongodb_uri}",
+      "secret_value": "${random_string.random.result}"
+    }
+  EOF
+}
+
 resource "aws_ecs_task_definition" "main" {
   family                   = "${var.namespace}-${terraform.workspace}-ecs-task-definition"
   task_role_arn            = aws_iam_role.main_ecs_tasks.arn
@@ -34,18 +52,24 @@ resource "aws_ecs_task_definition" "main" {
           value : var.events_queue_url
         },
         {
-          name : "NFT_STORAGE_S3_BUCKET",
-          value : var.nft_storage_s3_bucket
+          name: "AWS_REGION",
+          value: var.region
+        }
+      ],
+      secrets: [
+        {
+          name: "MONGODB_URI",
+          valueFrom: "${aws_secretsmanager_secret.secret_variables.arn}:mongodb_uri::"
         },
         {
-          name : "NFT_STORAGE_URL",
-          value : var.nft_storage_url
+          name: "SESSION_SECRET",
+          valueFrom: "${aws_secretsmanager_secret.secret_variables.arn}:secret_value::"
         }
       ]
     },
     {
       name : "${var.namespace}-${terraform.workspace}-redis-container",
-      image : "${var.namespace}-${terraform.workspace}-redis-ecr",
+      image : "public.ecr.aws/ubuntu/redis:latest",
       cpu : var.redis_cpu,
       memory : var.redis_memory,
       networkMode : "awsvpc",
@@ -63,7 +87,13 @@ resource "aws_ecs_task_definition" "main" {
           containerPort : var.redis_port,
           hostPort : var.redis_port
         }
-      ]
+      ],
+      environment: [
+        {
+          name: "ALLOW_EMPTY_PASSWORD",
+          value: "yes"
+        }
+      ],
     }
   ])
 }

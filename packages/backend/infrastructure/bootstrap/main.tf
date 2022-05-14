@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 variable "account_alias" {
-  type    = string
+  type = string
 }
 
 resource "aws_s3_bucket" "terraform_state" {

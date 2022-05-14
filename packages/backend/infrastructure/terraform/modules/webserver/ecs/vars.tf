@@ -81,3 +81,8 @@ variable "events_queue_arn" {
 variable "aws_security_group_ecs_tasks_id" {
   type = string
 }
+
+variable "mongodb_uri" {
+  type        = string
+  sensitive   = true
+}

@@ -36,6 +36,17 @@ resource "aws_iam_role_policy" "main_ecs_tasks" {
         {
             "Effect": "Allow",
             "Action": [
+                "secretsmanager:GetResourcePolicy",
+                "secretsmanager:GetSecretValue",
+                "secretsmanager:DescribeSecret",
+                "secretsmanager:ListSecretVersionIds",
+                "secretsmanager:ListSecrets"
+            ],
+            "Resource": ["*"]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
               "s3:DeleteObject",
               "s3:GetObject",
               "s3:PutObject",

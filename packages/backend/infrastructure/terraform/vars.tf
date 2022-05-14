@@ -9,3 +9,8 @@ variable "nft_storage_domain_name" {
 variable "api_domain_name" {
   type = string
 }
+
+variable "mongodb_uri" {
+  type      = string
+  sensitive = true
+}

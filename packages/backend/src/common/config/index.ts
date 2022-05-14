@@ -8,7 +8,7 @@ export default () => ({
     password: process.env.DB_PASSWORD,
   },
   sqs: {
-    queueUrl: process.env.AWS_SQS_QUEUE_URL,
+    queueUrl: process.env.EVENTS_QUEUE_URL,
   },
   blockchain: {
     jsonRpcProvider: process.env.JSON_RPC_PROVIDER,
