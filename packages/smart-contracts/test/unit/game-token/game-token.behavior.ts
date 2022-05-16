@@ -95,8 +95,10 @@ export function shouldBehaveLikeGameToken() {
         });
       });
     });
+
     context('batched transfers', () => {
       const BATCH_SIZE = 5;
+      const BATCH_SIZE_LIMIT = 100;
       context('transferBatch', () => {
         context('when sender holds enough tokens', () => {
           it('works', async () => {
@@ -134,6 +136,19 @@ export function shouldBehaveLikeGameToken() {
           it('reverts', async () => {
             await expect(token.transferBatch([{ account: AddressZero, amount: ONE_TOKEN }])).to.be.revertedWith(
               `ERC20: transfer to the zero address`,
+            );
+          });
+        });
+
+        context('when batch size is too large', () => {
+          it('reverts', async () => {
+            const batch: GameToken.PayeeStruct[] = [...Array(BATCH_SIZE_LIMIT + 1)].map(() => ({
+              account: user.address,
+              amount: ONE_TOKEN,
+            }));
+
+            await expect(token.transferBatch(batch)).to.be.revertedWith(
+              `BatchSizeTooLarge(${BATCH_SIZE_LIMIT}, ${batch.length})`,
             );
           });
         });
@@ -176,15 +191,32 @@ export function shouldBehaveLikeGameToken() {
 
             it('reverts', async () => {
               await expect(
-                token.transferBatch([{ account: user.address, amount: ONE_TOKEN * 1_000_000n }]),
+                token
+                  .connect(user.address)
+                  .transferFromBatch(admin.address, [{ account: user.address, amount: ONE_TOKEN * 1_000_000n }]),
               ).to.be.revertedWith(`ERC20: transfer amount exceeds balance`);
             });
           });
 
           context('when sender sends tokens to zero address', () => {
             it('reverts', async () => {
-              await expect(token.transferBatch([{ account: AddressZero, amount: ONE_TOKEN }])).to.be.revertedWith(
-                `ERC20: transfer to the zero address`,
+              await expect(
+                token
+                  .connect(user.address)
+                  .transferFromBatch(admin.address, [{ account: AddressZero, amount: ONE_TOKEN }]),
+              ).to.be.revertedWith(`ERC20: transfer to the zero address`);
+            });
+          });
+
+          context('when batch size is too large', () => {
+            it('reverts', async () => {
+              const batch: GameToken.PayeeStruct[] = [...Array(BATCH_SIZE_LIMIT + 1)].map(() => ({
+                account: user.address,
+                amount: ONE_TOKEN,
+              }));
+
+              await expect(token.transferFromBatch(admin.address, batch)).to.be.revertedWith(
+                `BatchSizeTooLarge(${BATCH_SIZE_LIMIT}, ${batch.length})`,
               );
             });
           });

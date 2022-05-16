@@ -6,12 +6,16 @@ import "../dependencies/@openzeppelin/contracts-upgradeable/token/ERC20/extensio
 import "../dependencies/@openzeppelin/contracts-upgradeable/token/ERC20/extensions/draft-ERC20PermitUpgradeable.sol";
 import "../BaseContract.sol";
 
+error BatchSizeTooLarge(uint256 maximum, uint256 actual);
+
 // solhint-disable no-empty-blocks
 contract GameToken is ERC20BurnableUpgradeable, PausableUpgradeable, ERC20PermitUpgradeable, BaseContract {
     struct Payee {
         address account;
         uint256 amount;
     }
+
+    uint256 private constant BATCH_SIZE_LIMIT = 100;
 
     /**
      * @custom:oz-upgrades-unsafe-allow constructor
@@ -41,11 +45,15 @@ contract GameToken is ERC20BurnableUpgradeable, PausableUpgradeable, ERC20Permit
     }
 
     function transferBatch(Payee[] calldata payee) external {
+        if (payee.length > BATCH_SIZE_LIMIT) revert BatchSizeTooLarge(BATCH_SIZE_LIMIT, payee.length);
+
         uint256 total = _getTotal(payee);
         _transferBatch(_msgSender(), total, payee);
     }
 
     function transferFromBatch(address from, Payee[] calldata payee) external {
+        if (payee.length > BATCH_SIZE_LIMIT) revert BatchSizeTooLarge(BATCH_SIZE_LIMIT, payee.length);
+
         address spender = _msgSender();
         uint256 total = _getTotal(payee);
         _spendAllowance(from, spender, total);
