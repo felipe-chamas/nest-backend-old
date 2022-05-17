@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { NftClaim } from 'common/entities';
 import { FindConditions, Repository } from 'typeorm';
-import { CreateNftClaimDto } from './dto/create-nft-claim.dto';
-import { UpdateNftClaimDto } from './dto/update-nft-claim.dto';
-import { NftClaim } from './entities/nft-claim.entity';
+import { CreateNftClaimDto } from '../dto/create-nft-claim.dto';
+import { UpdateNftClaimDto } from '../dto/update-nft-claim.dto';
 
 @Injectable()
 export class NftClaimService {

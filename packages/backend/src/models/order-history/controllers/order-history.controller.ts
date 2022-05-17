@@ -27,7 +27,7 @@ export class OrderHistoryController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.orderHistoryService.findOne(id);
+    return this.orderHistoryService.findOne({ id });
   }
 
   @Patch(':id')

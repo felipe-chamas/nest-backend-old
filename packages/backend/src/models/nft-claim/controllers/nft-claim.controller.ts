@@ -7,9 +7,9 @@ import {
   Param,
   Delete,
 } from '@nestjs/common';
-import { NftClaimService } from './nft-claim.service';
-import { CreateNftClaimDto } from './dto/create-nft-claim.dto';
-import { UpdateNftClaimDto } from './dto/update-nft-claim.dto';
+import { CreateNftClaimDto } from '../dto/create-nft-claim.dto';
+import { UpdateNftClaimDto } from '../dto/update-nft-claim.dto';
+import { NftClaimService } from '../services/nft-claim.service';
 
 @Controller('nft-claim')
 export class NftClaimController {

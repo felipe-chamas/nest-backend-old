@@ -1,5 +1,5 @@
 import { Column, Entity, Index, ObjectID, ObjectIdColumn } from 'typeorm';
-import { Metadata } from '../../nft/interface';
+import { Metadata } from '../../models/nft/interface';
 
 @Entity()
 @Index(['nftCollectionId'])

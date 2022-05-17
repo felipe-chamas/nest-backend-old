@@ -40,8 +40,8 @@ export default async function transfer(
     const nftCollectionService = new NftCollectionService(nftCollectionRepo);
 
     const [userTo, nftCollection] = await Promise.all([
-      userService.findOneBy({ account: to }),
-      nftCollectionService.findOneBy({ contractAddress }),
+      userService.findOne({ account: to }),
+      nftCollectionService.findOne({ contractAddress }),
     ]);
 
     const { id: userId } = userTo
@@ -49,7 +49,7 @@ export default async function transfer(
       : await userService.create({ account: to });
     logger.debug({ userTo, nftCollection });
 
-    const nft = await nftService.findOneBy({
+    const nft = await nftService.findOne({
       tokenId: tokenId,
       nftCollectionId: nftCollection.id,
     });

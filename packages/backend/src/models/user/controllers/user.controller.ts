@@ -38,7 +38,7 @@ export class UserController {
 
   @Get(':id')
   findOne(@Param('id') id: ObjectID) {
-    return this.userService.findOne(id);
+    return this.userService.findOne({ id });
   }
 
   @UseGuards(AuthGuard)

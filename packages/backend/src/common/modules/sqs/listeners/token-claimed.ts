@@ -5,12 +5,12 @@ import { getRepository } from 'typeorm';
 
 import { parseLogs, ParsiqEvent } from '../sqs.service';
 import { logger } from 'common/providers/logger';
-import { NftClaim } from 'models/nft-claim/entities/nft-claim.entity';
-import { NftClaimService } from 'models/nft-claim/nft-claim.service';
+import { NftClaim } from 'common/entities/nft-claim.entity';
 import { NftCollection, NftCollectionService } from 'models/nft-collection';
 import { UserService } from 'models/user/services';
 import { Nft, NftService } from 'models/nft';
 import { User } from 'common/entities';
+import { NftClaimService } from 'models/nft-claim/services/nft-claim.service';
 
 const config = new ConfigService();
 
@@ -51,7 +51,7 @@ export default async function tokenClaimed(
 
     const [user, nftCollection, nftClaim] = await Promise.all([
       userService.find({ account: account.toLowerCase() }),
-      nftCollectionService.findOneBy({ contractAddress }),
+      nftCollectionService.findOne({ contractAddress }),
       nftClaimService.findOne({ merkleRoot }),
     ]);
     logger.debug({ user, nftCollection, nftClaim });

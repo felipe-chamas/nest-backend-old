@@ -23,13 +23,10 @@ export class User {
   email?: string;
 
   @Column()
-  password: string;
-
-  @Column()
   isAdmin: boolean;
 
   @Column()
-  @Index({ unique: true })
+  @Index()
   account: string;
 
   @Column()

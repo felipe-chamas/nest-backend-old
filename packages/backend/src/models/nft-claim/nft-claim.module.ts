@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { NftClaimService } from './nft-claim.service';
-import { NftClaimController } from './nft-claim.controller';
+import { NftClaimController } from './controllers/nft-claim.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { NftClaim } from './entities/nft-claim.entity';
+import { NftClaim } from '../../common/entities/nft-claim.entity';
+import { NftClaimService } from './services/nft-claim.service';
 
 @Module({
   controllers: [NftClaimController],

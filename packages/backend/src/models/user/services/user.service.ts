@@ -40,26 +40,6 @@ export class UserService {
     return user;
   }
 
-  async findOne(id: ObjectID) {
-    const user = await this.userRepo.findOne(id);
-
-    if (!user) throw new NotFoundException(`User with id ${id} not found`);
-
-    const nfts = await getMongoRepository(Nft).find({
-      userId: id,
-    });
-
-    const res = {
-      ...user,
-      nfts: nfts.map((nft) => ({
-        ...nft,
-        id: nft.id.toHexString(),
-      })),
-    };
-
-    return res;
-  }
-
   async find(idOrConditions: string | FindConditions<User>) {
     switch (idOrConditions) {
       case typeof idOrConditions === 'string': {
@@ -71,16 +51,35 @@ export class UserService {
     }
   }
 
-  async findOneBy(conditions: FindConditions<User>) {
-    return await this.userRepo.findOne(conditions);
-  }
-
   async findById(id: ObjectID) {
     const user = await this.userRepo.findOne(id);
 
     if (!user) throw new NotFoundException(`User with id ${id} not found`);
 
     return user;
+  }
+
+  async findOne(conditions: FindConditions<User>) {
+    let user: User;
+    if (conditions?.id)
+      user = await this.userRepo.findOne(String(conditions.id));
+    else user = await this.userRepo.findOne(conditions);
+
+    if (!user) throw new NotFoundException(`user not found`);
+
+    const nfts = await getMongoRepository(Nft).find({
+      userId: user.id,
+    });
+
+    const res = {
+      ...user,
+      nfts: nfts.map((nft) => ({
+        ...nft,
+        id: nft.id.toHexString(),
+      })),
+    };
+
+    return res;
   }
 
   async update(id: ObjectID, updatedUser: UpdateUserDto) {

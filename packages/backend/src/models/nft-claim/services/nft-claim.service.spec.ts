@@ -11,8 +11,8 @@ import {
 import {
   mockCreateNftClaim,
   mockUpdateNftClaim,
-} from '../../test/mocks/nft-claim.mock';
-import { NftClaim } from './entities/nft-claim.entity';
+} from '../../../test/mocks/nft-claim.mock';
+import { NftClaim } from '../../../common/entities/nft-claim.entity';
 import { NftClaimService } from './nft-claim.service';
 
 const dbConnName = 'default';

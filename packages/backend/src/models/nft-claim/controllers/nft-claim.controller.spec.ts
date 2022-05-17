@@ -4,12 +4,12 @@ import {
   mockNftClaim,
   mockCreateNftClaim,
   mockCreateNftClaimResponse,
-} from '../../test/mocks/nft-claim.mock';
-import { CreateNftClaimDto } from './dto/create-nft-claim.dto';
-import { UpdateNftClaimDto } from './dto/update-nft-claim.dto';
-import { NftClaim } from './entities/nft-claim.entity';
+} from '../../../test/mocks/nft-claim.mock';
+import { CreateNftClaimDto } from '../dto/create-nft-claim.dto';
+import { UpdateNftClaimDto } from '../dto/update-nft-claim.dto';
+import { NftClaim } from '../../../common/entities/nft-claim.entity';
 import { NftClaimController } from './nft-claim.controller';
-import { NftClaimService } from './nft-claim.service';
+import { NftClaimService } from '../nft-claim.service';
 
 describe('NftClaimController', () => {
   let controller: NftClaimController;

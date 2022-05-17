@@ -27,7 +27,7 @@ export class NftCollectionController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.nftCollectionService.findOne(id);
+    return this.nftCollectionService.findOne({ id });
   }
 
   @Patch(':id')

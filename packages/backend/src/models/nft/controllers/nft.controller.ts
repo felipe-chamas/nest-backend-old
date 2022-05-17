@@ -6,12 +6,10 @@ import {
   Patch,
   Param,
   Delete,
-  UseGuards,
 } from '@nestjs/common';
 import { NftService } from '../services/nft.service';
 import { CreateNftDto } from '../dto/create-nft.dto';
 import { UpdateNftDto } from '../dto/update-nft.dto';
-import { AuthGuard } from 'common/guards';
 import { ObjectID } from 'typeorm';
 import { NftCollectionService } from 'models/nft-collection';
 
@@ -22,7 +20,6 @@ export class NftController {
     private readonly nftService: NftService
   ) {}
 
-  @UseGuards(AuthGuard)
   @Post()
   create(@Body() createNftDto: CreateNftDto) {
     return this.nftService.create(createNftDto);
@@ -38,11 +35,12 @@ export class NftController {
     @Param('nftCollectionSlug') nftCollectionSlug: string,
     @Param('tokenId') tokenId: string
   ) {
-    const nftCollection = await this.nftCollectionService.findOneBy({
+    const nftCollection = await this.nftCollectionService.findOne({
       slug: nftCollectionSlug,
     });
+
     const nftCollectionId = nftCollection.id.toString();
-    const nft = await this.nftService.findOneBy({
+    const nft = await this.nftService.findOne({
       nftCollectionId,
       tokenId,
     });
@@ -51,7 +49,7 @@ export class NftController {
 
   @Get(':id')
   findOne(@Param('id') id: ObjectID) {
-    return this.nftService.findOne(id);
+    return this.nftService.findOne({ id });
   }
 
   @Patch(':id')

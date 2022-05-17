@@ -1,31 +1,58 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindConditions, Repository } from 'typeorm';
 import { CreateOrderDto } from '../dto/create-order.dto';
 import { UpdateOrderDto } from '../dto/update-order.dto';
-import { Order } from '../../../common/entities/order.entity';
+import { Order, OrderHistory } from 'common/entities';
+import { OrderStatus } from 'common/enums';
 
 @Injectable()
 export class OrderService {
   constructor(
-    @InjectRepository(Order) private readonly orderRepo: Repository<Order>
+    @InjectRepository(Order) private readonly orderRepo: Repository<Order>,
+    @InjectRepository(OrderHistory)
+    private readonly orderHistoryRepo: Repository<OrderHistory>
   ) {}
 
   async create(createOrderDto: CreateOrderDto) {
     const order = this.orderRepo.create(createOrderDto);
-    return await this.orderRepo.save(order);
+    const newOrder = await this.orderRepo.save(order);
+
+    const orderHistory = this.orderHistoryRepo.create({
+      orderId: newOrder.id,
+      currentStatus: OrderStatus.OPEN,
+    });
+
+    await this.orderRepo.save(orderHistory);
+
+    return newOrder;
   }
 
   async findAll() {
-    return await this.orderRepo.find();
+    const orders = await this.orderRepo.find();
+    const orderHistories = await this.orderHistoryRepo.find();
+
+    return orders.map((order) => {
+      const orderHistory = orderHistories.find(
+        (orderHistory) => orderHistory.orderId === order.id
+      );
+      return { ...order, ...orderHistory };
+    });
   }
 
-  async findOne(id: string) {
-    const order = await this.orderRepo.findOne(id);
+  async findOne(conditions: FindConditions<Order>) {
+    let order: Order;
+    if (conditions?.id)
+      order = await this.orderRepo.findOne(String(conditions.id));
+    else order = await this.orderRepo.findOne(conditions);
 
-    if (!order) throw new NotFoundException(`Order with id ${id} not found`);
+    if (!order) throw new NotFoundException(`Order not found`);
 
-    return order;
+    const orderHistory = await this.orderHistoryRepo.findOne({
+      orderId: order.id,
+    });
+
+    return { order, orderHistory };
   }
 
   async update(id: string, updateOrderDto: UpdateOrderDto) {
@@ -35,7 +62,17 @@ export class OrderService {
 
     Object.assign(order, updateOrderDto);
 
-    return await this.orderRepo.save(order);
+    const updatedOrder = await this.orderRepo.save(order);
+    const orderHistory = await this.orderHistoryRepo.findOne({
+      orderId: updatedOrder.id,
+    });
+
+    orderHistory.lastStatus = orderHistory.currentStatus;
+    orderHistory.currentStatus = updatedOrder.status;
+
+    await this.orderRepo.save(orderHistory);
+
+    return { order: updatedOrder, orderHistory };
   }
 
   async remove(id: string) {

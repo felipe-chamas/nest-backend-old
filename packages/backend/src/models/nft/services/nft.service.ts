@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import {
   FindConditions,
-  FindOneOptions,
   getMongoRepository,
   ObjectID,
   Repository,
@@ -33,18 +32,12 @@ export class NftService {
     return nft;
   }
 
-  async findOneBy(conditions: FindConditions<Nft>) {
-    const nft = await this.nftRepo.findOne(conditions);
+  async findOne(conditions: FindConditions<Nft>) {
+    let nft: Nft;
+    if (conditions?.id) nft = await this.nftRepo.findOne(String(conditions.id));
+    else nft = await this.nftRepo.findOne(conditions);
 
     if (!nft) throw new NotFoundException(`Nft not found`);
-
-    return nft;
-  }
-
-  async findOne(id: ObjectID) {
-    const nft = await this.nftRepo.findOne(id);
-
-    if (!nft) throw new NotFoundException(`Nft with id ${id} not found`);
 
     const user = await getMongoRepository(User).findOne(nft.userId);
 

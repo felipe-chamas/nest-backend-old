@@ -12,7 +12,6 @@ export const mockUser = {
 export const mockCreateUser: CreateUserDto = {
   name: 'John Doe',
   email: 'joshn@email.com',
-  password: '12345678@Abc',
   isAdmin: false,
   account: '0x12345',
 };
