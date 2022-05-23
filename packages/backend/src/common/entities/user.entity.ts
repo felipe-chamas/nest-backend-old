@@ -26,7 +26,6 @@ export class User {
   isAdmin: boolean;
 
   @Column()
-  @Index()
   account: string;
 
   @Column()
