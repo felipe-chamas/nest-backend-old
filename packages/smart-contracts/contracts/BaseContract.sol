@@ -2,11 +2,10 @@
 pragma solidity 0.8.12;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "./extras/ERC20TokenRecoverable.sol";
 import "./access/AccessControllable.sol";
 
 // solhint-disable func-name-mixedcase
-abstract contract BaseContract is ERC20TokenRecoverable, AccessControllable, UUPSUpgradeable {
+abstract contract BaseContract is AccessControllable, UUPSUpgradeable {
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new
      * variables without shifting down storage in the inheritance chain.
@@ -24,10 +23,4 @@ abstract contract BaseContract is ERC20TokenRecoverable, AccessControllable, UUP
     }
 
     function _authorizeUpgrade(address newImplementation) internal override onlyAdmin {}
-
-    function _authorizeRecover(
-        IERC20Upgradeable,
-        address,
-        uint256
-    ) internal override onlyAdmin {}
 }

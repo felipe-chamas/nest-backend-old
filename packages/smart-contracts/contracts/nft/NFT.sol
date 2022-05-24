@@ -3,7 +3,7 @@ pragma solidity 0.8.12;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
-import "../BaseContract.sol";
+import "../BaseRecoverableContract.sol";
 import "./NFTStorage.sol";
 import "./INFT.sol";
 
@@ -11,7 +11,7 @@ error MaximumTotalSupplyReached(uint256 maximum);
 error BurningIsNotEnabled();
 
 // solhint-disable no-empty-blocks
-contract NFT is INFT, ERC721EnumerableUpgradeable, ERC721URIStorageUpgradeable, BaseContract, NFTStorage {
+contract NFT is INFT, ERC721EnumerableUpgradeable, ERC721URIStorageUpgradeable, BaseRecoverableContract, NFTStorage {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
     event BaseURIChanged(string baseURI);

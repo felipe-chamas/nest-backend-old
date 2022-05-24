@@ -9,6 +9,7 @@ import {
   TASK_DEPLOY_NFT_BOX_UNBOXING,
   TASK_DEPLOY_NFT_CLAIM,
   TASK_DEPLOY_SPLITTER,
+  TASK_DEPLOY_STAKING,
   TASK_DEPLOY_TOKEN_SALE,
 } from '../../tasks';
 import {
@@ -21,6 +22,7 @@ import {
   NFTClaimConstructor,
   NFTConstructor,
   SplitterConstructor,
+  StakingConstructor,
   TokenSaleConstructor,
 } from '../../tasks/types';
 import {
@@ -32,6 +34,7 @@ import {
   NFTUnboxing__factory,
   NFT__factory,
   Splitter__factory,
+  Staking__factory,
   TokenSale__factory,
   VRFCoordinatorV2Mock__factory,
 } from '../../typechain';
@@ -83,6 +86,11 @@ export async function deployACL(deployer: Signer, args: ACLConstructor) {
 export async function deploySplitter(deployer: Signer) {
   const address = await hre.run(TASK_DEPLOY_SPLITTER);
   return Splitter__factory.connect(address, deployer);
+}
+
+export async function deployStaking(deployer: Signer, args: StakingConstructor) {
+  const address = await hre.run(TASK_DEPLOY_STAKING, args);
+  return Staking__factory.connect(address, deployer);
 }
 
 export async function deployNFT(

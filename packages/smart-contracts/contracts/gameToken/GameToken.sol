@@ -4,12 +4,12 @@ pragma solidity 0.8.12;
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "../dependencies/@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
 import "../dependencies/@openzeppelin/contracts-upgradeable/token/ERC20/extensions/draft-ERC20PermitUpgradeable.sol";
-import "../BaseContract.sol";
+import "../BaseRecoverableContract.sol";
 
 error BatchSizeTooLarge(uint256 maximum, uint256 actual);
 
 // solhint-disable no-empty-blocks
-contract GameToken is ERC20BurnableUpgradeable, PausableUpgradeable, ERC20PermitUpgradeable, BaseContract {
+contract GameToken is ERC20BurnableUpgradeable, PausableUpgradeable, ERC20PermitUpgradeable, BaseRecoverableContract {
     struct Payee {
         address account;
         uint256 amount;

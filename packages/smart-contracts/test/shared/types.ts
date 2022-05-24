@@ -16,6 +16,7 @@ import {
   NFTUnboxing,
   TokenSale,
   VRFCoordinatorV2Mock,
+  Staking,
 } from '../../typechain';
 
 declare module 'mocha' {
@@ -32,6 +33,7 @@ export interface Contracts {
   mockToken: ERC20Mock;
   acl: ACL;
   splitter: Splitter;
+  staking: Staking;
   nft: NFT;
   gameToken: GameToken;
   recoverable: ERC20TokenRecoverable;

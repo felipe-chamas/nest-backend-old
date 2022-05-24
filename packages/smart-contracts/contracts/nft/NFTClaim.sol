@@ -2,13 +2,13 @@
 pragma solidity 0.8.12;
 
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol";
-import "../BaseContract.sol";
+import "../BaseRecoverableContract.sol";
 import "./INFT.sol";
 
 error ClaimingNotAllowed();
 
 // solhint-disable no-empty-blocks
-contract NFTClaim is BaseContract {
+contract NFTClaim is BaseRecoverableContract {
     using MerkleProofUpgradeable for bytes32[];
     INFT internal _nft;
 

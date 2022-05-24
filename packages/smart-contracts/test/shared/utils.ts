@@ -1,7 +1,7 @@
 import { ContractTransaction } from 'ethers';
 import { ethers } from 'hardhat';
 import { MerkleTree } from 'merkletreejs';
-import { ERC721Upgradeable, NFTUnboxing, TokenSale, VRFCoordinatorV2Mock } from '../../typechain';
+import { ERC721Upgradeable, NFTUnboxing, Staking, TokenSale, VRFCoordinatorV2Mock } from '../../typechain';
 
 export const getTransferEvent = async (tx: ContractTransaction, erc721: ERC721Upgradeable) => {
   const receipt = await tx.wait();
@@ -50,5 +50,13 @@ export const getSubscriptionCreatedEvent = async (tx: ContractTransaction, coord
 export const getUnboxedEvent = async (tx: ContractTransaction, nftUnboxing: NFTUnboxing) => {
   const receipt = await tx.wait();
   const events = await nftUnboxing.queryFilter(nftUnboxing.filters.Unboxed(), receipt.blockNumber);
+  return events[0].args;
+};
+
+export const getStakeEvent = async (ptx: Promise<ContractTransaction>, staking: Staking) => {
+  const events = await ptx.then(tx =>
+    tx.wait().then(receipt => staking.queryFilter(staking.filters.Staked(), receipt.blockNumber)),
+  );
+
   return events[0].args;
 };

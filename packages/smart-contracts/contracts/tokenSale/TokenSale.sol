@@ -5,7 +5,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeab
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
-import "../BaseContract.sol";
+import "../BaseRecoverableContract.sol";
 import "./TokenSaleStorage.sol";
 
 error RoundStartInPast(uint64 start);
@@ -31,7 +31,7 @@ error AccountNotAllowlisted(address account);
 error NotEnoughTokensLeftInCurrentRound(uint112 tokensLeft, uint112 tokensRequested);
 
 // solhint-disable no-empty-blocks, not-rely-on-time
-contract TokenSale is BaseContract, TokenSaleStorage {
+contract TokenSale is BaseRecoverableContract, TokenSaleStorage {
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using SafeCastUpgradeable for uint256;
     using MerkleProofUpgradeable for bytes32[];
