@@ -61,7 +61,12 @@ describe('NftClaimController', () => {
   });
 
   it('should fetch all nft claims', async () => {
-    const result = await controller.findAll();
+    const result = await controller.findAll({
+      skip: 0,
+      take: 10,
+      sort: [],
+      search: [],
+    });
     expect(result).toEqual([]);
   });
 
