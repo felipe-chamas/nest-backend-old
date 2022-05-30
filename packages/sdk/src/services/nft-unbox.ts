@@ -7,7 +7,6 @@ import { SignerUtils } from '../signer-utils';
 import { Signer } from '../types';
 import { ContractResolver } from '../contract-resolver';
 
-
 /**
  * Class provides functionality for unboxing nfts.
  */
@@ -17,7 +16,7 @@ export class NFTUnbox {
 
   private constructor(
     signerUtils: SignerUtils,
-    unboxContract: NFTUnboxingContract,
+    unboxContract: NFTUnboxingContract
   ) {
     this.signerUtils = signerUtils;
     this.unboxContract = unboxContract;
@@ -27,7 +26,7 @@ export class NFTUnbox {
     const signerUtils = new SignerUtils(signer);
     const unboxContract = new ContractResolver(signer).resolve(
       'NFTUnboxing',
-      await signerUtils.parseAddress(nftUnboxingAccountId),
+      await signerUtils.parseAddress(nftUnboxingAccountId)
     );
     return new NFTUnbox(signerUtils, unboxContract);
   }
@@ -50,20 +49,20 @@ export class NFTUnbox {
   async completeUnboxing(
     requestId: BigNumberish,
     nftAccountIdsToMint: AccountId[],
-    tokenCountsToMint: BigNumberish[],
+    tokenCountsToMint: BigNumberish[]
   ) {
     if (nftAccountIdsToMint.length !== tokenCountsToMint.length)
       throw new GeneralError(
         ErrorCodes.unboxing_error,
         `nfts length: ${nftAccountIdsToMint.length} !== ` +
-        `token counts: ${tokenCountsToMint}.`,
+          `token counts: ${tokenCountsToMint}.`
       );
     return this.unboxContract.completeUnboxing(
       requestId,
       await Promise.all(
-        nftAccountIdsToMint.map(x => this.signerUtils.parseAddress(x)),
+        nftAccountIdsToMint.map((x) => this.signerUtils.parseAddress(x))
       ),
-      tokenCountsToMint,
+      tokenCountsToMint
     );
   }
 
@@ -90,5 +89,4 @@ export class NFTUnbox {
    */
   getGeneratedRandomByRequestId = (requestId: BigNumberish) =>
     this.unboxContract.getRandomResultByRequestId(requestId);
-
 }

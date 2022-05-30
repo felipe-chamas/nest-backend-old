@@ -20,7 +20,6 @@ const APPROVAL_MESSAGE_TYPES_DEFINITION = {
   ],
 };
 
-
 /**
  * Class provides functionality related to management of GameToken ERC20.
  *
@@ -66,7 +65,6 @@ const APPROVAL_MESSAGE_TYPES_DEFINITION = {
  * ```
  */
 export class GameToken {
-
   private readonly signerUtils: SignerUtils;
   private readonly gameTokenContract: GameTokenContract;
   readonly tokenMetaInfo: ERC20MetaInfo;
@@ -74,21 +72,18 @@ export class GameToken {
   private constructor(
     signerUtils: SignerUtils,
     gameTokenContract: GameTokenContract,
-    tokenMetaInfo: ERC20MetaInfo,
+    tokenMetaInfo: ERC20MetaInfo
   ) {
     this.signerUtils = signerUtils;
     this.gameTokenContract = gameTokenContract;
     this.tokenMetaInfo = tokenMetaInfo;
   }
 
-  static async create(
-    signer: Signer,
-    gameTokenContractAccountId: AccountId,
-  ) {
+  static async create(signer: Signer, gameTokenContractAccountId: AccountId) {
     const signerUtils = new SignerUtils(signer);
     const gameTokenContract = new ContractResolver(signer).resolve(
       'GameToken',
-      await signerUtils.parseAddress(gameTokenContractAccountId),
+      await signerUtils.parseAddress(gameTokenContractAccountId)
     );
     const [symbol, name, decimals, totalSupply] = await Promise.all([
       gameTokenContract.symbol(),
@@ -102,11 +97,7 @@ export class GameToken {
       decimals,
       totalSupply,
     };
-    return new GameToken(
-      signerUtils,
-      gameTokenContract,
-      metaInfo,
-    );
+    return new GameToken(signerUtils, gameTokenContract, metaInfo);
   }
 
   /**
@@ -121,7 +112,7 @@ export class GameToken {
   transfer = async (to: AccountId, amount: BigNumberish) =>
     await this.gameTokenContract.transfer(
       await this.signerUtils.parseAddress(to),
-      amount,
+      amount
     );
 
   /**
@@ -136,7 +127,7 @@ export class GameToken {
   approve = async (spender: AccountId, amount: BigNumberish) =>
     await this.gameTokenContract.approve(
       await this.signerUtils.parseAddress(spender),
-      amount,
+      amount
     );
 
   /**
@@ -146,7 +137,7 @@ export class GameToken {
   increaseAllowance = async (spender: AccountId, amount: BigNumberish) =>
     await this.gameTokenContract.increaseAllowance(
       await this.signerUtils.parseAddress(spender),
-      amount,
+      amount
     );
 
   /**
@@ -156,7 +147,7 @@ export class GameToken {
   decreaseAllowance = async (spender: AccountId, amount: BigNumberish) =>
     await this.gameTokenContract.decreaseAllowance(
       await this.signerUtils.parseAddress(spender),
-      amount,
+      amount
     );
 
   /**
@@ -165,7 +156,7 @@ export class GameToken {
   getAllowance = async (owner: AccountId, spender: AccountId) =>
     this.gameTokenContract.allowance(
       await this.signerUtils.parseAddress(owner),
-      await this.signerUtils.parseAddress(spender),
+      await this.signerUtils.parseAddress(spender)
     );
 
   /**
@@ -191,7 +182,7 @@ export class GameToken {
    */
   private async getOwnNonce() {
     const ownAccountId = await this.signerUtils.createAccountIdFromAddress(
-      await this.signerUtils.signer.getAddress(),
+      await this.signerUtils.signer.getAddress()
     );
     return this.getNonceOf(ownAccountId);
   }
@@ -216,30 +207,32 @@ export class GameToken {
   async createSignedApproval(
     spender: AccountId,
     amount: BigNumberish,
-    deadline: BigNumberish,
+    deadline: BigNumberish
   ) {
     const ownerAddress = await this.signerUtils.signer.getAddress();
     const spenderAddress = await this.signerUtils.parseAddress(spender);
     const value = BigNumber.from(amount);
-    const signature = await this.signerUtils.signer._signTypedData({
-      name: this.tokenMetaInfo.name,
-      version: '1',
-      chainId: await this.signerUtils.getSignerChainId(),
-      verifyingContract: this.gameTokenContract.address,
-    },
-    APPROVAL_MESSAGE_TYPES_DEFINITION,
-    {
-      owner: ownerAddress,
-      spender: spenderAddress,
-      value,
-      nonce: await this.getOwnNonce(),
-      deadline,
-    });
+    const signature = await this.signerUtils.signer._signTypedData(
+      {
+        name: this.tokenMetaInfo.name,
+        version: '1',
+        chainId: await this.signerUtils.getSignerChainId(),
+        verifyingContract: this.gameTokenContract.address,
+      },
+      APPROVAL_MESSAGE_TYPES_DEFINITION,
+      {
+        owner: ownerAddress,
+        spender: spenderAddress,
+        value,
+        nonce: await this.getOwnNonce(),
+        deadline,
+      }
+    );
     const result: ERC20SignedApproval = {
-      owner: await this.signerUtils
-        .createAccountIdFromAddress(ownerAddress),
-      spender: await this.signerUtils
-        .createAccountIdFromAddress(spenderAddress),
+      owner: await this.signerUtils.createAccountIdFromAddress(ownerAddress),
+      spender: await this.signerUtils.createAccountIdFromAddress(
+        spenderAddress
+      ),
       amount: BigNumber.from(amount),
       deadline: BigNumber.from(deadline),
       signature,
@@ -252,12 +245,14 @@ export class GameToken {
    */
   async submitSignedApproval(approval: ERC20SignedApproval) {
     const ownerAddress = await this.signerUtils.parseAddress(approval.owner);
-    const spenderAddress = await this.signerUtils
-      .parseAddress(approval.spender);
+    const spenderAddress = await this.signerUtils.parseAddress(
+      approval.spender
+    );
     const amount = BigNumber.from(approval.amount);
     const deadline = BigNumber.from(approval.deadline);
-    const signature: Signature = ethers.utils
-      .splitSignature(approval.signature);
+    const signature: Signature = ethers.utils.splitSignature(
+      approval.signature
+    );
     return await this.gameTokenContract.permit(
       ownerAddress,
       spenderAddress,
@@ -265,7 +260,7 @@ export class GameToken {
       deadline,
       signature.v,
       signature.r,
-      signature.s,
+      signature.s
     );
   }
 
@@ -278,12 +273,12 @@ export class GameToken {
   transferFrom = async (
     fromAddress: AccountId,
     to: AccountId,
-    amount: BigNumberish,
+    amount: BigNumberish
   ) =>
     await this.gameTokenContract.transferFrom(
       await this.signerUtils.parseAddress(fromAddress),
       await this.signerUtils.parseAddress(to),
-      amount,
+      amount
     );
 
   /**
@@ -298,7 +293,7 @@ export class GameToken {
   burnTokenFrom = async (owner: AccountId, amount: BigNumberish) =>
     await this.gameTokenContract.burnFrom(
       await this.signerUtils.parseAddress(owner),
-      amount,
+      amount
     );
 
   /**
@@ -332,12 +327,11 @@ export class GameToken {
   recover = async (
     addressOfTokenToRecover: AccountId,
     whoSentAddress: AccountId,
-    amount: BigNumberish,
+    amount: BigNumberish
   ) =>
     await this.gameTokenContract.recover(
       await this.signerUtils.parseAddress(addressOfTokenToRecover),
       await this.signerUtils.parseAddress(whoSentAddress),
-      amount,
+      amount
     );
-
 }

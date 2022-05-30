@@ -5,7 +5,6 @@ import { CHAIN_STANDARD } from './constants';
 import { ErrorCodes, GeneralError } from './errors';
 import { Address, Signer } from './types';
 
-
 /**
  * Class provides utility methods related to {@link Signer},
  * {@link Address}, {@link https://www.npmjs.com/package/caip | `AccountId`}
@@ -29,8 +28,7 @@ export class SignerUtils {
    *
    */
   public async getSignerChainId() {
-    if(typeof this.signerChainId !== 'undefined')
-      return this.signerChainId;
+    if (typeof this.signerChainId !== 'undefined') return this.signerChainId;
     const chainId = await this.signer.getChainId();
     this.signerChainId = chainId.toString();
     return this.signerChainId;
@@ -66,7 +64,7 @@ export class SignerUtils {
       throw new GeneralError(
         ErrorCodes.unsupported_chain_standard,
         `Provided chain standart(${accountId.chainId.namespace}) ` +
-        `is not supported. Should be ${CHAIN_STANDARD}.`,
+          `is not supported. Should be ${CHAIN_STANDARD}.`
       );
     }
     const signerChainId = await this.getSignerChainId();
@@ -74,7 +72,7 @@ export class SignerUtils {
       throw new GeneralError(
         ErrorCodes.accounts_not_on_the_same_chain,
         `signer chain(${signerChainId}) != ` +
-        `account id chain(${accountId.chainId.reference})`,
+          `account id chain(${accountId.chainId.reference})`
       );
     }
     const address = ethers.utils.getAddress(accountId.address);

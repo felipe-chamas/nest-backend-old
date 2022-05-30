@@ -4,16 +4,22 @@
   "rules": {
     "prettier/prettier": "error",
     "compiler-version": ["error", "^0.8.10"],
-    "func-visibility": ["warn", {
-      "ignoreConstructors": true
-    }],
+    "func-visibility": [
+      "warn",
+      {
+        "ignoreConstructors": true
+      }
+    ],
     "code-complexity": ["warn", 5],
     "comprehensive-interface": "off",
     "func-param-name-mixedcase": "warn",
     "ordering": "warn",
-    "private-vars-leading-underscore": ["warn", {
-      "strict": false
-    }],
+    "private-vars-leading-underscore": [
+      "warn",
+      {
+        "strict": false
+      }
+    ],
     "no-inline-assembly": "off",
     "reason-string": "off",
     "no-empty-blocks": "off"

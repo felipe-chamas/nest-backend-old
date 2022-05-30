@@ -1,0 +1,55 @@
+name: NX Checks
+
+on: push
+
+jobs:
+  workspace-lint:
+    name: Workspace Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: nrwl/nx-set-shas@v2
+      - run: yarn install --frozen-lockfile
+      - run: npx nx workspace-lint --base=remotes/origin/main
+  format-check:
+    name: Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: nrwl/nx-set-shas@v2
+      - run: yarn install --frozen-lockfile
+      - run: npx nx format:check --base=remotes/origin/main
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: nrwl/nx-set-shas@v2
+      - run: yarn install --frozen-lockfile
+      - run: npx nx affected --target=lint --parallel=3 --base=remotes/origin/main
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: nrwl/nx-set-shas@v2
+      - run: yarn install --frozen-lockfile
+      - run: npx nx affected --target=test --parallel=3 --ci --code-coverage --base=remotes/origin/main
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: nrwl/nx-set-shas@v2
+      - run: yarn install --frozen-lockfile
+      - run: npx nx affected --target=build --parallel=3 --base=remotes/origin/main

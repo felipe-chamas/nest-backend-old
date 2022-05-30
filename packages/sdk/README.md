@@ -20,12 +20,12 @@ nmp i -g serve
 ```
 
 Serve docs with it:
+
 ```
 serve node_modules/@falco-gg/blockchain-sdk/docs
 ```
 
 Then open your [browser](http://localhost:3000) to view documenation.
-
 
 ### Install
 
@@ -41,6 +41,7 @@ Install it with [npm](https://www.npmjs.com/package/@falco-gg/blockchain-sdk)
 First sdk should be initialized with [signer/wallet](https://docs.ethers.io/v5/api/signer/)
 
 In browser signer could be aquired with following command(Metamask extension should be installed):
+
 ```
 import { ethers } from 'ethers';
 ...
@@ -50,6 +51,7 @@ const signer = provider.getSigner();
 ```
 
 In NodeJs application:
+
 ```
 const signer = new ethers.Wallet(
     '0xdf57089febbacf7b____fa9fc08a93fdc68_________2411a14efcf23656e', // private key
@@ -58,14 +60,16 @@ const signer = new ethers.Wallet(
 ```
 
 After {@link Signer} is created, pass it to {@link SDK}:
+
 ```
 import { SDK } from '@falco-gg/blockchain-sdk';
 ...
 const sdk = new SDK(signer);
 ```
+
 > If signer is provided via the wallet which allow to switch accounts, no new instance of sdk should be created on address-switch because signer keeps track of the last account that was switched to.
 
-> If network is switch(ex from mainnet to testnet) and provider supports switching, no new instance of sdk should be created because signer keeps track of a new account even while switching to a new network. 
+> If network is switch(ex from mainnet to testnet) and provider supports switching, no new instance of sdk should be created because signer keeps track of a new account even while switching to a new network.
 
 ### Address representation
 
@@ -74,6 +78,7 @@ It allowes program to check if provided address is located on the same network a
 
 Ex. if you want to transfer tokens to someone, you specify receiving address
 in caip format:
+
 ```
   const receiver = new caip.AccountId({
     chainId: {
@@ -86,12 +91,13 @@ in caip format:
   // const receiver = caip.AccountId.parse('eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb');
 
   transfer(receiver, 12345); // by providing `AccountId` and not plain `Address`(string), the program can validate your intentions.
-  
+
 ```
 
 ### Services
 
 Having sdk created, there are several services each related to set of contracts:
+
 - {@link AccessControl} - Manages roles in the system.
 - {@link Utils} - Helper methods not related to any secific contract. {@link Utils.fetchEvents | fetching events emitter by the transaction}.
 - {@link GameToken} - Manages GameToken(in game fungable currency).
@@ -100,11 +106,12 @@ Having sdk created, there are several services each related to set of contracts:
 - {@link NFTUnbox} - Unboxing nfts(from another nft called sealed box that drops random nfts used in the game).
 
 Other useful exports:
-- {@link SignerUtils} - helps to manage `caip.AccountId` transformation, validation.
 
+- {@link SignerUtils} - helps to manage `caip.AccountId` transformation, validation.
 
 To create a service, call corresponding factory method on sdk instance:
 For examle lets {@link NFT.listOwnTokens | list own nfts}.
+
 ```
 const helmetNFTAccountId = AccountId.parse("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb");
 const helmetNFT = await sdk.nft(aclAddress); // nft that manages
@@ -112,44 +119,49 @@ const ownNftsFirstPage = await helmetNFT.listOwnTokens(
   { limit: 10, offset: 0 } // optional. This is how {@link PaginationParams | pagination} is done.
 )
 ```
+
 > If account is changed through the wallet, you do not need to recreate a service, because {@link Signer} always stores the most recent activated account.
 
 > If network is switched, you have to recreate used services, because smart-contracts are located on different addresses in different network.
 
 `AccesControl` service is managiring roles and access on the system.
 
-
 ### Development
 
 Clone monorepo:
+
 ```
 git clone https://github.com/falco-gg/blockchain
 ```
 
 Go to packages/sdk and install dependencies:
+
 ```
 cd blockchain/packages/sdk
 yarn install
 ```
 
 Nuild typechain interfaces of smart contracts:
+
 ```
 yarn contracts
 ```
 
 Build sdk:
+
 ```
 yarn build
 ```
 
 Run tests:
+
 ```
 yarn test
 ```
 
 Publish package to npm:
+
 ```
 npm login
 npm publish --access restricted
 ```
-

@@ -12,12 +12,10 @@ import { ErrorCodes, GeneralError } from '../errors';
 import { SignerUtils } from '../signer-utils';
 import { ContractResolver } from '../contract-resolver';
 
-
 export type CreateClaimProofParams = {
-  claimData: NFTClaimData,
-  merkleTree: MerkleTree,
-}
-
+  claimData: NFTClaimData;
+  merkleTree: MerkleTree;
+};
 
 /**
  * Class provides functionality related to claiming nfts.
@@ -33,22 +31,16 @@ export class NFTClaim {
   private readonly signerUtils: SignerUtils;
   private readonly nftClaimContract: NFTClaimContract;
 
-  constructor(
-    signerUtils: SignerUtils,
-    nftClaimContract: NFTClaimContract,
-  ) {
+  constructor(signerUtils: SignerUtils, nftClaimContract: NFTClaimContract) {
     this.signerUtils = signerUtils;
     this.nftClaimContract = nftClaimContract;
   }
 
-  static async create(
-    signer: Signer,
-    nftClaimContractAccountId: AccountId,
-  ) {
+  static async create(signer: Signer, nftClaimContractAccountId: AccountId) {
     const signerUtils = new SignerUtils(signer);
     const nftClaimContract = new ContractResolver(signer).resolve(
       'NFTClaim',
-      await signerUtils.parseAddress(nftClaimContractAccountId),
+      await signerUtils.parseAddress(nftClaimContractAccountId)
     );
     return new NFTClaim(signerUtils, nftClaimContract);
   }
@@ -65,7 +57,7 @@ export class NFTClaim {
     if (result.toString() !== chainId)
       throw new GeneralError(
         ErrorCodes.nft_claim_error,
-        `chain Id ${chainId} can not be transformed to number`,
+        `chain Id ${chainId} can not be transformed to number`
       );
     return result;
   }
@@ -93,7 +85,7 @@ export class NFTClaim {
    */
   async createMerkleTreeFromClaims(claims: NFTClaimData[]) {
     const addresses = await Promise.all(
-      claims.map(x => this.signerUtils.parseAddress(x.accountId)),
+      claims.map((x) => this.signerUtils.parseAddress(x.accountId))
     );
     const claimList = claims.map((x, idx) => ({
       tokens: x.tokenCount.toNumber(),
@@ -102,7 +94,7 @@ export class NFTClaim {
     return createNFTClaimMerkleTree(
       await this.getChainIdAsANumber(),
       this.nftClaimContract.address,
-      claimList,
+      claimList
     );
   }
 
@@ -124,16 +116,14 @@ export class NFTClaim {
    * to `submitNewMerkleRoot`
    */
   async createAndSubmitMerkleTreeFromClaims(
-    claims: NFTClaimData[],
-  ): Promise<[
-    merkleTree: MerkleTree,
-    submitRootTransaction: ContractTransaction,
-  ]> {
+    claims: NFTClaimData[]
+  ): Promise<
+    [merkleTree: MerkleTree, submitRootTransaction: ContractTransaction]
+  > {
     const tree = await this.createMerkleTreeFromClaims(claims);
     const transaction = await this.submitNewMerkleRoot(tree.getHexRoot());
     return [tree, transaction];
   }
-
 
   /**
    *
@@ -173,7 +163,7 @@ export class NFTClaim {
       await this.getChainIdAsANumber(),
       this.nftClaimContract.address,
       await this.signerUtils.parseAddress(params.claimData.accountId),
-      params.claimData.tokenCount.toNumber(),
+      params.claimData.tokenCount.toNumber()
     );
     const provingSequence = params.merkleTree.getHexProof(provingLeaf);
     const result: NFTClaimProof = {
@@ -196,7 +186,7 @@ export class NFTClaim {
       proof.merkleRoot,
       proof.provingSequence,
       await this.signerUtils.parseAddress(proof.claim.accountId),
-      proof.claim.tokenCount,
+      proof.claim.tokenCount
     );
 
   /**
@@ -207,7 +197,7 @@ export class NFTClaim {
       proof.merkleRoot,
       proof.provingSequence,
       await this.signerUtils.parseAddress(proof.claim.accountId),
-      proof.claim.tokenCount,
+      proof.claim.tokenCount
     );
 
   /**
@@ -216,11 +206,11 @@ export class NFTClaim {
   async createAndSubmitClaimProof(params: CreateClaimProofParams) {
     const proof = await this.createClaimProof(params);
     const isProofValid = await this.isClaimProofAllowed(proof);
-    if (!isProofValid) throw new GeneralError(
-      ErrorCodes.nft_claim_error,
-      'Claim was created but is not accepted by contract as valid.',
-    );
+    if (!isProofValid)
+      throw new GeneralError(
+        ErrorCodes.nft_claim_error,
+        'Claim was created but is not accepted by contract as valid.'
+      );
     return await this.submitClaimProof(proof);
   }
-
 }

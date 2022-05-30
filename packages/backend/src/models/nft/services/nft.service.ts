@@ -15,7 +15,6 @@ import { UpdateNftDto } from '../dto/update-nft.dto';
 import { User, Nft } from 'common/entities';
 import { Pagination } from 'common/decorators';
 
-
 @Injectable()
 export class NftService {
   constructor(

@@ -4,14 +4,15 @@ import { ErrorCodes, GeneralError, Roles } from '../dist/sdk';
 
 describe('Utils service', () => {
   let ctx: TestContext;
-  beforeEach(async () => { ctx = await prepareTestContext(); });
+  beforeEach(async () => {
+    ctx = await prepareTestContext();
+  });
   describe('when role is granted', () => {
     let receipt: ContractReceipt;
     beforeEach('grantRole', async () => {
-      receipt = await wait(ctx.admin.accessControl.grantRole(
-        ctx.anon.accountId,
-        Roles.Operator,
-      ));
+      receipt = await wait(
+        ctx.admin.accessControl.grantRole(ctx.anon.accountId, Roles.Operator)
+      );
     });
     describe('fetchEvents', () => {
       it('returns role granted event', async () => {
@@ -19,7 +20,7 @@ describe('Utils service', () => {
           receipt.transactionHash,
           ctx.acl,
           'ACL',
-          'RoleGranted',
+          'RoleGranted'
         );
         expect(events.length).equals(1);
         expect(events[0].role).equals(Roles.Operator);
@@ -33,29 +34,33 @@ describe('Utils service', () => {
           receipt.transactionHash,
           ctx.gameToken,
           'ACL',
-          'RoleGranted',
+          'RoleGranted'
         );
         expect(events.length).equals(0);
       });
     });
     describe('when called with unsupported event/contract', () => {
       it('fails', async () => {
-        await expect(ctx.anon.utils.fetchEvents(
-          receipt.transactionHash,
-          ctx.acl,
-          'NotExistedContract' as 'ACL', // ask for non existing contract
-          'RoleRevoked',
-        ))
+        await expect(
+          ctx.anon.utils.fetchEvents(
+            receipt.transactionHash,
+            ctx.acl,
+            'NotExistedContract' as 'ACL', // ask for non existing contract
+            'RoleRevoked'
+          )
+        )
           .to.eventually.rejectedWith(GeneralError)
           .to.have.property('errorCode', ErrorCodes.not_supported_event);
       });
       it('fails', async () => {
-        await expect(ctx.anon.utils.fetchEvents(
-          receipt.transactionHash,
-          ctx.acl,
-          'ACL',
-          'Unboxed' as 'RoleGranted', // ask for non existing contract
-        ))
+        await expect(
+          ctx.anon.utils.fetchEvents(
+            receipt.transactionHash,
+            ctx.acl,
+            'ACL',
+            'Unboxed' as 'RoleGranted' // ask for non existing contract
+          )
+        )
           .to.eventually.rejectedWith(GeneralError)
           .to.have.property('errorCode', ErrorCodes.not_supported_event);
       });

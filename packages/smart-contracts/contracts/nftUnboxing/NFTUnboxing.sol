@@ -17,7 +17,12 @@ error UnboxingAlreadyRequested(uint256 tokenId);
 error ArrayLengthsDoesNotMatch(uint256 first, uint256 second);
 error UnregisteredRequestId(uint256 requestId);
 
-contract NFTUnboxing is VRFConsumerBaseV2Upgradeable, ReentrancyGuardUpgradeable, BaseRecoverableContract, NFTUnboxingStorage {
+contract NFTUnboxing is
+    VRFConsumerBaseV2Upgradeable,
+    ReentrancyGuardUpgradeable,
+    BaseRecoverableContract,
+    NFTUnboxingStorage
+{
     event UnboxingRequested(uint256 indexed requestId, uint256 tokenId);
     event UnboxingRandomReceived(uint256 indexed requestId, uint256 indexed tokenId, uint256 randomWord);
     event Unboxed(uint256 indexed requestId, uint256 indexed tokenId, address[] nfts, uint256[][] mintedTokenIds);

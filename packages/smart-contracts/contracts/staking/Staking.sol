@@ -55,19 +55,17 @@ contract Staking is BaseContract {
     }
 
     /**
-    * periods - in seconds
-    * percentages - with 4 decimals, multiplied till integer (e.g. pass 60025 if you want 6.0025%)
-    */
-    function setLockPeriods(
-        LockPeriod[] calldata lockPeriods
-    ) external onlyAdmin {
+     * periods - in seconds
+     * percentages - with 4 decimals, multiplied till integer (e.g. pass 60025 if you want 6.0025%)
+     */
+    function setLockPeriods(LockPeriod[] calldata lockPeriods) external onlyAdmin {
         for (uint256 i = 0; i < lockPeriods.length; i++) {
             poolSettings.set(bytes32(lockPeriods[i].period), bytes32(lockPeriods[i].rewardPercentage));
         }
 
         emit LockPeriodsChanged(lockPeriods);
     }
-    
+
     function getLockPeriods() external view returns (LockPeriod[] memory) {
         uint256 count = poolSettings.length();
         LockPeriod[] memory res = new LockPeriod[](count);
@@ -79,23 +77,18 @@ contract Staking is BaseContract {
         return res;
     }
 
-    function setCustody(
-        address _newCustody
-    ) external onlyAdmin {
+    function setCustody(address _newCustody) external onlyAdmin {
         custody = _newCustody;
-        
+
         emit CustodyChanged(_newCustody);
     }
 
-    function stake(
-        uint256 _amount,
-        uint256 _lockPeriod
-    ) public returns (uint256) {
+    function stake(uint256 _amount, uint256 _lockPeriod) public returns (uint256) {
         uint256 rewardPercentage = uint256(poolSettings.get(bytes32(_lockPeriod)));
-        if ( rewardPercentage <= 0) revert InvalidLockPeriod();
+        if (rewardPercentage <= 0) revert InvalidLockPeriod();
 
-        uint256 interest = _amount * rewardPercentage / (100 * (10 ** PERCENTAGE_DECIMALS));
-        
+        uint256 interest = (_amount * rewardPercentage) / (100 * (10**PERCENTAGE_DECIMALS));
+
         tokenContract.safeTransferFrom(custody, address(this), interest);
         tokenContract.safeTransferFrom(msg.sender, address(this), _amount);
 
@@ -103,7 +96,7 @@ contract Staking is BaseContract {
 
         stakes[stakeTokenId].amount = _amount + interest;
         stakes[stakeTokenId].unlockTimestamp = block.timestamp + _lockPeriod;
-        
+
         emit Staked(msg.sender, stakeTokenId);
 
         return stakeTokenId;
@@ -122,9 +115,7 @@ contract Staking is BaseContract {
         return stake(_amount, _lockPeriod);
     }
 
-    function withdraw(
-        uint256 _stakeTokenId
-    ) external {
+    function withdraw(uint256 _stakeTokenId) external {
         if (!nftStake.isApprovedOrOwner(msg.sender, _stakeTokenId)) revert UnownedNFT();
         if (block.timestamp < stakes[_stakeTokenId].unlockTimestamp) revert PrematureWithdrawal();
 
@@ -132,9 +123,7 @@ contract Staking is BaseContract {
         nftStake.burn(_stakeTokenId);
     }
 
-    function getStakeInfo(
-        uint256 _stakeTokenId
-    ) external view returns (Stake memory) {
+    function getStakeInfo(uint256 _stakeTokenId) external view returns (Stake memory) {
         return stakes[_stakeTokenId];
     }
 }

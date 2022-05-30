@@ -22,10 +22,6 @@ export * as services from './services';
 
 export { CHAIN_STANDARD } from './constants';
 
-export {
-  ErrorCodes,
-  GeneralError,
-  errorCodeDescriptions,
-} from './errors';
+export { ErrorCodes, GeneralError, errorCodeDescriptions } from './errors';
 
 export * from './services';

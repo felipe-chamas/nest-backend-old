@@ -20,12 +20,12 @@ export const ONE_TOKEN = BigNumber.from(10).pow(18);
 
 export const runDeployTask = (
   contractName: string,
-  args: {[key: string]: unknown},
+  args: { [key: string]: unknown }
 ): Promise<Address> =>
-  hre.run('deploy:'+contractName, { ...args, silent: true });
+  hre.run('deploy:' + contractName, { ...args, silent: true });
 
 export async function wait(
-  unresolvedTransaction: Promise<ContractTransaction>,
+  unresolvedTransaction: Promise<ContractTransaction>
 ) {
   const transaction = await unresolvedTransaction;
   return transaction.wait();
@@ -48,8 +48,9 @@ export type Actor = Awaited<ReturnType<typeof prepareActor>>;
 async function prepareActor(signer: SignerWithAddress) {
   const sdk = new SDK(signer);
   const signerUtils = new SignerUtils(signer);
-  const accountId = await signerUtils
-    .createAccountIdFromAddress(signer.address);
+  const accountId = await signerUtils.createAccountIdFromAddress(
+    signer.address
+  );
   const utils = await sdk.utils();
   return {
     sdk,
@@ -70,11 +71,10 @@ async function prepareActor(signer: SignerWithAddress) {
   };
 }
 
-function _sizeOfOne<T>(input: T[]): T
-function _sizeOfOne<T>(input: Promise<T[]>): Promise<T>
+function _sizeOfOne<T>(input: T[]): T;
+function _sizeOfOne<T>(input: Promise<T[]>): Promise<T>;
 function _sizeOfOne<T>(input: T[] | Promise<T[]>) {
-  if (input instanceof Promise)
-    return input.then(x => _sizeOfOne(x));
+  if (input instanceof Promise) return input.then((x) => _sizeOfOne(x));
   expect(input).to.have.lengthOf(1);
   return input[0];
 }
@@ -83,88 +83,85 @@ export const sizeOfOne = _sizeOfOne;
 
 export type TestContext = Awaited<ReturnType<typeof prepareTestContext>>;
 export async function prepareTestContext() {
-  const [
-    admin, operator, anon,
-    anon2, minter, anon3, anon4,
-  ] = await hre.ethers.getSigners();
+  const [admin, operator, anon, anon2, minter, anon3, anon4] =
+    await hre.ethers.getSigners();
   const signerUtils = new SignerUtils(admin);
-  const aclAddress = await runDeployTask(
-    'acl', { admin: admin.address, operator: operator.address },
-  );
+  const aclAddress = await runDeployTask('acl', {
+    admin: admin.address,
+    operator: operator.address,
+  });
   acl = await signerUtils.createAccountIdFromAddress(aclAddress);
   const gameTokenConfig: GameTokenConfig = {
     name: 'Game Token',
     symbol: 'gt',
     supply: ONE_TOKEN.mul(100).toString(),
   };
-  const gameTokenAddress = await runDeployTask(
-    'game-token',
-    {
-      admin: admin.address,
-      ...gameTokenConfig,
-      acl: aclAddress,
-    },
-  );
+  const gameTokenAddress = await runDeployTask('game-token', {
+    admin: admin.address,
+    ...gameTokenConfig,
+    acl: aclAddress,
+  });
   gameToken = await signerUtils.createAccountIdFromAddress(gameTokenAddress);
   const boxConfig: NftConfig = {
     name: 'Box',
     symbol: 'box',
   };
-  const boxAddress = await runDeployTask(
-    'nft', {
-      acl: aclAddress, burnEnabled: true, ...boxConfig,
-    },
-  );
+  const boxAddress = await runDeployTask('nft', {
+    acl: aclAddress,
+    burnEnabled: true,
+    ...boxConfig,
+  });
   box = await signerUtils.createAccountIdFromAddress(boxAddress);
   const nftConfig: NftConfig = {
     name: 'NFT',
     symbol: 'nft',
   };
-  const nftAddress = await runDeployTask(
-    'nft', { acl: aclAddress, burnEnabled: true, ...nftConfig },
-  );
+  const nftAddress = await runDeployTask('nft', {
+    acl: aclAddress,
+    burnEnabled: true,
+    ...nftConfig,
+  });
   nft = await signerUtils.createAccountIdFromAddress(nftAddress);
   const sdk = new SDK(admin);
   const accessControl = await sdk.accessControl(
-    await signerUtils.createAccountIdFromAddress(aclAddress),
+    await signerUtils.createAccountIdFromAddress(aclAddress)
   );
   await accessControl.grantRole(
     await signerUtils.createAccountIdFromAddress(minter.address),
-    Roles.Minter,
+    Roles.Minter
   );
-  const coordinator = await new typechain.VRFCoordinatorV2Mock__factory(admin)
-    .deploy(0, 0);
-  const vrfCoordinatorAccountId = await signerUtils
-    .createAccountIdFromAddress(coordinator.address);
+  const coordinator = await new typechain.VRFCoordinatorV2Mock__factory(
+    admin
+  ).deploy(0, 0);
+  const vrfCoordinatorAccountId = await signerUtils.createAccountIdFromAddress(
+    coordinator.address
+  );
   const receipt = await wait(coordinator.createSubscription());
   const utils = await sdk.utils();
   const events = await utils.fetchEvents(
     receipt.transactionHash,
     vrfCoordinatorAccountId,
     'VRFCoordinatorV2Mock',
-    'SubscriptionCreated',
+    'SubscriptionCreated'
   );
   const createSubEvent = events[0];
   expect(createSubEvent).to.exist;
   await coordinator.fundSubscription(createSubEvent.subId, ONE_TOKEN.mul(100));
-  const nftUnboxAddress = await runDeployTask(
-    'nft-box-unboxing',
-    {
-      acl: aclAddress,
-      nftBox: boxAddress,
-      vrfCoordinator: coordinator.address,
-      keyHash:
-        '0xd4bb89654db74673a187bd804519e65e3f71a52bc55f11da7601a13dcf505314',
-      requestConfirmations: 3,
-      subscriptionId: createSubEvent.subId.toString(),
-      addToACL: true,
-    },
-  );
+  const nftUnboxAddress = await runDeployTask('nft-box-unboxing', {
+    acl: aclAddress,
+    nftBox: boxAddress,
+    vrfCoordinator: coordinator.address,
+    keyHash:
+      '0xd4bb89654db74673a187bd804519e65e3f71a52bc55f11da7601a13dcf505314',
+    requestConfirmations: 3,
+    subscriptionId: createSubEvent.subId.toString(),
+    addToACL: true,
+  });
   nftUnbox = await signerUtils.createAccountIdFromAddress(nftUnboxAddress);
-  const nftClaimAddress = await runDeployTask(
-    'nft-claim',
-    { acl: aclAddress, nft: nftAddress },
-  );
+  const nftClaimAddress = await runDeployTask('nft-claim', {
+    acl: aclAddress,
+    nft: nftAddress,
+  });
   nftClaim = await signerUtils.createAccountIdFromAddress(nftClaimAddress);
   await accessControl.grantRole(nftClaim, Roles.Minter);
   const actors = {
@@ -197,4 +194,3 @@ export async function prepareTestContext() {
     minters: [actors.minter.accountId, nftUnbox, nftClaim],
   };
 }
-

@@ -2,14 +2,16 @@ import { expect, TestContext, prepareTestContext } from './utils';
 import { CHAIN_STANDARD, ErrorCodes, GeneralError } from '../';
 import { AccountId, ChainId } from 'caip';
 
-
 describe('SignerUtils', () => {
   let ctx: TestContext;
-  beforeEach(async () => { ctx = await prepareTestContext(); });
+  beforeEach(async () => {
+    ctx = await prepareTestContext();
+  });
   describe('getSignerChainId', () => {
     it('returns chain id of a signer', async () => {
-      expect(await ctx.anon.signerUtils.getSignerChainId())
-        .equals('' + await ctx.anon.signer.getChainId());
+      expect(await ctx.anon.signerUtils.getSignerChainId()).equals(
+        '' + (await ctx.anon.signer.getChainId())
+      );
     });
   });
   describe('parseAddress', () => {
@@ -20,7 +22,7 @@ describe('SignerUtils', () => {
         address,
         chainId: new ChainId({
           namespace: CHAIN_STANDARD,
-          reference: '' + await ctx.anon.signer.getChainId(),
+          reference: '' + (await ctx.anon.signer.getChainId()),
         }),
       });
     });
@@ -35,10 +37,7 @@ describe('SignerUtils', () => {
       it('fails', async () => {
         await expect(ctx.anon.signerUtils.parseAddress(accountId))
           .to.eventually.rejectedWith(GeneralError)
-          .to.have.property(
-            'errorCode',
-            ErrorCodes.unsupported_chain_standard,
-          );
+          .to.have.property('errorCode', ErrorCodes.unsupported_chain_standard);
       });
     });
     describe("When called with chain id, different from signer's", () => {
@@ -50,7 +49,7 @@ describe('SignerUtils', () => {
           .to.eventually.rejectedWith(GeneralError)
           .to.have.property(
             'errorCode',
-            ErrorCodes.accounts_not_on_the_same_chain,
+            ErrorCodes.accounts_not_on_the_same_chain
           );
       });
     });
@@ -63,32 +62,30 @@ describe('SignerUtils', () => {
         ];
         for (const word of incorrectAddresses) {
           accountId.address = word;
-          await expect(ctx.anon.signerUtils.parseAddress(accountId))
-            .to.eventually.rejected;
+          await expect(ctx.anon.signerUtils.parseAddress(accountId)).to
+            .eventually.rejected;
         }
       });
     });
   });
   describe('getProvider', () => {
-    it ('returns provider', async () => {
+    it('returns provider', async () => {
       const reply = ctx.anon.signerUtils.getProvider();
       expect(reply).to.exist;
       expect(reply).equals(ctx.anon.signerUtils.signer.provider);
     });
   });
   describe('createAccountIdFromAddress', () => {
-    it(
-      'Creates AccountId based on provided address and the signer',
-      async () => {
-        const address = '0x8ba1f109551bD432803012645Ac136ddd64DBA72';
-        const accountId = await ctx.anon.signerUtils
-          .createAccountIdFromAddress(address);
-        expect(accountId.address).equals(address);
-        expect(accountId.chainId.namespace).equals(CHAIN_STANDARD);
-        expect(accountId.chainId.reference).equals(
-          '' + await ctx.anon.signerUtils.signer.getChainId(),
-        );
-      },
-    );
+    it('Creates AccountId based on provided address and the signer', async () => {
+      const address = '0x8ba1f109551bD432803012645Ac136ddd64DBA72';
+      const accountId = await ctx.anon.signerUtils.createAccountIdFromAddress(
+        address
+      );
+      expect(accountId.address).equals(address);
+      expect(accountId.chainId.namespace).equals(CHAIN_STANDARD);
+      expect(accountId.chainId.reference).equals(
+        '' + (await ctx.anon.signerUtils.signer.getChainId())
+      );
+    });
   });
 });

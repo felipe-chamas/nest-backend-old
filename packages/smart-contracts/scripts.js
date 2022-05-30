@@ -2,6 +2,7 @@
 /* eslint-disable no-undef */
 /* eslint-disable @typescript-eslint/no-var-requires */
 const { spawn } = require('child_process');
+// eslint-disable-next-line node/no-unpublished-require
 require('dotenv').config();
 
 const rawArgs = process.argv.slice(2);

@@ -7,7 +7,7 @@ const MAX_REQUESTS_AT_MOMENT = BigNumber.from(5);
 export const listAsyncItemsWithPagination = async <T>(
   getTotalSize: () => Promise<BigNumber>,
   getByIndex: (index: BigNumberish) => Promise<T>,
-  params?: PaginationParams,
+  params?: PaginationParams
 ) => {
   const totalSize = await getTotalSize();
   const offset = BigNumber.from(params?.offset ?? 0);
@@ -20,15 +20,13 @@ export const listAsyncItemsWithPagination = async <T>(
   const result = [] as T[];
   while (itemsFetched.lt(limit)) {
     const itemsLeft = limit.sub(itemsFetched);
-    const fetchThisTimeCount =
-      itemsLeft.lt(MAX_REQUESTS_AT_MOMENT) ?
-      itemsLeft : MAX_REQUESTS_AT_MOMENT;
+    const fetchThisTimeCount = itemsLeft.lt(MAX_REQUESTS_AT_MOMENT)
+      ? itemsLeft
+      : MAX_REQUESTS_AT_MOMENT;
     const promisedItems: Promise<T>[] = [];
     let promisesCreated = BigNumber.from(0);
     while (promisesCreated.lt(fetchThisTimeCount)) {
-      const promise = getByIndex(
-        offset.add(itemsFetched).add(promisesCreated),
-      );
+      const promise = getByIndex(offset.add(itemsFetched).add(promisesCreated));
       promisesCreated = promisesCreated.add(1);
       promisedItems.push(promise);
     }
@@ -38,4 +36,3 @@ export const listAsyncItemsWithPagination = async <T>(
   }
   return result;
 };
-

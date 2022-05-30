@@ -9,26 +9,24 @@ export type ResolveContractFunctionBase = (
   address: Address
 ) => unknown;
 
-
 export class ContractResolver {
   constructor(private readonly signer: Signer) {}
 
   private resolveWithNoTypeSupport: ResolveContractFunctionBase = (
     contractName: ContractName,
-    address: Address,
+    address: Address
   ) => {
     const factoryName = contractName + '__factory';
     const factory = typechain[factoryName as keyof typeof typechain];
     if (!factory)
       throw new GeneralError(
         ErrorCodes.not_supported_contract_factory,
-        `factory ${factoryName} is not found.`,
+        `factory ${factoryName} is not found.`
       );
     return factory.connect(address, this.signer);
   };
 
   resolve = wrapContractResolveWithContractTypes(
-    this.resolveWithNoTypeSupport.bind(this),
+    this.resolveWithNoTypeSupport.bind(this)
   );
-
 }

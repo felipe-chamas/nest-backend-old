@@ -4,7 +4,9 @@ import { BigNumber } from 'ethers';
 
 describe('NFTUnbox service', () => {
   let ctx: TestContext;
-  beforeEach(async () => { ctx = await prepareTestContext(); });
+  beforeEach(async () => {
+    ctx = await prepareTestContext();
+  });
 
   describe('unboxing process', () => {
     let boxId: BigNumber;
@@ -22,7 +24,7 @@ describe('NFTUnbox service', () => {
           receipt.transactionHash,
           ctx.nftUnbox,
           'NFTUnboxing',
-          'UnboxingRequested',
+          'UnboxingRequested'
         );
         expect(events).to.have.lengthOf(1);
         expect(events[0].tokenId).to.equal(boxId);
@@ -41,15 +43,17 @@ describe('NFTUnbox service', () => {
       describe('when random request fulfilled', () => {
         let randomWord: BigNumber;
         beforeEach('fulfill random request', async () => {
-          const receipt = await wait(ctx.vrfCoordinator.fulfillRandomWords(
-            requestId,
-            ctx.nftUnbox.address,
-          ));
+          const receipt = await wait(
+            ctx.vrfCoordinator.fulfillRandomWords(
+              requestId,
+              ctx.nftUnbox.address
+            )
+          );
           const events = await ctx.anon.utils.fetchEvents(
             receipt.transactionHash,
             ctx.nftUnbox,
             'NFTUnboxing',
-            'UnboxingRandomReceived',
+            'UnboxingRandomReceived'
           );
           expect(events).to.have.lengthOf(1);
           const event = events[0];
@@ -60,13 +64,14 @@ describe('NFTUnbox service', () => {
         });
         describe('fetch random result', () => {
           it('returns generated random by box id', async () => {
-            const result = await ctx.anon.nftUnbox
-              .getGeneratedRandomByBoxId(boxId);
+            const result = await ctx.anon.nftUnbox.getGeneratedRandomByBoxId(
+              boxId
+            );
             expect(result).equals(randomWord);
           });
           it('returns generated random by request id', async () => {
-            const result = await ctx.anon.nftUnbox
-              .getGeneratedRandomByRequestId(requestId);
+            const result =
+              await ctx.anon.nftUnbox.getGeneratedRandomByRequestId(requestId);
             expect(result).equals(randomWord);
           });
         });
@@ -80,16 +85,18 @@ describe('NFTUnbox service', () => {
             expect(nftAccountIds.length).equals(tokenCounts.length);
           });
           beforeEach('complete unbox request', async () => {
-            const receipt = await wait(ctx.operator.nftUnbox.completeUnboxing(
-              requestId,
-              nftAccountIds,
-              tokenCounts,
-            ));
+            const receipt = await wait(
+              ctx.operator.nftUnbox.completeUnboxing(
+                requestId,
+                nftAccountIds,
+                tokenCounts
+              )
+            );
             const events = await ctx.anon.utils.fetchEvents(
               receipt.transactionHash,
               ctx.nftUnbox,
               'NFTUnboxing',
-              'Unboxed',
+              'Unboxed'
             );
             expect(events).to.have.lengthOf(1);
             const event = events[0];
