@@ -8,7 +8,12 @@ describe('OrderHistoryController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [OrderHistoryController],
-      providers: [OrderHistoryService],
+      providers: [
+        {
+          provide: OrderHistoryService,
+          useValue: OrderHistoryService.prototype,
+        },
+      ],
     }).compile();
 
     controller = module.get<OrderHistoryController>(OrderHistoryController);

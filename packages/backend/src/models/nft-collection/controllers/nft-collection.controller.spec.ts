@@ -6,9 +6,9 @@ import {
   mockCreateNftCollection,
   mockNftCollection,
 } from '../../../test/mocks/nft-collection.mock';
-import { NftCollection } from '../entities/nft-collection.entity';
 import { CreateNftCollectionDto } from '../dto/create-nft-collection.dto';
 import { ObjectID } from 'typeorm';
+import { NftCollection } from '../../../common/entities';
 
 describe('NftCollectionController', () => {
   let controller: NftCollectionController;
@@ -20,18 +20,19 @@ describe('NftCollectionController', () => {
         Promise.resolve({
           ...mockNftCollection,
           ...createNftCollectionDto,
-        }),
+        } as unknown as NftCollection),
       findAll: () => Promise.resolve([mockNftCollection as NftCollection]),
-      findOne: (id: string) =>
+      findOne: jest.fn().mockImplementation(async () => {
+        return {
+          ...mockNftCollection,
+          id: '123' as unknown as ObjectID,
+        } as unknown as NftCollection;
+      }),
+      update: jest.fn().mockImplementation(async () =>
         Promise.resolve({
           ...mockNftCollection,
-          id: id as unknown as ObjectID,
-        } as NftCollection),
-      update: (_: string, updatedNftCollection: Partial<NftCollection>) =>
-        Promise.resolve({
-          ...mockNftCollection,
-          ...updatedNftCollection,
-        }),
+        })
+      ),
       remove: jest.fn(),
     };
     const module: TestingModule = await Test.createTestingModule({

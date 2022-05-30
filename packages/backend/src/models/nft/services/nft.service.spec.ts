@@ -6,20 +6,18 @@ import {
   createConnection,
   getConnection,
   getRepository,
+  ObjectID,
   Repository,
 } from 'typeorm';
+import { Nft, NftCollection, User } from '../../../common/entities';
 import { mockCreateNft, mockUpdateNft } from '../../../test/mocks/nft.mock';
-import { NftCollection } from '../../nft-collection/entities/nft-collection.entity';
-import { NftCollectionService } from '../../nft-collection/services/nft-collection.service';
-import { User } from '../../user/entities/user.entity';
-import { Nft } from '../entities/nft.entity';
 import { NftService } from './nft.service';
 
 const dbConnName = 'default';
 const config = new ConfigService();
 
 describe('NftService', () => {
-  let service: Partial<NftCollectionService>;
+  let service: Partial<NftService>;
   let neftRepo: Repository<Nft>;
 
   beforeEach(async () => {
@@ -73,8 +71,8 @@ describe('NftService', () => {
     const nft = neftRepo.create(mockCreateNft);
     await neftRepo.save(nft);
 
-    const id = nft.id as unknown as string;
-    const result = await service.findOne(id);
+    const id = nft.id as unknown as ObjectID;
+    const result = await service.findOne({ id });
     expect(result).toEqual({ ...mockCreateNft, ...result });
   });
 
@@ -89,7 +87,10 @@ describe('NftService', () => {
     await neftRepo.save(nft);
 
     const nftId = nft.id as unknown as string;
-    const result = await service.update(nftId, mockUpdateNft);
+    const result = await service.update(
+      nftId as unknown as ObjectID,
+      mockUpdateNft
+    );
     expect(result).toEqual({ ...mockCreateNft, ...result });
   });
 
@@ -98,7 +99,7 @@ describe('NftService', () => {
     await neftRepo.save(nft);
     const id = nft.id as unknown as string;
 
-    const result = await service.remove(id);
+    const result = await service.remove(id as unknown as ObjectID);
     expect(result.id).toBeUndefined();
   });
 });

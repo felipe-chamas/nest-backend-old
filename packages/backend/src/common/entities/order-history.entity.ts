@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 
 import { Order } from './order.entity';
-import { Status } from 'common/types';
+import { Status } from '../types';
 import { User } from './user.entity';
 
 @Entity()

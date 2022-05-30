@@ -7,13 +7,16 @@ import {
 } from '../../../test/mocks/nft.mock';
 import { CreateNftDto } from '../dto/create-nft.dto';
 import { UpdateNftDto } from '../dto/update-nft.dto';
-import { Nft } from '../entities/nft.entity';
 import { NftController } from '../controllers/nft.controller';
 import { NftService } from '../services/nft.service';
+import { mockUser } from '../../../test/mocks/user.mock';
+import { Nft } from '../../../common/entities';
+import { NftCollectionService } from 'models/nft-collection';
 
 describe('NftController', () => {
   let controller: NftController;
   let service: Partial<NftService>;
+  const nftCollectionService = NftCollectionService.prototype;
 
   beforeEach(async () => {
     service = {
@@ -23,12 +26,13 @@ describe('NftController', () => {
           ...createNftDto,
         } as unknown as Nft),
       findAll: () => Promise.resolve([]),
-      findOne: (id: string) =>
-        Promise.resolve({
-          ...mockCreateNft,
-          id: id as unknown as ObjectID,
-        } as Nft),
-      update: (_: string, updatedNft: UpdateNftDto) =>
+      findOne: jest.fn().mockImplementation(async () => {
+        return {
+          ...mockNft,
+          user: mockUser,
+        };
+      }),
+      update: (_: ObjectID, updatedNft: UpdateNftDto) =>
         Promise.resolve({
           ...mockNft,
           ...updatedNft,
@@ -42,6 +46,10 @@ describe('NftController', () => {
           provide: NftService,
           useValue: service,
         },
+        {
+          provide: NftCollectionService,
+          useValue: nftCollectionService,
+        },
       ],
     }).compile();
 
@@ -54,10 +62,7 @@ describe('NftController', () => {
 
   it('should create a nft', async () => {
     const result = await controller.create(mockCreateNft);
-    expect(result).toEqual({
-      ...mockCreateNft,
-      ...mockCreateNftResponse,
-    });
+    expect(result.id).toBe(mockCreateNftResponse.id);
   });
 
   it('should fetch all nfts', async () => {
@@ -66,17 +71,17 @@ describe('NftController', () => {
   });
 
   it('should fetch a nft', async () => {
-    const result = await controller.findOne(mockCreateNftResponse.id);
-    expect(result).toEqual({
-      ...mockCreateNft,
-      ...mockCreateNftResponse,
-    });
+    const result = await controller.findOne('123' as unknown as ObjectID);
+    expect(result.metadata).toBe(mockNft.metadata);
   });
 
   it('should update a nft', async () => {
-    const result = await controller.update(mockCreateNftResponse.id, {
-      userId: '123',
-    } as UpdateNftDto);
+    const result = await controller.update(
+      mockCreateNftResponse.id as unknown as ObjectID,
+      {
+        userId: '123' as unknown as ObjectID,
+      } as UpdateNftDto
+    );
 
     expect(result).toEqual({
       ...mockNft,
@@ -85,7 +90,7 @@ describe('NftController', () => {
   });
 
   it('should delete a nft', async () => {
-    await controller.remove('123');
+    await controller.remove('123' as unknown as ObjectID);
     expect(service.remove).toHaveBeenCalledWith('123');
   });
 });

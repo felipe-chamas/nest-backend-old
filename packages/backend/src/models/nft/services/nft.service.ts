@@ -11,9 +11,10 @@ import {
 
 import { CreateNftDto } from '../dto/create-nft.dto';
 import { UpdateNftDto } from '../dto/update-nft.dto';
-import { Nft } from '../../../common/entities/nft.entity';
-import { User } from 'common/entities';
+
+import { User, Nft } from 'common/entities';
 import { Pagination } from 'common/decorators';
+
 
 @Injectable()
 export class NftService {

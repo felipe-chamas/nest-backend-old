@@ -1,4 +1,3 @@
-import { NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -9,13 +8,9 @@ import {
   getRepository,
   Repository,
 } from 'typeorm';
-import {
-  mockCreateUser,
-  mockUpdateUser,
-  mockUser,
-} from '../../../test/mocks/user.mock';
+import { Nft, NftCollection, User } from '../../../common/entities';
+import { mockCreateUser, mockUpdateUser } from '../../../test/mocks/user.mock';
 import { UpdateUserDto } from '../dto/update-user.dto';
-import { User } from '../entities/user.entity';
 import { UserService } from './user.service';
 
 const dbConnName = 'default';
@@ -39,7 +34,7 @@ describe('UserService', () => {
     const connection = await createConnection({
       type: 'mongodb',
       url: config.get<string>('database.url'),
-      entities: [User],
+      entities: [User, Nft, NftCollection],
       useNewUrlParser: true,
       logging: true,
       useUnifiedTopology: true,
@@ -65,7 +60,7 @@ describe('UserService', () => {
     await userRepo.save(user);
 
     const result = await service.create(user);
-    expect(result).toEqual({ user });
+    expect(result.id).toEqual(user.id);
   });
 
   it('should fetch all users', async () => {
@@ -77,24 +72,8 @@ describe('UserService', () => {
   it('should fetch a user', async () => {
     user = userRepo.create(mockCreateUser);
     await userRepo.save(user);
-    const userFound = await userRepo.findOne(user.id);
-    const result = await service.findOne(user.id);
-    expect(result).toEqual(userFound);
-  });
-
-  it('should fail to fetch a user', async () => {
-    expect(await userRepo.findOne(mockUser.id)).toBeUndefined();
-    const userId = mockUser.id as unknown as string;
-    expect(await service.findOne(userId)).toBeUndefined();
-  });
-
-  it('should throw an error when trying to fetch a user', async () => {
-    const userId = mockUser.id as unknown as string;
-    const user = await service.findOne(userId);
-    const error = () => {
-      throw new NotFoundException(`User with id ${userId} not found`);
-    };
-    if (!user) expect(error).toThrow();
+    const result = await service.findOne({ id: user.id });
+    expect(result.id).toEqual(user.id);
   });
 
   it('should update a user', async () => {

@@ -2,6 +2,7 @@ import { UpdateNftDto } from '../../models/nft/dto/update-nft.dto';
 import { CreateNftDto } from '../../models/nft/dto/create-nft.dto';
 
 export const mockCreateNft = {
+  id: '624b3c3adb4b27a36fc4d450',
   userId: '624b3c3adb4b27a36fc4d450',
   nftCollectionId: '624b40189c5293c6f75945f1',
   metadata: {
@@ -12,6 +13,8 @@ export const mockCreateNft = {
       display_value: 'small',
     },
   },
+  createdAt: new Date(),
+  updatedAt: new Date(),
 } as unknown as CreateNftDto;
 
 export const mockUpdateNft = {
@@ -38,7 +41,7 @@ export const mockCreateNftResponse = {
   },
   userId: '624b3c3adb4b27a36fc4d450',
   nftCollectionId: '624b40189c5293c6f75945f1',
-  id: '624f2d18a5883560a662cdd8',
+  id: '624b3c3adb4b27a36fc4d450',
 };
 
 export const mockNft = {

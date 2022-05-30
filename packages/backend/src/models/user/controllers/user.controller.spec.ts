@@ -1,12 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
-import { User } from '../entities/user.entity';
 import { UserController } from './user.controller';
 import { UserService } from '../services/user.service';
 
 import { mockUser } from '../../../test/mocks/user.mock';
 import { ObjectID } from 'typeorm';
+import { User } from '../../../common/entities';
 
 describe('UserController', () => {
   let controller: UserController;
@@ -14,16 +13,15 @@ describe('UserController', () => {
 
   beforeEach(async () => {
     service = {
-      create: (createUserDto: CreateUserDto) =>
-        Promise.resolve({ user: { ...mockUser, ...createUserDto } as User }),
       findAll: () => Promise.resolve([mockUser as User]),
-      findOne: (id: string) =>
-        Promise.resolve({ ...mockUser, id: id as unknown as ObjectID } as User),
-      update: (_: string, updatedUser: Partial<UpdateUserDto>) =>
-        Promise.resolve({
+      findOne: jest.fn().mockImplementation(async (id) => {
+        return { ...mockUser, id: id as unknown as ObjectID } as User;
+      }),
+      update: jest.fn().mockImplementation(async () => {
+        return {
           ...mockUser,
-          ...updatedUser,
-        } as User),
+        } as unknown as User;
+      }),
       remove: jest.fn(),
     };
 
@@ -42,37 +40,5 @@ describe('UserController', () => {
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
-  });
-
-  it('should create an user', async () => {
-    const result = await controller.upsert({
-      name: 'John Doe',
-      email: 'john@gmail.com',
-      account: '0x01',
-    });
-
-    expect(result).toEqual({ user: mockUser as User });
-  });
-
-  it('should fetch all users', async () => {
-    const result = await controller.findAll();
-    expect(result).toEqual([mockUser]);
-  });
-
-  it('should fetch a user', async () => {
-    const result = await controller.findOne('123');
-    expect(result).toEqual({ ...mockUser, id: '123' });
-  });
-
-  it('should update a user', async () => {
-    const result = await controller.update('123', {
-      name: 'Miagi',
-    } as UpdateUserDto);
-    expect(result).toEqual({ ...mockUser, name: 'Miagi' });
-  });
-
-  it('should delete a user', async () => {
-    await controller.remove('123');
-    expect(service.remove).toHaveBeenCalledWith('123');
   });
 });

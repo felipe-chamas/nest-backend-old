@@ -2,12 +2,10 @@ import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { getConnection, getRepository, Repository } from 'typeorm';
 import { mockCreateNftCollection } from '../../../test/mocks/nft-collection.mock';
-import { Nft } from '../../nft/entities/nft.entity';
-import { NftCollection } from '../entities/nft-collection.entity';
 import { NftCollectionService } from './nft-collection.service';
 import { ConfigService } from '@nestjs/config';
 import { createConnection } from 'typeorm';
-import { User } from '../../user/entities/user.entity';
+import { Nft, NftCollection, User } from '../../../common/entities';
 
 const dbConnName = 'default';
 const config = new ConfigService();
@@ -68,7 +66,7 @@ describe('NftCollectionService', () => {
     nftCollection = nftCollectionRepo.create(mockCreateNftCollection);
     await nftCollectionRepo.save(nftCollection);
 
-    const result = await service.findOne(nftCollection.id);
+    const result = await service.findOne({ id: nftCollection.id });
     expect(result.id).toEqual(nftCollection.id);
   });
 

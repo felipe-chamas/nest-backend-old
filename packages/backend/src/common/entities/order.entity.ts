@@ -1,4 +1,4 @@
-import { Status } from 'common/types';
+import { Status } from '../types';
 import {
   BeforeInsert,
   BeforeUpdate,
