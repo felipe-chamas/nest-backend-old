@@ -1,9 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindConditions, Repository } from 'typeorm';
+import { FindConditions, FindManyOptions, Repository } from 'typeorm';
 import { CreateNftCollectionDto } from '../dto/create-nft-collection.dto';
 import { UpdateNftCollectionDto } from '../dto/update-nft-collection.dto';
 import { NftCollection } from '../../../common/entities/nft-collection.entity';
+import { Pagination } from 'common/decorators';
 
 @Injectable()
 export class NftCollectionService {
@@ -20,8 +21,8 @@ export class NftCollectionService {
     return newNftCollection;
   }
 
-  async findAll() {
-    return await this.nftCollectionRepo.find();
+  async findAll(options?: FindManyOptions<NftCollection> | Pagination) {
+    return await this.nftCollectionRepo.find(options);
   }
 
   async findOne(conditions: FindConditions<NftCollection>) {

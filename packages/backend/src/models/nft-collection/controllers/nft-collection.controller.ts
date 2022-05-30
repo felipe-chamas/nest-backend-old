@@ -10,6 +10,7 @@ import {
 import { NftCollectionService } from '../services/nft-collection.service';
 import { CreateNftCollectionDto } from '../dto/create-nft-collection.dto';
 import { UpdateNftCollectionDto } from '../dto/update-nft-collection.dto';
+import { GetPagination, Pagination } from 'common/decorators';
 
 @Controller('nft-collection')
 export class NftCollectionController {
@@ -21,8 +22,8 @@ export class NftCollectionController {
   }
 
   @Get()
-  findAll() {
-    return this.nftCollectionService.findAll();
+  findAll(@GetPagination() pagination: Pagination) {
+    return this.nftCollectionService.findAll(pagination);
   }
 
   @Get(':id')

@@ -1,10 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { InjectRepository } from '@nestjs/typeorm';
+import { Pagination } from 'common/decorators';
 import { Nft, User } from 'common/entities';
 
 import {
   FindConditions,
+  FindManyOptions,
   getMongoRepository,
   ObjectID,
   Repository,
@@ -26,8 +28,8 @@ export class UserService {
     return user;
   }
 
-  async findAll() {
-    return await this.userRepo.find();
+  async findAll(options?: FindManyOptions<User> | Pagination) {
+    return await this.userRepo.find(options);
   }
 
   async findByEmail(email: string) {

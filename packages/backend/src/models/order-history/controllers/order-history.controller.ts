@@ -10,6 +10,7 @@ import {
 import { OrderHistoryService } from '../services/order-history.service';
 import { CreateOrderHistoryDto } from '../dto/create-order-history.dto';
 import { UpdateOrderHistoryDto } from '../dto/update-order-history.dto';
+import { GetPagination, Pagination } from 'common/decorators';
 
 @Controller('order-history')
 export class OrderHistoryController {
@@ -21,8 +22,8 @@ export class OrderHistoryController {
   }
 
   @Get()
-  findAll() {
-    return this.orderHistoryService.findAll();
+  findAll(@GetPagination() pagination: Pagination) {
+    return this.orderHistoryService.findAll(pagination);
   }
 
   @Get(':id')

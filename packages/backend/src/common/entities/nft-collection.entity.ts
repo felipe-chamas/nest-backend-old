@@ -25,6 +25,9 @@ export class NftCollection {
   name: string;
 
   @Column()
+  icon: string;
+
+  @Column()
   imageBaseUri: string;
 
   @Column()

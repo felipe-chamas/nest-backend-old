@@ -1,7 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Pagination } from 'common/decorators';
 import { NftClaim } from 'common/entities';
-import { FindConditions, Repository } from 'typeorm';
+import { FindConditions, FindManyOptions, Repository } from 'typeorm';
 import { CreateNftClaimDto } from '../dto/create-nft-claim.dto';
 import { UpdateNftClaimDto } from '../dto/update-nft-claim.dto';
 
@@ -18,8 +19,8 @@ export class NftClaimService {
     return nftClaim;
   }
 
-  async findAll() {
-    return await this.nftClaimRepo.find();
+  async findAll(options?: FindManyOptions<NftClaim> | Pagination) {
+    return await this.nftClaimRepo.find(options);
   }
 
   async findOne(idOrNftClaim: string | FindConditions<NftClaim>) {

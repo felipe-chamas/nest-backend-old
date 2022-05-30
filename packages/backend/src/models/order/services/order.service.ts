@@ -1,10 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindConditions, Repository } from 'typeorm';
+import { FindConditions, FindManyOptions, Repository } from 'typeorm';
 import { CreateOrderDto } from '../dto/create-order.dto';
 import { UpdateOrderDto } from '../dto/update-order.dto';
 import { Order, OrderHistory } from 'common/entities';
 import { OrderStatus } from 'common/enums';
+import { Pagination } from 'common/decorators';
 
 @Injectable()
 export class OrderService {
@@ -28,8 +29,8 @@ export class OrderService {
     return newOrder;
   }
 
-  async findAll() {
-    const orders = await this.orderRepo.find();
+  async findAll(options?: FindManyOptions<Order> | Pagination) {
+    const orders = await this.orderRepo.find(options);
     const orderHistories = await this.orderHistoryRepo.find();
 
     return orders.map((order) => {

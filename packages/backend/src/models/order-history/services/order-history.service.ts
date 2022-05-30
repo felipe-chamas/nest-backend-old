@@ -1,9 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindConditions, Repository } from 'typeorm';
+import { FindConditions, FindManyOptions, Repository } from 'typeorm';
 import { CreateOrderHistoryDto } from '../dto/create-order-history.dto';
 import { UpdateOrderHistoryDto } from '../dto/update-order-history.dto';
 import { Order, OrderHistory } from 'common/entities';
+import { Pagination } from 'common/decorators';
 @Injectable()
 export class OrderHistoryService {
   constructor(
@@ -17,8 +18,8 @@ export class OrderHistoryService {
     return this.orderHistoryRepo.save(orderHistory);
   }
 
-  async findAll() {
-    return await this.orderHistoryRepo.find();
+  async findAll(options?: FindManyOptions<OrderHistory> | Pagination) {
+    return await this.orderHistoryRepo.find(options);
   }
 
   async findOne(conditions: FindConditions<OrderHistory>) {

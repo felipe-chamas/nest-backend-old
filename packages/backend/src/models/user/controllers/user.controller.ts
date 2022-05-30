@@ -22,6 +22,7 @@ import { Serialize } from 'common/interceptors';
 
 import { AuthGuard } from 'common/guards';
 import { User } from 'common/entities';
+import { GetPagination, Pagination } from 'common/decorators';
 
 @Controller('user')
 @Serialize(UserDto)
@@ -30,10 +31,10 @@ export class UserController {
 
   @UseGuards(AuthGuard)
   @Get()
-  findAll(@CurrentUser() user: User) {
+  findAll(@CurrentUser() user: User, @GetPagination() pagination: Pagination) {
     if (!user?.isAdmin) throw new UnauthorizedException();
 
-    return this.userService.findAll();
+    return this.userService.findAll(pagination);
   }
 
   @Get(':id')

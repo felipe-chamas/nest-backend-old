@@ -7,12 +7,27 @@ export class UpdateNftCollectionDto {
   name: string;
 
   @ApiProperty()
-  @IsString()
   @IsOptional()
+  @IsString()
   contractAddress?: string;
 
   @ApiProperty()
-  @IsString()
   @IsOptional()
+  @IsString()
   tx?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  imageBaseUri?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  externalUrl?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  icon?: string;
 }

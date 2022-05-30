@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import {
   FindConditions,
+  FindManyOptions,
   getMongoRepository,
   ObjectID,
   Repository,
@@ -12,6 +13,7 @@ import { CreateNftDto } from '../dto/create-nft.dto';
 import { UpdateNftDto } from '../dto/update-nft.dto';
 import { Nft } from '../../../common/entities/nft.entity';
 import { User } from 'common/entities';
+import { Pagination } from 'common/decorators';
 
 @Injectable()
 export class NftService {
@@ -26,9 +28,8 @@ export class NftService {
     return nft;
   }
 
-  async findAll() {
-    const nft = await this.nftRepo.find();
-
+  async findAll(options?: FindManyOptions<Nft> | Pagination) {
+    const nft = await this.nftRepo.find(options);
     return nft;
   }
 
