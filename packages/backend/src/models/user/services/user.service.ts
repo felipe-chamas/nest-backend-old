@@ -61,6 +61,11 @@ export class UserService {
     return user;
   }
 
+  async findByAccount(account: string): Promise<User | undefined> {
+    const user = await this.userRepo.findOne({ account })
+    return user;
+  }
+
   async findOne(conditions: FindConditions<User>) {
     let user: User;
     if (conditions?.id)

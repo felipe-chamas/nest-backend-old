@@ -16,6 +16,7 @@ import {
 import { NftClaimModule } from 'models/nft-claim/nft-claim.module';
 import { AppController } from './controllers/app.controller';
 import { AppService } from './services/app.service';
+import { AuthModule } from 'auth';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { AppService } from './services/app.service';
     OrderModule,
     OrderHistoryModule,
     NftClaimModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -30,7 +30,7 @@ import { UserService } from './services';
     TypeOrmModule.forFeature([User, Nft]),
     MongoEntityManager,
   ],
-  exports: [UserService, AuthService],
+  exports: [UserService, AuthService, TypeOrmModule],
   providers: [
     UserService,
     AuthService,
