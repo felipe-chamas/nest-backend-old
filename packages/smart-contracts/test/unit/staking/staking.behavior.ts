@@ -82,7 +82,7 @@ export function shouldBehaveLikeStaking() {
           });
 
           it('should show stake info', async function () {
-            const { amount, unlockTimestamp } = await staking.connect(other).getStakeInfo(stakeTokenId);
+            const { amount, unlockTimestamp } = await staking.connect(other).stakes(stakeTokenId);
 
             expect(amount).to.be.eq(stakeWithInterest);
             expect(unlockTimestamp).to.be.eq(stakeTime + STAKE_PERIOD);
@@ -163,7 +163,9 @@ export function shouldBehaveLikeStaking() {
             ({ stakeTokenId } = await getStakeEvent(
               staking
                 .connect(other)
-                .stakeWithPermit(STAKE_AMOUNT, STAKE_PERIOD, permit.deadline, permit.v, permit.r, permit.s),
+                .stakeWithPermit(STAKE_AMOUNT, STAKE_PERIOD, permit.deadline, permit.v, permit.r, permit.s, {
+                  gasLimit: 10000000,
+                }),
               staking,
             ));
 

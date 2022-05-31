@@ -30,7 +30,7 @@ async function stakingFixture(signers: Signer[], custody: string) {
 }
 
 export function unitTestStaking(): void {
-  describe('Staking', function () {
+  describe.only('Staking', function () {
     const fixture = (signers: Signer[]) => stakingFixture(signers, this.ctx.signers.custody.address);
     beforeEach(async function () {
       const { staking, gameToken, acl, nftStake } = await this.loadFixture(fixture);

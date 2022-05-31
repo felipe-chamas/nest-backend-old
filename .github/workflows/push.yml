@@ -32,6 +32,7 @@ jobs:
           fetch-depth: 0
       - uses: nrwl/nx-set-shas@v2
       - run: yarn install --frozen-lockfile
+      - run: npx nx affected --target=setup --base=remotes/origin/main
       - run: npx nx affected --target=lint --parallel=3 --base=remotes/origin/main
   test:
     name: Test
@@ -42,7 +43,8 @@ jobs:
           fetch-depth: 0
       - uses: nrwl/nx-set-shas@v2
       - run: yarn install --frozen-lockfile
-      - run: npx nx affected --target=test --parallel=3 --ci --code-coverage --base=remotes/origin/main
+      - run: npx nx affected --target=setup --base=remotes/origin/main
+      - run: npx nx affected --target=test --parallel=3 --base=remotes/origin/main
   build:
     name: Build
     runs-on: ubuntu-latest
