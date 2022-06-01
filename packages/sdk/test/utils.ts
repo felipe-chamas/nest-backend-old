@@ -20,12 +20,12 @@ export const ONE_TOKEN = BigNumber.from(10).pow(18);
 
 export const runDeployTask = (
   contractName: string,
-  args: { [key: string]: unknown }
+  args: { [key: string]: unknown },
 ): Promise<Address> =>
   hre.run('deploy:' + contractName, { ...args, silent: true });
 
 export async function wait(
-  unresolvedTransaction: Promise<ContractTransaction>
+  unresolvedTransaction: Promise<ContractTransaction>,
 ) {
   const transaction = await unresolvedTransaction;
   return transaction.wait();
@@ -49,7 +49,7 @@ async function prepareActor(signer: SignerWithAddress) {
   const sdk = new SDK(signer);
   const signerUtils = new SignerUtils(signer);
   const accountId = await signerUtils.createAccountIdFromAddress(
-    signer.address
+    signer.address,
   );
   const utils = await sdk.utils();
   return {
@@ -124,17 +124,17 @@ export async function prepareTestContext() {
   nft = await signerUtils.createAccountIdFromAddress(nftAddress);
   const sdk = new SDK(admin);
   const accessControl = await sdk.accessControl(
-    await signerUtils.createAccountIdFromAddress(aclAddress)
+    await signerUtils.createAccountIdFromAddress(aclAddress),
   );
   await accessControl.grantRole(
     await signerUtils.createAccountIdFromAddress(minter.address),
-    Roles.Minter
+    Roles.Minter,
   );
   const coordinator = await new typechain.VRFCoordinatorV2Mock__factory(
-    admin
+    admin,
   ).deploy(0, 0);
   const vrfCoordinatorAccountId = await signerUtils.createAccountIdFromAddress(
-    coordinator.address
+    coordinator.address,
   );
   const receipt = await wait(coordinator.createSubscription());
   const utils = await sdk.utils();
@@ -142,7 +142,7 @@ export async function prepareTestContext() {
     receipt.transactionHash,
     vrfCoordinatorAccountId,
     'VRFCoordinatorV2Mock',
-    'SubscriptionCreated'
+    'SubscriptionCreated',
   );
   const createSubEvent = events[0];
   expect(createSubEvent).to.exist;

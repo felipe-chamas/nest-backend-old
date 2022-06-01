@@ -64,7 +64,7 @@ export class SignerUtils {
       throw new GeneralError(
         ErrorCodes.unsupported_chain_standard,
         `Provided chain standart(${accountId.chainId.namespace}) ` +
-          `is not supported. Should be ${CHAIN_STANDARD}.`
+          `is not supported. Should be ${CHAIN_STANDARD}.`,
       );
     }
     const signerChainId = await this.getSignerChainId();
@@ -72,7 +72,7 @@ export class SignerUtils {
       throw new GeneralError(
         ErrorCodes.accounts_not_on_the_same_chain,
         `signer chain(${signerChainId}) != ` +
-          `account id chain(${accountId.chainId.reference})`
+          `account id chain(${accountId.chainId.reference})`,
       );
     }
     const address = ethers.utils.getAddress(accountId.address);

@@ -7,7 +7,10 @@ import {
   sizeOfOne,
 } from './utils';
 import { BigNumber, ContractReceipt } from 'ethers';
-import { ERC20SignedApproval } from '../dist/sdk';
+import {
+  ERC20SignedApproval, ErrorCodes, GeneralError,
+  Payee,
+} from '../dist/sdk';
 import { ethers } from 'hardhat';
 import { AccountId } from 'caip';
 
@@ -26,21 +29,21 @@ describe('game-token functionality', () => {
         approve = await ctx.admin.gameToken.createSignedApproval(
           ctx.anon.accountId,
           approveAmount,
-          deadline
+          deadline,
         );
       });
       describe('when anon submits approval', () => {
         beforeEach('submit approval and check events', async () => {
           const receipt = await wait(
-            ctx.anon.gameToken.submitSignedApproval(approve)
+            ctx.anon.gameToken.submitSignedApproval(approve),
           );
           const event = await sizeOfOne(
             ctx.anon.utils.fetchEvents(
               receipt.transactionHash,
               ctx.gameToken,
               'GameToken',
-              'Approval'
-            )
+              'Approval',
+            ),
           );
           expect(event.owner).eql(ctx.admin.accountId);
           expect(event.value).equals(approveAmount);
@@ -50,7 +53,7 @@ describe('game-token functionality', () => {
           it('returns approved allowance', async () => {
             const reply = await ctx.anon.gameToken.getAllowance(
               ctx.admin.accountId,
-              ctx.anon.accountId
+              ctx.anon.accountId,
             );
             expect(reply).equals(approveAmount);
           });
@@ -58,7 +61,7 @@ describe('game-token functionality', () => {
             it('returns zero', async () => {
               const reply = await ctx.anon.gameToken.getAllowance(
                 ctx.admin.accountId,
-                ctx.admin.accountId
+                ctx.admin.accountId,
               );
               expect(reply).equals(BigNumber.from(0));
             });
@@ -69,15 +72,15 @@ describe('game-token functionality', () => {
     describe('on-chain approves', () => {
       beforeEach('set initial anon approval and check emit', async () => {
         const receipt = await wait(
-          ctx.admin.gameToken.approve(ctx.anon.accountId, approveAmount)
+          ctx.admin.gameToken.approve(ctx.anon.accountId, approveAmount),
         );
         const event = await sizeOfOne(
           ctx.anon.utils.fetchEvents(
             receipt.transactionHash,
             ctx.gameToken,
             'GameToken',
-            'Approval'
-          )
+            'Approval',
+          ),
         );
         expect(event.spender).eql(ctx.anon.accountId);
         expect(event.value).equals(approveAmount);
@@ -89,16 +92,16 @@ describe('game-token functionality', () => {
           const receipt = await wait(
             ctx.admin.gameToken.increaseAllowance(
               ctx.anon.accountId,
-              increaseByAmount
-            )
+              increaseByAmount,
+            ),
           );
           const event = await sizeOfOne(
             ctx.anon.utils.fetchEvents(
               receipt.transactionHash,
               ctx.gameToken,
               'GameToken',
-              'Approval'
-            )
+              'Approval',
+            ),
           );
           expect(event.value).equals(expectedAmount);
         });
@@ -110,16 +113,16 @@ describe('game-token functionality', () => {
           const receipt = await wait(
             ctx.admin.gameToken.decreaseAllowance(
               ctx.anon.accountId,
-              decreaseByAmount
-            )
+              decreaseByAmount,
+            ),
           );
           const event = await sizeOfOne(
             ctx.anon.utils.fetchEvents(
               receipt.transactionHash,
               ctx.gameToken,
               'GameToken',
-              'Approval'
-            )
+              'Approval',
+            ),
           );
           expect(event.value).equals(expectedAmount);
         });
@@ -132,8 +135,8 @@ describe('game-token functionality', () => {
             ctx.anon.gameToken.transferFrom(
               ctx.admin.accountId,
               ctx.anon2.accountId,
-              sendAmount
-            )
+              sendAmount,
+            ),
           );
         });
         it('emits Transfer event', async () => {
@@ -142,8 +145,8 @@ describe('game-token functionality', () => {
               receipt.transactionHash,
               ctx.gameToken,
               'GameToken',
-              'Transfer'
-            )
+              'Transfer',
+            ),
           );
           expect(event.value).equals(sendAmount);
           expect(event.to).eql(ctx.anon2.accountId);
@@ -156,12 +159,12 @@ describe('game-token functionality', () => {
         let receipt: ContractReceipt;
         beforeEach('burn tokens from admin', async () => {
           receipt = await wait(
-            ctx.anon.gameToken.burnTokenFrom(ctx.admin.accountId, burnAmount)
+            ctx.anon.gameToken.burnTokenFrom(ctx.admin.accountId, burnAmount),
           );
         });
         beforeEach('createZeroAccountId', async () => {
           zeroAccountId = await ctx.anon.signerUtils.createAccountIdFromAddress(
-            ethers.constants.AddressZero
+            ethers.constants.AddressZero,
           );
         });
         it('emits Tansfer event', async () => {
@@ -170,12 +173,128 @@ describe('game-token functionality', () => {
               receipt.transactionHash,
               ctx.gameToken,
               'GameToken',
-              'Transfer'
-            )
+              'Transfer',
+            ),
           );
           expect(event.from).eql(ctx.admin.accountId);
           expect(event.value).equals(burnAmount);
           expect(event.to).eql(zeroAccountId);
+        });
+      });
+      describe('transfer batch operations', () => {
+        let payees: Payee[];
+        let wrongPayees: Payee[];
+        let amountMap: Map<string, BigNumber>;
+        let uniquePayeesCount: number;
+        let transferTx: ContractReceipt;
+        beforeEach('init payees', () => {
+          payees = [
+            { amount: ONE_TOKEN.mul(1), accountId: ctx.anon2.accountId },
+            { amount: ONE_TOKEN.mul(2), accountId: ctx.anon3.accountId },
+            { amount: ONE_TOKEN.mul(1), accountId: ctx.anon2.accountId },
+          ];
+        });
+        beforeEach('init wrongPayees', () => {
+          wrongPayees = [
+            // it's wrong because amount should be positive
+            { accountId: ctx.anon2.accountId, amount: BigNumber.from(0) },
+          ];
+        });
+        beforeEach('init amountMap & uniquePayeesCount', () => {
+          amountMap = new Map();
+          for (const payee of payees) {
+            const address = payee.accountId.address;
+            const before = amountMap.get(address) ?? BigNumber.from(0);
+            const summed = before.add(payee.amount);
+            amountMap.set(address, summed);
+          }
+          uniquePayeesCount = Array.from(amountMap.keys()).length;
+        });
+        async function checkNotMergedTransferEvents() {
+          const events = await ctx.anon.utils.fetchEvents(
+            transferTx.transactionHash, ctx.gameToken,
+            'GameToken', 'Transfer',
+          );
+          expect(events).to.have.lengthOf(payees.length);
+          for (let i = 0; i < events.length; i++) {
+            expect(events[i].value).equals(payees[i].amount);
+            expect(events[i].from).eql(ctx.admin.accountId);
+            expect(events[i].to).eql(payees[i].accountId);
+          }
+        }
+        async function checkMergedTransferEvents() {
+          const events = await ctx.anon.utils.fetchEvents(
+            transferTx.transactionHash, ctx.gameToken,
+            'GameToken', 'Transfer',
+          );
+          expect(events).to.have.lengthOf(uniquePayeesCount);
+          for (let i = 0; i < events.length; i++) {
+            expect(events[i].from).eql(ctx.admin.accountId);
+            expect(events[i].value)
+              .equals(amountMap.get(events[i].to.address));
+          }
+        }
+        describe('transferBatchFrom', () => {
+          describe('when invalid amount is passed', () => {
+            it('fails', async () => {
+              await expect(wait(ctx.anon.gameToken.transferBatchFrom(
+                ctx.admin.accountId, wrongPayees,
+              )))
+                .to.eventually.rejectedWith(GeneralError)
+                .to.have.property('errorCode', ErrorCodes.bad_input);
+            });
+          });
+          describe('anon `transferBatchFrom` admin to anon2, anon3', () => {
+            describe('when `mergeDuplicates` is not set', () => {
+              beforeEach('transfer tokens', async () => {
+                transferTx = await wait(ctx.anon.gameToken.transferBatchFrom(
+                  ctx.admin.accountId,
+                  payees,
+                ));
+              });
+              it('emits transfer events', checkNotMergedTransferEvents);
+            });
+            describe('when `mergeDuplicates` is set', () => {
+              beforeEach('transfer tokens', async () => {
+                transferTx = await wait(ctx.anon.gameToken.transferBatchFrom(
+                  ctx.admin.accountId,
+                  payees,
+                  true,
+                ));
+              });
+              it('emits transfer events', checkMergedTransferEvents);
+            });
+          });
+        });
+        describe('transferBatch', () => {
+          describe('when invalid amount is passed', () => {
+            it('fails', async () => {
+              await expect(wait(ctx.admin.gameToken.transferBatch(
+                wrongPayees,
+              )))
+                .to.eventually.rejectedWith(GeneralError)
+                .to.have.property('errorCode', ErrorCodes.bad_input);
+            });
+          });
+          describe('admin `transferBatch` to anon2, anon3', () => {
+            describe('when `mergeDuplicates` is not set', () => {
+              beforeEach('transfer tokens', async () => {
+                transferTx = await wait(ctx.admin.gameToken.transferBatch(
+                  payees,
+                ));
+              });
+              it('emits transfer events', checkNotMergedTransferEvents);
+            });
+            describe('when `mergeDuplicates` is set', () => {
+              beforeEach('transfer tokens', async () => {
+                transferTx = await wait(ctx.admin.gameToken.transferBatch(
+                  payees,
+                  true,
+                ));
+              });
+              it('emits transfer events', checkMergedTransferEvents);
+            });
+          });
         });
       });
     });
@@ -185,7 +304,7 @@ describe('game-token functionality', () => {
     let receipt: ContractReceipt;
     beforeEach('make transfer to anon', async () => {
       receipt = await wait(
-        ctx.admin.gameToken.transfer(ctx.anon.accountId, transferAmount)
+        ctx.admin.gameToken.transfer(ctx.anon.accountId, transferAmount),
       );
     });
     it('emits Transfer event', async () => {
@@ -194,8 +313,8 @@ describe('game-token functionality', () => {
           receipt.transactionHash,
           ctx.gameToken,
           'GameToken',
-          'Transfer'
-        )
+          'Transfer',
+        ),
       );
       expect(event.to).eql(ctx.anon.accountId);
       expect(event.from).eql(ctx.admin.accountId);
@@ -212,15 +331,15 @@ describe('game-token functionality', () => {
         let missTransferReceipt: ContractReceipt;
         beforeEach('transfers to contract and check emit ', async () => {
           missTransferReceipt = await wait(
-            ctx.anon.gameToken.transfer(ctx.gameToken, transferAmount)
+            ctx.anon.gameToken.transfer(ctx.gameToken, transferAmount),
           );
           const event = await sizeOfOne(
             ctx.anon.utils.fetchEvents(
               missTransferReceipt.transactionHash,
               ctx.gameToken,
               'GameToken',
-              'Transfer'
-            )
+              'Transfer',
+            ),
           );
           expect(event.to).eql(ctx.gameToken);
         });
@@ -230,16 +349,16 @@ describe('game-token functionality', () => {
               ctx.admin.gameToken.recover(
                 ctx.gameToken,
                 ctx.anon.accountId,
-                transferAmount
-              )
+                transferAmount,
+              ),
             );
             const event = await sizeOfOne(
               ctx.anon.utils.fetchEvents(
                 recoverReceipt.transactionHash,
                 ctx.gameToken,
                 'GameToken',
-                'Transfer'
-              )
+                'Transfer',
+              ),
             );
             expect(event.to).eql(ctx.anon.accountId);
             expect(event.value).equals(transferAmount);

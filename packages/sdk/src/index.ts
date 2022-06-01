@@ -10,6 +10,7 @@ export {
   TokenBaseMetaInfo,
   Address,
   PaginationParams,
+  Payee,
 } from './types';
 
 export { Roles, Role } from './services/access-control';

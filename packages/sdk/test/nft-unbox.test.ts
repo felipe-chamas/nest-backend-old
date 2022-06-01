@@ -24,7 +24,7 @@ describe('NFTUnbox service', () => {
           receipt.transactionHash,
           ctx.nftUnbox,
           'NFTUnboxing',
-          'UnboxingRequested'
+          'UnboxingRequested',
         );
         expect(events).to.have.lengthOf(1);
         expect(events[0].tokenId).to.equal(boxId);
@@ -46,14 +46,14 @@ describe('NFTUnbox service', () => {
           const receipt = await wait(
             ctx.vrfCoordinator.fulfillRandomWords(
               requestId,
-              ctx.nftUnbox.address
-            )
+              ctx.nftUnbox.address,
+            ),
           );
           const events = await ctx.anon.utils.fetchEvents(
             receipt.transactionHash,
             ctx.nftUnbox,
             'NFTUnboxing',
-            'UnboxingRandomReceived'
+            'UnboxingRandomReceived',
           );
           expect(events).to.have.lengthOf(1);
           const event = events[0];
@@ -65,7 +65,7 @@ describe('NFTUnbox service', () => {
         describe('fetch random result', () => {
           it('returns generated random by box id', async () => {
             const result = await ctx.anon.nftUnbox.getGeneratedRandomByBoxId(
-              boxId
+              boxId,
             );
             expect(result).equals(randomWord);
           });
@@ -89,14 +89,14 @@ describe('NFTUnbox service', () => {
               ctx.operator.nftUnbox.completeUnboxing(
                 requestId,
                 nftAccountIds,
-                tokenCounts
-              )
+                tokenCounts,
+              ),
             );
             const events = await ctx.anon.utils.fetchEvents(
               receipt.transactionHash,
               ctx.nftUnbox,
               'NFTUnboxing',
-              'Unboxed'
+              'Unboxed',
             );
             expect(events).to.have.lengthOf(1);
             const event = events[0];

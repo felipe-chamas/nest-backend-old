@@ -10,7 +10,7 @@ describe('SignerUtils', () => {
   describe('getSignerChainId', () => {
     it('returns chain id of a signer', async () => {
       expect(await ctx.anon.signerUtils.getSignerChainId()).equals(
-        '' + (await ctx.anon.signer.getChainId())
+        '' + (await ctx.anon.signer.getChainId()),
       );
     });
   });
@@ -49,7 +49,7 @@ describe('SignerUtils', () => {
           .to.eventually.rejectedWith(GeneralError)
           .to.have.property(
             'errorCode',
-            ErrorCodes.accounts_not_on_the_same_chain
+            ErrorCodes.accounts_not_on_the_same_chain,
           );
       });
     });
@@ -76,15 +76,15 @@ describe('SignerUtils', () => {
     });
   });
   describe('createAccountIdFromAddress', () => {
-    it('Creates AccountId based on provided address and the signer', async () => {
+    it('Creates AccountId based on address and the signer', async () => {
       const address = '0x8ba1f109551bD432803012645Ac136ddd64DBA72';
       const accountId = await ctx.anon.signerUtils.createAccountIdFromAddress(
-        address
+        address,
       );
       expect(accountId.address).equals(address);
       expect(accountId.chainId.namespace).equals(CHAIN_STANDARD);
       expect(accountId.chainId.reference).equals(
-        '' + (await ctx.anon.signerUtils.signer.getChainId())
+        '' + (await ctx.anon.signerUtils.signer.getChainId()),
       );
     });
   });

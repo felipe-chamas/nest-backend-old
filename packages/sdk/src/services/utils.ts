@@ -43,7 +43,7 @@ for (const [factoryName, factory] of Object.entries(typechain)) {
   )
     continue;
   const eventAbis = (factory.abi as Array<JsonFragment>).filter(
-    (x) => x.type === 'event'
+    (x) => x.type === 'event',
   );
   const eventNames = eventAbis
     .map((x) => x.name)
@@ -89,7 +89,7 @@ export class Utils {
     transactionHash: string,
     contractAddress: AccountId,
     contractName: ContractName,
-    eventName: EventName
+    eventName: EventName,
   ) => {
     const receipt = await this.signerUtils
       .getProvider()
@@ -97,7 +97,7 @@ export class Utils {
     let rawEvents = receipt.logs;
     // filter by contract address
     const contractAddressAsString = await this.signerUtils.parseAddress(
-      contractAddress
+      contractAddress,
     );
     rawEvents = rawEvents.filter((x) => x.address === contractAddressAsString);
 
@@ -105,24 +105,25 @@ export class Utils {
     if (!eventsDetails)
       throw new GeneralError(
         ErrorCodes.not_supported_event,
-        `Handlers for contract ${contractName} were not found`
+        `Handlers for contract ${contractName} were not found`,
       );
 
     // filter by supported event ids
     rawEvents = rawEvents.filter((x) =>
-      eventsDetails.supportedEventIds.has(x.topics[0])
+      eventsDetails.supportedEventIds.has(x.topics[0]),
     );
 
     // parse raw events
     let events = rawEvents.map((x) =>
-      eventsDetails.eventsInterface.parseLog(x)
+      eventsDetails.eventsInterface.parseLog(x),
     );
 
     // filter by event name
     if (!eventsDetails.supportedEventNames.has(eventName))
       throw new GeneralError(
         ErrorCodes.not_supported_event,
-        `contract ${contractName} ` + `does not support event ${eventName}`
+        `contract ${contractName} ` +
+        `does not support event ${eventName}`,
       );
     events = events.filter((x) => x && x.name === eventName);
 
@@ -131,18 +132,18 @@ export class Utils {
     for (const event of events) {
       const eventName = event.name as EventName;
       const eventAbi = eventsDetails.eventAbis.find(
-        (x) => x.name === eventName
+        (x) => x.name === eventName,
       );
       if (!eventAbi)
         throw new GeneralError(
           ErrorCodes.not_supported_event,
-          `abi was not found for event ${eventName}`
+          `abi was not found for event ${eventName}`,
         );
       if (event.args.length !== (eventAbi.inputs || []).length)
         throw new GeneralError(
           ErrorCodes.not_supported_event,
           'abi event argument length is not equal to ' +
-            `actual event argument length for event ${eventName}`
+            `actual event argument length for event ${eventName}`,
         );
       const resultItem: { [key: string]: unknown } = {};
       const argumentDescriptionsFromAbi = eventAbi.inputs || [];
@@ -151,20 +152,20 @@ export class Utils {
           throw new GeneralError(
             ErrorCodes.not_supported_event,
             `event ${contractName}:${eventName} ` +
-              `does not have name for n-th(${idx}) argument`
+              `does not have name for n-th(${idx}) argument`,
           );
         let value: unknown = event.args[idx];
         if (argument.type === 'address') {
           value = await this.signerUtils.createAccountIdFromAddress(
-            value as string
+            value as string,
           );
         } else if (argument.name.match(/Role|role/)) {
           value = parseRole(value as string);
         } else if (argument.type === 'address[]') {
           value = await Promise.all(
             (value as string[]).map((x) =>
-              this.signerUtils.createAccountIdFromAddress(x)
-            )
+              this.signerUtils.createAccountIdFromAddress(x),
+            ),
           );
         }
         resultItem[argument.name] = value;
@@ -209,6 +210,6 @@ export class Utils {
    *
    */
   fetchEvents = wrapFetchEventsWithEventTypes(
-    this.fetchEventsNoTypeSupport.bind(this)
+    this.fetchEventsNoTypeSupport.bind(this),
   );
 }

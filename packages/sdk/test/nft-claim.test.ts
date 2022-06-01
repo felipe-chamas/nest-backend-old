@@ -41,15 +41,15 @@ describe('NFTClaim service', () => {
     describe('submitNewMerkleRoot', () => {
       it('emits MerkleRootAdded', async () => {
         const receipt = await wait(
-          ctx.operator.nftClaim.submitNewMerkleRoot(merkleTree.getHexRoot())
+          ctx.operator.nftClaim.submitNewMerkleRoot(merkleTree.getHexRoot()),
         );
         const event = await sizeOfOne(
           ctx.anon.utils.fetchEvents(
             receipt.transactionHash,
             ctx.nftClaim,
             'NFTClaim',
-            'MerkleRootAdded'
-          )
+            'MerkleRootAdded',
+          ),
         );
         expect(event.merkleRoot).equals(merkleTree.getHexRoot());
       });
@@ -61,7 +61,7 @@ describe('NFTClaim service', () => {
       beforeEach('createAndSubmitMerkleTreeFromClaims', async () => {
         [submittedMerkleTree, submitTransaction] =
           await ctx.operator.nftClaim.createAndSubmitMerkleTreeFromClaims(
-            claims
+            claims,
           );
         await expect(submitTransaction.wait()).to.eventually.fulfilled;
       });
@@ -73,8 +73,8 @@ describe('NFTClaim service', () => {
               submitTransaction.hash,
               ctx.nftClaim,
               'NFTClaim',
-              'MerkleRootAdded'
-            )
+              'MerkleRootAdded',
+            ),
           );
           expect(event.merkleRoot).equals(merkleTree.getHexRoot());
         });
@@ -106,7 +106,7 @@ describe('NFTClaim service', () => {
                 ctx.anon.nftClaim.createAndSubmitClaimProof({
                   merkleTree: submittedMerkleTree,
                   claimData,
-                })
+                }),
               );
             });
             it('createAndSubmitClaimProof emits TokenClaimed', async () => {
@@ -114,13 +114,13 @@ describe('NFTClaim service', () => {
                 receipt.transactionHash,
                 ctx.nftClaim,
                 'NFTClaim',
-                'TokenClaimed'
+                'TokenClaimed',
               );
               expect(events).to.have.lengthOf(tokensPerAccount);
               for (const event of events) {
                 expect(event.account).eql(claimData.accountId);
                 expect(event.merkleRoot).equals(
-                  submittedMerkleTree.getHexRoot()
+                  submittedMerkleTree.getHexRoot(),
                 );
               }
             });
@@ -138,7 +138,7 @@ describe('NFTClaim service', () => {
               describe('isClaimProofAllowed', () => {
                 it('returns false', async () => {
                   await expect(
-                    ctx.anon.nftClaim.isClaimProofAllowed(claimProofInvalid)
+                    ctx.anon.nftClaim.isClaimProofAllowed(claimProofInvalid),
                   ).to.eventually.be.false;
                 });
               });
@@ -151,8 +151,8 @@ describe('NFTClaim service', () => {
                       ctx.anon.nftClaim.createAndSubmitClaimProof({
                         claimData,
                         merkleTree: submittedMerkleTree,
-                      })
-                    )
+                      }),
+                    ),
                   )
                     .to.eventually.rejectedWith(GeneralError)
                     .to.have.property('errorCode', ErrorCodes.nft_claim_error);

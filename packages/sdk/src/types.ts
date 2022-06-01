@@ -74,3 +74,12 @@ export interface NFTClaimData {
   accountId: AccountId;
   tokenCount: BigNumber;
 }
+
+/**
+ * @description
+ * Account id and amount
+ */
+export interface Payee {
+  accountId: AccountId;
+  amount: BigNumberish;
+}

@@ -1,4 +1,5 @@
 export const errorCodeDescriptions = {
+  bad_input: 'Bad input',
   unboxing_error: 'Error while unboxing',
   role_not_exist: 'Provided role does not exist',
   accounts_not_on_the_same_chain: 'AccountIds are from to different chains',
@@ -13,7 +14,7 @@ export const errorCodeDescriptions = {
 export type ErrorCode = keyof typeof errorCodeDescriptions;
 
 export const ErrorCodes = Object.fromEntries(
-  Object.keys(errorCodeDescriptions).map((x) => [x, x])
+  Object.keys(errorCodeDescriptions).map((x) => [x, x]),
 ) as { [key in ErrorCode]: key };
 
 export class GeneralError extends Error {

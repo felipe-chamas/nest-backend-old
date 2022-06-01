@@ -1,6 +1,6 @@
 {
   "name": "@falco-gg/blockchain-sdk",
-  "version": "0.6.1",
+  "version": "0.6.3",
   "types": "./dist/sdk.d.ts",
   "main": "./dist/sdk.js",
   "files": [

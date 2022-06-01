@@ -26,7 +26,7 @@ export class NFT {
   constructor(
     signerUtils: SignerUtils,
     nftContract: NFTContract,
-    tokenMetaInfo: ERC721MetaInfo
+    tokenMetaInfo: ERC721MetaInfo,
   ) {
     this.signerUtils = signerUtils;
     this.nftContract = nftContract;
@@ -37,7 +37,7 @@ export class NFT {
     const signerUtils = new SignerUtils(signer);
     const nftContract = new ContractResolver(signer).resolve(
       'NFT',
-      await signerUtils.parseAddress(nftContractAccountId)
+      await signerUtils.parseAddress(nftContractAccountId),
     );
     const [symbol, name, maxTokenSupply] = await Promise.all([
       nftContract.symbol(),
@@ -69,7 +69,7 @@ export class NFT {
    */
   getOwnerOfToken = async (tokenId: BigNumberish) =>
     this.signerUtils.createAccountIdFromAddress(
-      await this.nftContract.ownerOf(tokenId)
+      await this.nftContract.ownerOf(tokenId),
     );
 
   /**
@@ -115,7 +115,7 @@ export class NFT {
   isApprovedOrOwner = async (operator: AccountId, tokenId: BigNumberish) =>
     this.nftContract.isApprovedOrOwner(
       await this.signerUtils.parseAddress(operator),
-      tokenId
+      tokenId,
     );
 
   /**
@@ -124,7 +124,7 @@ export class NFT {
   approveOperator = async (operator: AccountId, tokenId: BigNumberish) =>
     await this.nftContract.approve(
       await this.signerUtils.parseAddress(operator),
-      tokenId
+      tokenId,
     );
 
   /**
@@ -138,7 +138,7 @@ export class NFT {
    */
   getApprovedOperator = async (tokenId: BigNumberish) =>
     this.signerUtils.createAccountIdFromAddress(
-      await this.nftContract.getApproved(tokenId)
+      await this.nftContract.getApproved(tokenId),
     );
 
   /**
@@ -146,11 +146,11 @@ export class NFT {
    */
   toggleApprovedOperatorForAllTokens = async (
     operator: AccountId,
-    isAllowedToOperate: boolean
+    isAllowedToOperate: boolean,
   ) =>
     await this.nftContract.setApprovalForAll(
       await this.signerUtils.parseAddress(operator),
-      isAllowedToOperate
+      isAllowedToOperate,
     );
 
   /**
@@ -158,11 +158,11 @@ export class NFT {
    */
   isOperatorApprovedForAllTokens = async (
     tokensOwner: AccountId,
-    operator: AccountId
+    operator: AccountId,
   ) =>
     this.nftContract.isApprovedForAll(
       await this.signerUtils.parseAddress(tokensOwner),
-      await this.signerUtils.parseAddress(operator)
+      await this.signerUtils.parseAddress(operator),
     );
 
   /**
@@ -175,10 +175,10 @@ export class NFT {
   transfer = async (to: AccountId, tokenId: BigNumberish) =>
     this.transferFrom(
       await this.signerUtils.createAccountIdFromAddress(
-        await this.signerUtils.signer.getAddress()
+        await this.signerUtils.signer.getAddress(),
       ),
       to,
-      tokenId
+      tokenId,
     );
 
   /**
@@ -187,12 +187,12 @@ export class NFT {
   transferFrom = async (
     from: AccountId,
     to: AccountId,
-    tokenId: BigNumberish
+    tokenId: BigNumberish,
   ) =>
     await this.nftContract.transferFrom(
       await this.signerUtils.parseAddress(from),
       await this.signerUtils.parseAddress(to),
-      tokenId
+      tokenId,
     );
 
   /**
@@ -223,7 +223,7 @@ export class NFT {
     listAsyncItemsWithPagination(
       () => this.getTokenTotalSupply(),
       (index: BigNumberish) => this.getTokenByIndex(index),
-      params
+      params,
     );
 
   /**
@@ -232,7 +232,7 @@ export class NFT {
   getTokenOfOwnerByIndex = async (owner: AccountId, index: BigNumberish) =>
     this.nftContract.tokenOfOwnerByIndex(
       await this.signerUtils.parseAddress(owner),
-      index
+      index,
     );
 
   /**
@@ -241,7 +241,7 @@ export class NFT {
   getOwnTokenByIndex = async (index: BigNumberish) =>
     this.nftContract.tokenOfOwnerByIndex(
       await this.signerUtils.signer.getAddress(),
-      index
+      index,
     );
 
   /**
@@ -251,7 +251,7 @@ export class NFT {
     listAsyncItemsWithPagination(
       () => this.getBalance(owner),
       (index) => this.getTokenOfOwnerByIndex(owner, index),
-      params
+      params,
     );
 
   /**
@@ -260,8 +260,8 @@ export class NFT {
   listOwnTokens = async (params?: PaginationParams) =>
     this.listTokensByOwner(
       await this.signerUtils.createAccountIdFromAddress(
-        await this.signerUtils.signer.getAddress()
+        await this.signerUtils.signer.getAddress(),
       ),
-      params
+      params,
     );
 }

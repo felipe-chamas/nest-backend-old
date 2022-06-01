@@ -14,7 +14,7 @@ describe('AccessControl service', () => {
       minters = [...ctx.minters];
       for (const actor of [ctx.anon, ctx.anon2]) {
         await wait(
-          ctx.admin.accessControl.grantRole(actor.accountId, Roles.Minter)
+          ctx.admin.accessControl.grantRole(actor.accountId, Roles.Minter),
         );
         minters.push(actor.accountId);
       }
@@ -24,7 +24,7 @@ describe('AccessControl service', () => {
       beforeEach('revokeRole', async () => {
         const receipt = await ctx.admin.accessControl.revokeRole(
           ctx.anon.accountId,
-          Roles.Minter
+          Roles.Minter,
         );
         txHash = receipt.hash;
       });
@@ -34,7 +34,7 @@ describe('AccessControl service', () => {
             txHash,
             ctx.acl,
             'ACL',
-            'RoleRevoked'
+            'RoleRevoked',
           );
           expect(events).to.have.lengthOf(1);
           expect(events[0].account).eql(ctx.anon.accountId);
@@ -46,7 +46,7 @@ describe('AccessControl service', () => {
     describe('getRoleMemberCount', () => {
       it('returns minter count', async () => {
         const membersCount = await ctx.admin.accessControl.getRoleMemberCount(
-          Roles.Minter
+          Roles.Minter,
         );
         expect(membersCount).equals(BigNumber.from(minters.length));
       });
@@ -56,7 +56,7 @@ describe('AccessControl service', () => {
         for (let i = 0; i < minters.length; i++) {
           const minter = await ctx.anon.accessControl.getNthRoleMember(
             Roles.Minter,
-            i
+            i,
           );
           expect(minter).eql(minters[i]);
         }
@@ -67,7 +67,7 @@ describe('AccessControl service', () => {
         const expectedSlice = minters.slice(1);
         const actualSlice = await ctx.anon.accessControl.listByRole(
           Roles.Minter,
-          { offset: 1, limit: 100 }
+          { offset: 1, limit: 100 },
         );
         expect(expectedSlice.length).equals(actualSlice.length);
         for (let i = 0; i < actualSlice.length; i++) {
@@ -80,12 +80,12 @@ describe('AccessControl service', () => {
     describe('when role exist', () => {
       it('returns true if address has it', async () => {
         await expect(
-          ctx.anon.accessControl.hasRole(ctx.admin.accountId, Roles.Admin)
+          ctx.anon.accessControl.hasRole(ctx.admin.accountId, Roles.Admin),
         ).to.eventually.be.true;
       });
       it('returns false if address does not have it', async () => {
         await expect(
-          ctx.anon.accessControl.hasRole(ctx.admin.accountId, Roles.Minter)
+          ctx.anon.accessControl.hasRole(ctx.admin.accountId, Roles.Minter),
         ).to.eventually.be.false;
       });
     });
@@ -95,8 +95,8 @@ describe('AccessControl service', () => {
         await expect(
           ctx.anon.accessControl.hasRole(
             ctx.admin.accountId,
-            unknownRole as Role
-          )
+            unknownRole as Role,
+          ),
         )
           .to.eventually.be.rejectedWith(GeneralError)
           .to.have.property('errorCode', ErrorCodes.role_not_exist);
@@ -110,8 +110,8 @@ describe('AccessControl service', () => {
         receipt = await wait(
           ctx.operator.accessControl.renounceRole(
             ctx.operator.accountId,
-            Roles.Operator
-          )
+            Roles.Operator,
+          ),
         );
       });
       describe('fetchEvents', () => {
@@ -120,7 +120,7 @@ describe('AccessControl service', () => {
             receipt.transactionHash,
             ctx.acl,
             'ACL',
-            'RoleRevoked'
+            'RoleRevoked',
           );
           expect(events.length).equals(1);
           expect(events[0].sender).eql(ctx.operator.accountId);
@@ -133,8 +133,8 @@ describe('AccessControl service', () => {
           await expect(
             ctx.operator.accessControl.hasRole(
               ctx.operator.accountId,
-              Roles.Operator
-            )
+              Roles.Operator,
+            ),
           ).to.eventually.be.false;
         });
       });
@@ -145,9 +145,9 @@ describe('AccessControl service', () => {
           wait(
             ctx.admin.accessControl.renounceRole(
               ctx.operator.accountId,
-              Roles.Operator
-            )
-          )
+              Roles.Operator,
+            ),
+          ),
         )
           .to.eventually.rejectedWith(GeneralError)
           .to.have.property('errorCode', ErrorCodes.renounce_only_self);
@@ -162,9 +162,9 @@ describe('AccessControl service', () => {
           wait(
             ctx.admin.accessControl.grantRole(
               ctx.anon.accountId,
-              unknownRole as Role
-            )
-          )
+              unknownRole as Role,
+            ),
+          ),
         )
           .to.eventually.be.rejectedWith(GeneralError, unknownRole)
           .with.property('errorCode', ErrorCodes.role_not_exist);

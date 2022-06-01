@@ -21,7 +21,7 @@ describe('NFT service', () => {
           receipt.transactionHash,
           ctx.nft,
           'NFT',
-          'Transfer'
+          'Transfer',
         )
       )[0];
       expect(mintEvent).to.exist;
@@ -36,10 +36,10 @@ describe('NFT service', () => {
         describe("receiver/sender's balance", () => {
           it('changes', async () => {
             const anonBalance = await ctx.anon.nft.getBalance(
-              ctx.anon.accountId
+              ctx.anon.accountId,
             );
             const anon2Balance = await ctx.anon.nft.getBalance(
-              ctx.anon2.accountId
+              ctx.anon2.accountId,
             );
             expect(anonBalance).equals(0);
             expect(anon2Balance).equals(1);
@@ -108,14 +108,14 @@ describe('NFT service', () => {
         it('returns true for anon as an owner', async () => {
           const reply = await ctx.anon.nft.isApprovedOrOwner(
             ctx.anon2.accountId,
-            tokenId
+            tokenId,
           );
           expect(reply).to.be.true;
         });
         it('returns true for anon2 as token operator', async () => {
           const reply = await ctx.anon.nft.isApprovedOrOwner(
             ctx.anon.accountId,
-            tokenId
+            tokenId,
           );
           expect(reply).to.be.true;
         });
@@ -133,8 +133,8 @@ describe('NFT service', () => {
               ctx.anon2.nft.transferFrom(
                 ctx.anon.accountId,
                 ctx.anon2.accountId,
-                tokenId
-              )
+                tokenId,
+              ),
             );
           });
           describe('receiver/sender balances', () => {
@@ -155,7 +155,7 @@ describe('NFT service', () => {
           it('returns false for anon2', async () => {
             const reply = await ctx.admin.nft.isApprovedOrOwner(
               ctx.anon2.accountId,
-              tokenId
+              tokenId,
             );
             expect(reply).to.be.false;
           });
@@ -170,14 +170,14 @@ describe('NFT service', () => {
       tokens = [];
       for (let i = 0; i < tokenCount; i++) {
         const receipt = await wait(
-          ctx.minter.nft.mintToken(ctx.anon.accountId)
+          ctx.minter.nft.mintToken(ctx.anon.accountId),
         );
         const mintEvent = (
           await ctx.anon.utils.fetchEvents(
             receipt.transactionHash,
             ctx.nft,
             'NFT',
-            'Transfer'
+            'Transfer',
           )
         )[0];
         expect(mintEvent).to.exist;
@@ -191,15 +191,15 @@ describe('NFT service', () => {
         await wait(
           ctx.anon.nft.toggleApprovedOperatorForAllTokens(
             ctx.anon2.accountId,
-            true
-          )
+            true,
+          ),
         );
       });
       describe('isOperatorApprovedForAllTokens', () => {
         it('returns true for anon2', async () => {
           const reply = await ctx.anon2.nft.isOperatorApprovedForAllTokens(
             ctx.anon.accountId,
-            ctx.anon2.accountId
+            ctx.anon2.accountId,
           );
           expect(reply).equals(true);
         });
@@ -211,8 +211,8 @@ describe('NFT service', () => {
               ctx.anon2.nft.transferFrom(
                 ctx.anon.accountId,
                 ctx.anon2.accountId,
-                tokens[i]
-              )
+                tokens[i],
+              ),
             );
           }
         });
@@ -230,15 +230,15 @@ describe('NFT service', () => {
           await wait(
             ctx.anon.nft.toggleApprovedOperatorForAllTokens(
               ctx.anon2.accountId,
-              false
-            )
+              false,
+            ),
           );
         });
         describe('isOperatorApprovedForAllTokens', () => {
           it('returns false for anon2', async () => {
             const reply = await ctx.anon2.nft.isOperatorApprovedForAllTokens(
               ctx.anon.accountId,
-              ctx.anon2.accountId
+              ctx.anon2.accountId,
             );
             expect(reply).equals(false);
           });
@@ -253,14 +253,14 @@ describe('NFT service', () => {
         anon2Tokens = [];
         for (let i = 0; i < anon2TokenCount; i++) {
           const receipt = await wait(
-            ctx.minter.nft.mintToken(ctx.anon2.accountId)
+            ctx.minter.nft.mintToken(ctx.anon2.accountId),
           );
           const mintEvent = (
             await ctx.anon.utils.fetchEvents(
               receipt.transactionHash,
               ctx.nft,
               'NFT',
-              'Transfer'
+              'Transfer',
             )
           )[0];
           expect(mintEvent).to.exist;
@@ -307,7 +307,7 @@ describe('NFT service', () => {
           for (let i = 0; i < anon2TokenCount; i++) {
             const item = await ctx.anon2.nft.getTokenOfOwnerByIndex(
               ctx.anon2.accountId,
-              i
+              i,
             );
             expect(item).equals(anon2Tokens[i]);
           }
@@ -324,7 +324,7 @@ describe('NFT service', () => {
           const expected = tokens.slice(3);
           const items = await ctx.anon.nft.listTokensByOwner(
             ctx.anon.accountId,
-            { offset: 3, limit: 5 }
+            { offset: 3, limit: 5 },
           );
           expect(expected.length).equals(items.length);
           for (let i = 0; i < expected.length; i++)

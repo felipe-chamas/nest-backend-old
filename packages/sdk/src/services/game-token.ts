@@ -2,10 +2,11 @@ import { BigNumber, BigNumberish, ethers, Signature } from 'ethers';
 import { AccountId } from 'caip';
 
 import { GameToken as GameTokenContract } from '../typechain';
-import { ERC20SignedApproval, Signer } from '../types';
+import { ERC20SignedApproval, Payee, Signer } from '../types';
 import { ERC20MetaInfo } from '../types';
 import { SignerUtils } from '../signer-utils';
 import { ContractResolver } from '../contract-resolver';
+import { GeneralError, ErrorCodes } from '../errors';
 
 /**
  * Object is used to create approval
@@ -72,7 +73,7 @@ export class GameToken {
   private constructor(
     signerUtils: SignerUtils,
     gameTokenContract: GameTokenContract,
-    tokenMetaInfo: ERC20MetaInfo
+    tokenMetaInfo: ERC20MetaInfo,
   ) {
     this.signerUtils = signerUtils;
     this.gameTokenContract = gameTokenContract;
@@ -83,7 +84,7 @@ export class GameToken {
     const signerUtils = new SignerUtils(signer);
     const gameTokenContract = new ContractResolver(signer).resolve(
       'GameToken',
-      await signerUtils.parseAddress(gameTokenContractAccountId)
+      await signerUtils.parseAddress(gameTokenContractAccountId),
     );
     const [symbol, name, decimals, totalSupply] = await Promise.all([
       gameTokenContract.symbol(),
@@ -112,7 +113,7 @@ export class GameToken {
   transfer = async (to: AccountId, amount: BigNumberish) =>
     await this.gameTokenContract.transfer(
       await this.signerUtils.parseAddress(to),
-      amount
+      amount,
     );
 
   /**
@@ -127,7 +128,7 @@ export class GameToken {
   approve = async (spender: AccountId, amount: BigNumberish) =>
     await this.gameTokenContract.approve(
       await this.signerUtils.parseAddress(spender),
-      amount
+      amount,
     );
 
   /**
@@ -137,7 +138,7 @@ export class GameToken {
   increaseAllowance = async (spender: AccountId, amount: BigNumberish) =>
     await this.gameTokenContract.increaseAllowance(
       await this.signerUtils.parseAddress(spender),
-      amount
+      amount,
     );
 
   /**
@@ -147,7 +148,7 @@ export class GameToken {
   decreaseAllowance = async (spender: AccountId, amount: BigNumberish) =>
     await this.gameTokenContract.decreaseAllowance(
       await this.signerUtils.parseAddress(spender),
-      amount
+      amount,
     );
 
   /**
@@ -156,7 +157,7 @@ export class GameToken {
   getAllowance = async (owner: AccountId, spender: AccountId) =>
     this.gameTokenContract.allowance(
       await this.signerUtils.parseAddress(owner),
-      await this.signerUtils.parseAddress(spender)
+      await this.signerUtils.parseAddress(spender),
     );
 
   /**
@@ -182,7 +183,7 @@ export class GameToken {
    */
   private async getOwnNonce() {
     const ownAccountId = await this.signerUtils.createAccountIdFromAddress(
-      await this.signerUtils.signer.getAddress()
+      await this.signerUtils.signer.getAddress(),
     );
     return this.getNonceOf(ownAccountId);
   }
@@ -207,7 +208,7 @@ export class GameToken {
   async createSignedApproval(
     spender: AccountId,
     amount: BigNumberish,
-    deadline: BigNumberish
+    deadline: BigNumberish,
   ) {
     const ownerAddress = await this.signerUtils.signer.getAddress();
     const spenderAddress = await this.signerUtils.parseAddress(spender);
@@ -226,12 +227,12 @@ export class GameToken {
         value,
         nonce: await this.getOwnNonce(),
         deadline,
-      }
+      },
     );
     const result: ERC20SignedApproval = {
       owner: await this.signerUtils.createAccountIdFromAddress(ownerAddress),
       spender: await this.signerUtils.createAccountIdFromAddress(
-        spenderAddress
+        spenderAddress,
       ),
       amount: BigNumber.from(amount),
       deadline: BigNumber.from(deadline),
@@ -246,12 +247,12 @@ export class GameToken {
   async submitSignedApproval(approval: ERC20SignedApproval) {
     const ownerAddress = await this.signerUtils.parseAddress(approval.owner);
     const spenderAddress = await this.signerUtils.parseAddress(
-      approval.spender
+      approval.spender,
     );
     const amount = BigNumber.from(approval.amount);
     const deadline = BigNumber.from(approval.deadline);
     const signature: Signature = ethers.utils.splitSignature(
-      approval.signature
+      approval.signature,
     );
     return await this.gameTokenContract.permit(
       ownerAddress,
@@ -260,7 +261,7 @@ export class GameToken {
       deadline,
       signature.v,
       signature.r,
-      signature.s
+      signature.s,
     );
   }
 
@@ -273,12 +274,12 @@ export class GameToken {
   transferFrom = async (
     fromAddress: AccountId,
     to: AccountId,
-    amount: BigNumberish
+    amount: BigNumberish,
   ) =>
     await this.gameTokenContract.transferFrom(
       await this.signerUtils.parseAddress(fromAddress),
       await this.signerUtils.parseAddress(to),
-      amount
+      amount,
     );
 
   /**
@@ -293,7 +294,7 @@ export class GameToken {
   burnTokenFrom = async (owner: AccountId, amount: BigNumberish) =>
     await this.gameTokenContract.burnFrom(
       await this.signerUtils.parseAddress(owner),
-      amount
+      amount,
     );
 
   /**
@@ -327,11 +328,78 @@ export class GameToken {
   recover = async (
     addressOfTokenToRecover: AccountId,
     whoSentAddress: AccountId,
-    amount: BigNumberish
+    amount: BigNumberish,
   ) =>
     await this.gameTokenContract.recover(
       await this.signerUtils.parseAddress(addressOfTokenToRecover),
       await this.signerUtils.parseAddress(whoSentAddress),
-      amount
+      amount,
     );
+
+  private parsePayee = async (
+    payee: Payee,
+  ): Promise<GameTokenContract.PayeeStruct> => {
+    if (payee.amount <= 0)
+      throw new GeneralError(
+        ErrorCodes.bad_input,
+        "Payee's amount should be positive. " +
+        'But got ' + payee.amount,
+      );
+    return ({
+      amount: payee.amount,
+      account: await this.signerUtils.parseAddress(payee.accountId),
+    });
+  };
+
+  private mergePayees = (
+    payees: GameTokenContract.PayeeStruct[],
+  ): GameTokenContract.PayeeStruct[] => {
+    const map = new Map<string, GameTokenContract.PayeeStruct>();
+    for (const payee of payees) {
+      const before = map.get(payee.account);
+      if (!before) {
+        map.set(payee.account, payee);
+        continue;
+      }
+      before.amount = BigNumber.from(before.amount).add(payee.amount);
+    }
+    return Array.from(map.values());
+  };
+
+
+  /**
+   *
+   * Batch equivalent of {@link transfer}.
+   *
+   * @param mergeDuplicates
+   * Default to `false`. If true, then all duplicate `payees` by account id
+   * are merged into a single entry.
+   *
+   */
+  transferBatch = async (
+    payees: Payee[],
+    mergeDuplicates = false,
+  ) => {
+    let _payees = await Promise.all(payees.map(x => this.parsePayee(x)));
+    if (mergeDuplicates) _payees = this.mergePayees(_payees);
+    return await this.gameTokenContract.transferBatch(_payees);
+  };
+
+  /**
+   * Batch equivalent of {@link transferFrom}.
+   *
+   * @see {@link transferBatch}.
+   */
+  transferBatchFrom = async (
+    from: AccountId,
+    payees: Payee[],
+    mergeDuplicates = false,
+  ) => {
+    let _payees = await Promise.all(payees.map(x => this.parsePayee(x)));
+    if (mergeDuplicates) _payees = this.mergePayees(_payees);
+    return await this.gameTokenContract.transferFromBatch(
+      await this.signerUtils.parseAddress(from),
+      _payees,
+    );
+  };
 }

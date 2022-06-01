@@ -43,7 +43,7 @@ async function main() {
       continue;
     const contractName = factoryName.replace('__factory', '');
     const eventAbis = (factory.abi as Array<JsonFragment>).filter(
-      (x) => x && x.type === 'event' && typeof x.name === 'string'
+      (x) => x && x.type === 'event' && typeof x.name === 'string',
     );
     const eventsInterface = new ethers.utils.Interface(eventAbis);
     const eventNames = eventAbis.map((x) => x.name as string).filter((x) => x);

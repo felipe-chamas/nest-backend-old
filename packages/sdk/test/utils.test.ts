@@ -11,7 +11,7 @@ describe('Utils service', () => {
     let receipt: ContractReceipt;
     beforeEach('grantRole', async () => {
       receipt = await wait(
-        ctx.admin.accessControl.grantRole(ctx.anon.accountId, Roles.Operator)
+        ctx.admin.accessControl.grantRole(ctx.anon.accountId, Roles.Operator),
       );
     });
     describe('fetchEvents', () => {
@@ -20,7 +20,7 @@ describe('Utils service', () => {
           receipt.transactionHash,
           ctx.acl,
           'ACL',
-          'RoleGranted'
+          'RoleGranted',
         );
         expect(events.length).equals(1);
         expect(events[0].role).equals(Roles.Operator);
@@ -34,7 +34,7 @@ describe('Utils service', () => {
           receipt.transactionHash,
           ctx.gameToken,
           'ACL',
-          'RoleGranted'
+          'RoleGranted',
         );
         expect(events.length).equals(0);
       });
@@ -46,8 +46,8 @@ describe('Utils service', () => {
             receipt.transactionHash,
             ctx.acl,
             'NotExistedContract' as 'ACL', // ask for non existing contract
-            'RoleRevoked'
-          )
+            'RoleRevoked',
+          ),
         )
           .to.eventually.rejectedWith(GeneralError)
           .to.have.property('errorCode', ErrorCodes.not_supported_event);
@@ -58,8 +58,8 @@ describe('Utils service', () => {
             receipt.transactionHash,
             ctx.acl,
             'ACL',
-            'Unboxed' as 'RoleGranted' // ask for non existing contract
-          )
+            'Unboxed' as 'RoleGranted', // ask for non existing contract
+          ),
         )
           .to.eventually.rejectedWith(GeneralError)
           .to.have.property('errorCode', ErrorCodes.not_supported_event);

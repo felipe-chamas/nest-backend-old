@@ -7,7 +7,7 @@ const MAX_REQUESTS_AT_MOMENT = BigNumber.from(5);
 export const listAsyncItemsWithPagination = async <T>(
   getTotalSize: () => Promise<BigNumber>,
   getByIndex: (index: BigNumberish) => Promise<T>,
-  params?: PaginationParams
+  params?: PaginationParams,
 ) => {
   const totalSize = await getTotalSize();
   const offset = BigNumber.from(params?.offset ?? 0);
