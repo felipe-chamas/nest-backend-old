@@ -1,2 +1,2 @@
-export * from './is-account-id';
+export * from './caip';
 export * from './pagination.decorators';

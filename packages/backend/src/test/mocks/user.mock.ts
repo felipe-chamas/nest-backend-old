@@ -13,7 +13,9 @@ export const mockCreateUser: CreateUserDto = {
   name: 'John Doe',
   email: 'joshn@email.com',
   isAdmin: false,
-  account: '0x12345',
+  accountIds: [
+    { chainId: { namespace: 'eip155', reference: '1' }, address: '0x12345' },
+  ],
 };
 
 export const mockUpdateUser: Partial<UpdateUserDto> = {

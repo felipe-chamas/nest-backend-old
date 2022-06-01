@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { AccountIdParams } from 'caip';
 import { IsBoolean, IsEmail, IsOptional, IsString } from 'class-validator';
+import { IsAccountIdArray } from 'common/decorators';
 
 export class CreateUserDto {
   @ApiProperty()
@@ -15,6 +17,7 @@ export class CreateUserDto {
   @IsBoolean()
   isAdmin?: boolean;
 
-  @IsString()
-  account: string;
+  @ApiProperty()
+  @IsAccountIdArray
+  accountIds: string[] | AccountIdParams[];
 }

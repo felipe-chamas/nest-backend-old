@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { AccountIdParams } from 'caip';
 import { IsEmail, IsOptional, IsString } from 'class-validator';
+import { IsAccountIdArray } from 'common/decorators';
 
 export class UpdateUserDto {
   @ApiProperty()
@@ -13,6 +15,6 @@ export class UpdateUserDto {
   name: string;
 
   @ApiProperty()
-  @IsString()
-  account: string;
+  @IsAccountIdArray
+  account: string[] | AccountIdParams[];
 }

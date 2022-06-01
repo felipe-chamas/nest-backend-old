@@ -11,6 +11,7 @@ import { UserService } from 'models/user/services';
 import { Nft, NftService } from 'models/nft';
 import { User } from 'common/entities';
 import { NftClaimService } from 'models/nft-claim/services/nft-claim.service';
+import { AccountId } from 'caip';
 
 const config = new ConfigService();
 
@@ -50,7 +51,7 @@ export default async function tokenClaimed(
     const nftCollectionService = new NftCollectionService(nftCollectionRepo);
 
     const [user, nftCollection, nftClaim] = await Promise.all([
-      userService.find({ account: account.toLowerCase() }),
+      userService.findByAccount(new AccountId(account)),
       nftCollectionService.findOne({ contractAddress }),
       nftClaimService.findOne({ merkleRoot }),
     ]);

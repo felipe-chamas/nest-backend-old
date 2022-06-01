@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { InjectRepository } from '@nestjs/typeorm';
+import { AccountId, AccountIdParams } from 'caip';
+import { AccountId as AccountIdType } from 'common/types';
 import { Pagination } from 'common/decorators';
 import { Nft, User } from 'common/entities';
 
@@ -23,7 +25,14 @@ export class UserService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
-    const user = this.userRepo.create(createUserDto);
+    const userData = {
+      ...createUserDto,
+      accountIds: createUserDto.accountIds.map(
+        (accountId: string | AccountIdParams) =>
+          new AccountId(accountId).toJSON() as AccountIdType
+      ),
+    };
+    const user = this.userRepo.create(userData);
     await this.userRepo.save(user);
     return user;
   }
@@ -61,8 +70,12 @@ export class UserService {
     return user;
   }
 
-  async findByAccount(account: string): Promise<User | undefined> {
-    const user = await this.userRepo.findOne({ account })
+  async findByAccount(account: AccountId): Promise<User | undefined> {
+    const user = await this.userRepo.findOne({
+      where: {
+        accountIds: { $elemMatch: account.toJSON() },
+      },
+    });
     return user;
   }
 

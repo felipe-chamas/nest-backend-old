@@ -7,6 +7,7 @@ import { Nft, NftCollection, User } from 'common/entities';
 import { UserService } from 'models/user';
 import { NftService } from 'models/nft';
 import { NftCollectionService } from 'models/nft-collection';
+import { AccountId } from 'caip';
 
 const config = new ConfigService();
 
@@ -39,14 +40,16 @@ export default async function transfer(
     const nftService = new NftService(nftRepo);
     const nftCollectionService = new NftCollectionService(nftCollectionRepo);
 
+    const toAccountId = new AccountId(to);
+
     const [userTo, nftCollection] = await Promise.all([
-      userService.findOne({ account: to }),
+      userService.findByAccount(toAccountId),
       nftCollectionService.findOne({ contractAddress }),
     ]);
 
     const { id: userId } = userTo
       ? userTo
-      : await userService.create({ account: to });
+      : await userService.create({ accountIds: [toAccountId.toJSON()] });
     logger.debug({ userTo, nftCollection });
 
     const nft = await nftService.findOne({
@@ -55,7 +58,7 @@ export default async function transfer(
     });
     logger.debug({ nft });
 
-    const nftUpdated = await nftService.update(nft.id, { userId: userTo.id });
+    const nftUpdated = await nftService.update(nft.id, { userId });
     console.debug(nftUpdated);
   }
 }
