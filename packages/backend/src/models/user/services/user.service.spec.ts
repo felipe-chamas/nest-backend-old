@@ -1,20 +1,28 @@
-import { ConfigService } from '@nestjs/config';
-import { Test } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 
+import { Repository } from 'typeorm';
+import { Nft, User } from '../../../common/entities';
 import {
-  createConnection,
-  getConnection,
-  getRepository,
-  Repository,
-} from 'typeorm';
-import { Nft, NftCollection, User } from '../../../common/entities';
-import { mockCreateUser, mockUpdateUser } from '../../../test/mocks/user.mock';
+  mockCreateUser,
+  mockUpdateUser,
+  mockUser,
+} from '../../../test/mocks/user.mock';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { UserService } from './user.service';
 
-const dbConnName = 'default';
-const config = new ConfigService();
+export type MockType<T> = {
+  [P in keyof T]?: jest.Mock<Nft>;
+};
+
+export const repositoryMockFactory: () => MockType<Repository<User>> = jest.fn(
+  () => ({
+    findOne: jest.fn((entity) => entity),
+    find: jest.fn().mockReturnValue([mockUser, mockUser]),
+    create: jest.fn().mockReturnValue(mockUser),
+    save: jest.fn().mockReturnValue(mockUser),
+  })
+);
 
 describe('UserService', () => {
   let user;
@@ -22,33 +30,28 @@ describe('UserService', () => {
   let userRepo: Repository<User>;
 
   beforeEach(async () => {
-    await Test.createTestingModule({
+    service = {
+      create: jest.fn().mockReturnValue(mockUser),
+      findAll: jest.fn().mockReturnValue([mockUser, mockUser]),
+      findOne: jest.fn().mockReturnValue(mockUser),
+      update: jest.fn().mockReturnValue(mockUser),
+      remove: jest.fn(),
+    };
+    const module: TestingModule = await Test.createTestingModule({
       providers: [
         {
+          provide: UserService,
+          useValue: service,
+        },
+        {
           provide: getRepositoryToken(User),
-          useClass: Repository,
+          useFactory: repositoryMockFactory,
         },
       ],
     }).compile();
 
-    const connection = await createConnection({
-      type: 'mongodb',
-      url: config.get<string>('database.url'),
-      entities: [User, Nft, NftCollection],
-      useNewUrlParser: true,
-      logging: true,
-      useUnifiedTopology: true,
-      name: dbConnName,
-    });
-
-    userRepo = getRepository(User, dbConnName);
-    service = new UserService(userRepo);
-
-    return connection;
-  });
-
-  afterEach(async () => {
-    await getConnection(dbConnName).close();
+    service = module.get<UserService>(UserService);
+    userRepo = module.get(getRepositoryToken(User));
   });
 
   it('should be defined', () => {
@@ -94,6 +97,6 @@ describe('UserService', () => {
 
     const result = await service.remove(user.id);
 
-    expect(result.id).toBeUndefined();
+    expect(result).toBeUndefined();
   });
 });

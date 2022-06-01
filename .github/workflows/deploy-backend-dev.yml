@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'packages/backend/src/*'
 
 env:
   REGISTRY_NAME: 'webserver-develop-ecr'
@@ -13,8 +15,24 @@ env:
   TASK_DEFINITION_FAMILY: 'webserver-develop-ecs-task-definition'
 
 jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    container:
+      image: node
+    steps:
+      - uses: actions/checkout@v2
+      - uses: borales/actions-yarn@v2.3.0
+        with:
+          cmd: install
+      - run: yarn nx run-many --target=test --projects=backend
+      - uses: borales/actions-yarn@v2.3.0
+        with:
+          cmd: install
+      - run: yarn nx run-many --target=lint --projects=backend
   deploy:
     name: Deploy Develop
+    needs: [test]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

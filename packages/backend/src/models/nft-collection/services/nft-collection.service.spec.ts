@@ -1,47 +1,55 @@
-import { Test } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { getConnection, getRepository, Repository } from 'typeorm';
-import { mockCreateNftCollection } from '../../../test/mocks/nft-collection.mock';
+import { Repository } from 'typeorm';
+import {
+  mockCreateNftCollection,
+  mockNftCollection,
+} from '../../../test/mocks/nft-collection.mock';
 import { NftCollectionService } from './nft-collection.service';
-import { ConfigService } from '@nestjs/config';
-import { createConnection } from 'typeorm';
-import { Nft, NftCollection, User } from '../../../common/entities';
+import { Nft, NftCollection } from '../../../common/entities';
 
-const dbConnName = 'default';
-const config = new ConfigService();
+export type MockType<T> = {
+  [P in keyof T]?: jest.Mock<Nft>;
+};
+
+export const repositoryMockFactory: () => MockType<Repository<NftCollection>> =
+  jest.fn(() => ({
+    findOne: jest.fn((entity) => entity),
+    find: jest.fn().mockReturnValue([mockNftCollection, mockNftCollection]),
+    create: jest.fn().mockReturnValue(mockNftCollection),
+    save: jest.fn().mockReturnValue(mockNftCollection),
+  }));
+
 describe('NftCollectionService', () => {
   let nftCollection;
-  let service: NftCollectionService;
+  let service: Partial<NftCollectionService>;
   let nftCollectionRepo: Repository<NftCollection>;
 
   beforeEach(async () => {
-    await Test.createTestingModule({
+    service = {
+      create: jest.fn().mockReturnValue(mockNftCollection),
+      findAll: jest
+        .fn()
+        .mockReturnValue([mockNftCollection, mockNftCollection]),
+      findOne: jest.fn().mockReturnValue(mockNftCollection),
+      update: jest.fn().mockReturnValue(mockNftCollection),
+      remove: jest.fn(),
+    };
+    const module: TestingModule = await Test.createTestingModule({
       providers: [
         {
+          provide: NftCollectionService,
+          useValue: service,
+        },
+        {
           provide: getRepositoryToken(NftCollection),
-          useClass: Repository,
+          useFactory: repositoryMockFactory,
         },
       ],
     }).compile();
 
-    const connection = await createConnection({
-      type: 'mongodb',
-      url: config.get<string>('database.url'),
-      entities: [NftCollection, Nft, User],
-      useNewUrlParser: true,
-      logging: true,
-      useUnifiedTopology: true,
-      name: dbConnName,
-    });
-
-    nftCollectionRepo = getRepository(NftCollection, dbConnName);
-    service = new NftCollectionService(nftCollectionRepo);
-
-    return connection;
-  });
-
-  afterEach(async () => {
-    await getConnection(dbConnName).close();
+    service = module.get<NftCollectionService>(NftCollectionService);
+    nftCollectionRepo = module.get(getRepositoryToken(NftCollection));
   });
 
   it('should be defined', () => {
@@ -83,6 +91,6 @@ describe('NftCollectionService', () => {
     await nftCollectionRepo.save(nftCollection);
 
     const result = await service.remove(nftCollection.id);
-    expect(result.id).toBeUndefined();
+    expect(result).toBeUndefined();
   });
 });

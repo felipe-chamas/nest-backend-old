@@ -17,5 +17,5 @@ export const mockCreateUser: CreateUserDto = {
 };
 
 export const mockUpdateUser: Partial<UpdateUserDto> = {
-  name: 'John smith',
+  name: 'John Doe',
 };
