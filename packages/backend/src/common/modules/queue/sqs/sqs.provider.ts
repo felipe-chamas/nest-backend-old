@@ -3,7 +3,7 @@ import * as https from 'https';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Consumer, ConsumerOptions } from 'sqs-consumer';
-import { SqsService } from './sqs.service';
+import { QueueService } from '../queue.service';
 import { logger } from 'common/providers/logger';
 
 @Injectable()
@@ -17,15 +17,17 @@ export class SqsProvider {
         }),
       },
     }),
-    handleMessage: this.sqsService.handleMessge,
+    handleMessage: this.queueService.handleMessage,
   };
 
-  sqsConsumer = Consumer.create(this.sqsOptions);
+  sqsConsumer: Consumer;
 
   constructor(
-    private readonly sqsService: SqsService,
+    private readonly queueService: QueueService,
     private readonly config: ConfigService
-  ) {}
+  ) {
+    this.sqsConsumer = Consumer.create(this.sqsOptions);
+  }
 
   start() {
     this.sqsConsumer.on('error', (err, msg) => {

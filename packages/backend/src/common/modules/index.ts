@@ -1,1 +1,1 @@
-export * from './sqs/sqs.module';
+export * from './queue/queue.module';

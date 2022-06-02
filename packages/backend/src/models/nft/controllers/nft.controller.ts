@@ -13,6 +13,7 @@ import { UpdateNftDto } from '../dto/update-nft.dto';
 import { ObjectID } from 'typeorm';
 import { NftCollectionService } from 'models/nft-collection';
 import { GetPagination, Pagination } from 'common/decorators';
+import { AssetId, AssetType } from 'caip';
 
 @Controller('nft')
 export class NftController {
@@ -31,20 +32,14 @@ export class NftController {
     return this.nftService.findAll(pagination);
   }
 
-  @Get(':nftCollectionSlug/:tokenId')
+  @Get(':chainId/:assetName/:tokenId')
   async findOneByParams(
-    @Param('nftCollectionSlug') nftCollectionSlug: string,
+    @Param('chainId') chainId: string,
+    @Param('assetName') assetName: string,
     @Param('tokenId') tokenId: string
   ) {
-    const nftCollection = await this.nftCollectionService.findOne({
-      slug: nftCollectionSlug,
-    });
-
-    const nftCollectionId = nftCollection.id.toString();
-    const nft = await this.nftService.findOne({
-      nftCollectionId,
-      tokenId,
-    });
+    const assetId = new AssetId({ chainId, assetName, tokenId });
+    const nft = await this.nftService.findByAssetId(assetId);
     return nft.metadata;
   }
 

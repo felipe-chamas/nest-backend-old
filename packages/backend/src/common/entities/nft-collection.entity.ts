@@ -4,19 +4,21 @@ import {
   BeforeUpdate,
   Column,
   Entity,
-  Index,
   ObjectID,
   ObjectIdColumn,
   OneToMany,
 } from 'typeorm';
 
 import slugify from 'slugify';
+import { AssetTypeDto } from 'common/types';
 
 @Entity()
-@Index(['contractAddress'])
 export class NftCollection {
   @ObjectIdColumn()
   id: ObjectID;
+
+  @Column()
+  AssetTypes: AssetTypeDto[];
 
   @Column()
   slug: string;
@@ -32,10 +34,6 @@ export class NftCollection {
 
   @Column()
   externalUrl: string;
-
-  @Column()
-  @Index()
-  contractAddress?: string;
 
   @OneToMany(() => Nft, (nft) => nft.nftCollectionId)
   nfts: Nft[];

@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { InjectRepository } from '@nestjs/typeorm';
 import { AccountId, AccountIdParams } from 'caip';
-import { AccountId as AccountIdType } from 'common/types';
+import { AccountIdDto } from 'common/types';
 import { Pagination } from 'common/decorators';
 import { Nft, User } from 'common/entities';
 
@@ -29,7 +29,7 @@ export class UserService {
       ...createUserDto,
       accountIds: createUserDto.accountIds.map(
         (accountId: string | AccountIdParams) =>
-          new AccountId(accountId).toJSON() as AccountIdType
+          new AccountId(accountId).toJSON() as AccountIdDto
       ),
     };
     const user = this.userRepo.create(userData);
@@ -51,17 +51,6 @@ export class UserService {
     return user;
   }
 
-  async find(idOrConditions: string | FindConditions<User>) {
-    switch (idOrConditions) {
-      case typeof idOrConditions === 'string': {
-        return await this.userRepo.findOne(idOrConditions);
-      }
-      case typeof idOrConditions === 'object': {
-        return await this.userRepo.findOne(idOrConditions);
-      }
-    }
-  }
-
   async findById(id: ObjectID) {
     const user = await this.userRepo.findOne(id);
 
@@ -70,10 +59,10 @@ export class UserService {
     return user;
   }
 
-  async findByAccount(account: AccountId): Promise<User | undefined> {
+  async findByAccountId(accountId: AccountId): Promise<User | undefined> {
     const user = await this.userRepo.findOne({
       where: {
-        accountIds: { $elemMatch: account.toJSON() },
+        accountIds: { $elemMatch: accountId.toJSON() },
       },
     });
     return user;

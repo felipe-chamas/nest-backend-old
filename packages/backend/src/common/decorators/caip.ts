@@ -1,4 +1,11 @@
-import { AccountId, AccountIdParams } from 'caip';
+import {
+  AccountId,
+  AccountIdParams,
+  AssetId,
+  AssetIdParams,
+  AssetType,
+  AssetTypeParams,
+} from 'caip';
 import { isArray, registerDecorator } from 'class-validator';
 
 export function IsAccountId(object: object, propertyName: string) {
@@ -39,6 +46,54 @@ export function IsAccountIdArray(object: object, propertyName: string) {
         if (!isArray(values)) return false;
         try {
           values.map((value: string | AccountIdParams) => new AccountId(value));
+          return true;
+        } catch (_) {
+          return false;
+        }
+      },
+    },
+  });
+}
+
+export function IsAssetTypeArray(object: object, propertyName: string) {
+  registerDecorator({
+    name: 'isAssetTypeArray',
+    target: object.constructor,
+    propertyName: propertyName,
+    options: {
+      message:
+        'String should be formatted according to caip standard. See more ' +
+        'https://github.com/ChainAgnostic/CAIPs/blob/master/CAIPs/caip-10.md',
+    },
+    validator: {
+      validate(values: string[] | AssetTypeParams[]) {
+        if (!isArray(values)) return false;
+        try {
+          values.map((value: string | AssetTypeParams) => new AssetType(value));
+          return true;
+        } catch (_) {
+          return false;
+        }
+      },
+    },
+  });
+}
+
+export function IsAssetIdArray(object: object, propertyName: string) {
+  registerDecorator({
+    name: 'isAssetIdArray',
+    target: object.constructor,
+    propertyName: propertyName,
+    options: {
+      message:
+        'String should be formatted according to caip standard. See more ' +
+        'https://github.com/ChainAgnostic/CAIPs/blob/master/CAIPs/caip-10.md',
+    },
+    validator: {
+      validate(values: string[] | AssetIdParams[]) {
+        if (!isArray(values)) return false;
+        try {
+          values.map((value: string | AssetIdParams) => new AssetId(value));
           return true;
         } catch (_) {
           return false;

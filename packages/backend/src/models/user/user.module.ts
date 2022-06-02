@@ -5,7 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { MongoEntityManager, MongoRepository } from 'typeorm';
 
-import { GloablConfigModule } from 'common/providers';
+import { GlobalConfigModule } from 'common/providers';
 
 import { UserController } from './controllers';
 import { CurrentUserInterceptor } from './interceptors';
@@ -19,7 +19,7 @@ import { UserService } from './services';
   controllers: [UserController, AuthController],
   imports: [
     ThrottlerModule.forRootAsync({
-      imports: [GloablConfigModule],
+      imports: [GlobalConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         ttl: configService.get('throttler.ttl'),

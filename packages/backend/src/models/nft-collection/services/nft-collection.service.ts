@@ -5,6 +5,7 @@ import { CreateNftCollectionDto } from '../dto/create-nft-collection.dto';
 import { UpdateNftCollectionDto } from '../dto/update-nft-collection.dto';
 import { NftCollection } from '../../../common/entities/nft-collection.entity';
 import { Pagination } from 'common/decorators';
+import { AssetType } from 'caip';
 
 @Injectable()
 export class NftCollectionService {
@@ -35,6 +36,15 @@ export class NftCollectionService {
 
     if (!nftCollection) throw new NotFoundException(`Nft with not found`);
 
+    return nftCollection;
+  }
+
+  async findByAssetType(assetType: AssetType) {
+    const nftCollection = await this.nftCollectionRepo.findOne({
+      where: {
+        assetTypes: { $elemMatch: assetType.toJSON() },
+      },
+    });
     return nftCollection;
   }
 

@@ -3,7 +3,7 @@ import { v4 as uuid } from 'uuid';
 import { sign } from 'tweetnacl';
 import { decode } from 'bs58';
 import { utils } from 'ethers';
-import { ChainId } from './constants';
+import { ChainId } from 'common/types';
 
 @Injectable()
 export class SignatureAuthService {

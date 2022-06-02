@@ -9,10 +9,10 @@ import {
   ObjectIdColumn,
   OneToMany,
 } from 'typeorm';
-import { AccountId } from 'common/types';
+import { AccountIdDto } from 'common/types';
 
 @Entity()
-@Index(['email', 'account'])
+@Index(['email'])
 export class User {
   @ObjectIdColumn()
   id: ObjectID;
@@ -27,7 +27,7 @@ export class User {
   isAdmin: boolean;
 
   @Column()
-  accountIds: AccountId[];
+  accountIds: AccountIdDto[];
 
   @Column()
   createdAt: Date;

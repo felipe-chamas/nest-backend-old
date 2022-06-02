@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 
 import { getRepository } from 'typeorm';
 
-import { parseLogs, ParsiqEvent } from '../sqs.service';
+import { parseLogs, ParsiqEvent } from '../queue.service';
 import { logger } from 'common/providers/logger';
 import { NftClaim } from 'common/entities/nft-claim.entity';
 import { NftCollection, NftCollectionService } from 'models/nft-collection';
@@ -11,13 +11,15 @@ import { UserService } from 'models/user/services';
 import { Nft, NftService } from 'models/nft';
 import { User } from 'common/entities';
 import { NftClaimService } from 'models/nft-claim/services/nft-claim.service';
-import { AccountId } from 'caip';
+import { AccountId, AssetId, AssetType, ChainId } from 'caip';
 
 const config = new ConfigService();
 
+// TODO: dynamic with chain ID
 export default async function tokenClaimed(
   parsiqEvent: ParsiqEvent
 ): Promise<void> {
+  const chainId = new ChainId(parsiqEvent.chainId);
   const jsonRpcProvider =
     config.get<string>('blockchain.jsonRpcProvider') ||
     process.env.JSON_RPC_PROVIDER;
@@ -29,7 +31,11 @@ export default async function tokenClaimed(
   const tokenClaimedLogs = logs.filter(
     (log) => log.event.name === 'TokenClaimed'
   );
-  const contractAddress = transferLog.address;
+
+  const assetName = {
+    namespace: 'erc721',
+    reference: transferLog.address,
+  };
 
   for (const log of tokenClaimedLogs) {
     const { account, merkleRoot, tokenId } = log.event.args;
@@ -50,9 +56,25 @@ export default async function tokenClaimed(
     const nftClaimService = new NftClaimService(nftClaimRepo);
     const nftCollectionService = new NftCollectionService(nftCollectionRepo);
 
+    const assetType = new AssetType({
+      chainId,
+      assetName,
+    });
+
+    const assetId = new AssetId({
+      chainId,
+      assetName,
+      tokenId,
+    });
+
+    const accountId = new AccountId({
+      chainId,
+      address: account,
+    });
+
     const [user, nftCollection, nftClaim] = await Promise.all([
-      userService.findByAccount(new AccountId(account)),
-      nftCollectionService.findOne({ contractAddress }),
+      userService.findByAccountId(accountId),
+      nftCollectionService.findByAssetType(assetType),
       nftClaimService.findOne({ merkleRoot }),
     ]);
     logger.debug({ user, nftCollection, nftClaim });
@@ -69,7 +91,7 @@ export default async function tokenClaimed(
     const nft = await nftService.create({
       metadata,
       userId: user.id,
-      tokenId: tokenId,
+      assetIds: [assetId],
       nftCollectionId: nftCollection.id,
     });
     logger.debug(nft);

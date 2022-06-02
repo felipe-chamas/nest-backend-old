@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsString } from 'class-validator';
+import { IsAssetTypeArray } from 'common/decorators';
+import { AssetTypeDto } from 'common/types';
 
 export class UpdateNftCollectionDto {
   @ApiProperty()
@@ -8,8 +10,8 @@ export class UpdateNftCollectionDto {
 
   @ApiProperty()
   @IsOptional()
-  @IsString()
-  contractAddress?: string;
+  @IsAssetTypeArray
+  assetTypes?: AssetTypeDto[];
 
   @ApiProperty()
   @IsOptional()

@@ -14,6 +14,7 @@ import { UpdateNftDto } from '../dto/update-nft.dto';
 
 import { User, Nft } from 'common/entities';
 import { Pagination } from 'common/decorators';
+import { AssetId } from 'caip';
 
 @Injectable()
 export class NftService {
@@ -43,6 +44,15 @@ export class NftService {
     const user = await getMongoRepository(User).findOne(nft.userId);
 
     return { ...nft, user };
+  }
+
+  async findByAssetId(assetId: AssetId) {
+    const nft = await this.nftRepo.findOne({
+      where: {
+        assetIds: { $elemMatch: assetId.toJSON() },
+      },
+    });
+    return nft;
   }
 
   async update(id: ObjectID, updateNftDto: UpdateNftDto) {

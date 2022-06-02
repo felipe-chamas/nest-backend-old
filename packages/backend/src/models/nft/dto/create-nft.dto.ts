@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsObject, IsOptional, IsString } from 'class-validator';
+import { IsAssetIdArray } from 'common/decorators';
+import { AssetIdDto } from 'common/types';
 import { ObjectID } from 'typeorm';
 import { Metadata } from '../interface';
 
@@ -9,14 +11,13 @@ export class CreateNftDto {
   metadata: Metadata;
 
   @ApiProperty()
-  @IsOptional()
-  @IsString()
-  userId?: ObjectID;
+  @IsAssetIdArray
+  assetIds: AssetIdDto[];
 
   @ApiProperty()
   @IsOptional()
   @IsString()
-  tokenId: string;
+  userId?: ObjectID;
 
   @ApiProperty()
   @IsString()

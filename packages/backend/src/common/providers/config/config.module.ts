@@ -11,7 +11,7 @@ import { logger } from '../logger';
     }),
   ],
 })
-export class GloablConfigModule {
+export class GlobalConfigModule {
   onModuleInit() {
     logger.info('config loaded');
   }

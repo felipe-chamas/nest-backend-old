@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { SqsModule } from 'common/modules';
+import { QueueModule } from 'common/modules';
 import {
-  GloablConfigModule,
+  GlobalConfigModule,
   logger,
   MongoDbProvider,
   RedisClient,
@@ -20,9 +20,9 @@ import { AuthModule } from 'auth';
 
 @Module({
   imports: [
-    GloablConfigModule,
+    GlobalConfigModule,
     MongoDbProvider,
-    SqsModule,
+    QueueModule.register(),
     UserModule,
     NftModule,
     NftCollectionModule,

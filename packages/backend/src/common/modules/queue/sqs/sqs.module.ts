@@ -4,13 +4,11 @@ import { ConfigService } from 'aws-sdk';
 import { logger } from 'common/providers/logger';
 
 import { SqsProvider } from './sqs.provider';
-import { SqsService } from './sqs.service';
 
 @Global()
 @Module({
   imports: [DiscoveryModule],
-  providers: [SqsService, ConfigService, SqsProvider],
-  exports: [SqsService],
+  providers: [ConfigService, SqsProvider],
 })
 export class SqsModule {
   constructor(private readonly sqsProvider: SqsProvider) {}

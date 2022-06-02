@@ -54,7 +54,7 @@ export class SignatureStrategy extends PassportStrategy(Strategy, 'signature') {
           'Provided signature does not match address of agreement request'
         )
       );
-    const existingUser = await this.userService.findByAccount(accountId);
+    const existingUser = await this.userService.findByAccountId(accountId);
     if (existingUser) {
       req.session.user = {
         id: existingUser.id,

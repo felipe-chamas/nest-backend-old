@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { logger } from 'common/providers';
+import { ChainId } from 'common/types';
 import { ethers } from 'ethers';
 import { SQSMessage } from 'sqs-consumer';
 import tokenClaimed from './listeners/token-claimed';
@@ -10,6 +12,7 @@ export interface ParsiqEvent {
   tx: string;
   event: EventType;
   contractAddress: string;
+  chainId: ChainId;
 }
 
 const TokenClaimedABI = [
@@ -52,8 +55,9 @@ const handlers: Record<EventType, (event: ParsiqEvent) => Promise<void>> = {
 };
 
 @Injectable()
-export class SqsService {
-  async handleMessge(message: SQSMessage) {
+export class QueueService {
+  async handleMessage(message: SQSMessage) {
+    logger.warn(message);
     const parsiqEvent: ParsiqEvent = JSON.parse(message.Body);
     const handler = handlers[parsiqEvent.event];
     if (handler) {

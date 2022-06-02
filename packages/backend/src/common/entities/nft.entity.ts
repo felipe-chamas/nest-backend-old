@@ -13,6 +13,7 @@ import {
   ObjectIdColumn,
 } from 'typeorm';
 import { Metadata } from '../../models/nft/interface';
+import { AssetIdDto } from 'common/types';
 
 @Entity()
 @Index(['userId', 'nftCollectionId'])
@@ -21,7 +22,7 @@ export class Nft {
   id: ObjectID;
 
   @Column()
-  tokenId: string;
+  assetIds: AssetIdDto[];
 
   @Column()
   metadata: Metadata;
