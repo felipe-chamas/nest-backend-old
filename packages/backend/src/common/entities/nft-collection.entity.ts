@@ -1,12 +1,14 @@
 import { Nft } from './nft.entity';
 import {
   BeforeInsert,
-  BeforeUpdate,
   Column,
+  CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   ObjectID,
   ObjectIdColumn,
   OneToMany,
+  UpdateDateColumn,
 } from 'typeorm';
 
 import slugify from 'slugify';
@@ -38,21 +40,17 @@ export class NftCollection {
   @OneToMany(() => Nft, (nft) => nft.nftCollectionId)
   nfts: Nft[];
 
-  @Column()
+  @CreateDateColumn()
   createdAt: Date;
 
-  @Column()
+  @UpdateDateColumn()
   updatedAt: Date;
+
+  @DeleteDateColumn()
+  deletedAt: Date;
 
   @BeforeInsert()
   beforeSave() {
     this.slug = slugify(this.name);
-    this.createdAt = new Date();
-    this.updatedAt = new Date();
-  }
-
-  @BeforeUpdate()
-  update() {
-    this.updatedAt = new Date();
   }
 }

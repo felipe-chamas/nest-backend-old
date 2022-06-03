@@ -76,7 +76,7 @@ describe('UserService', () => {
     user = userRepo.create(mockCreateUser);
     await userRepo.save(user);
     const result = await service.findOne({ id: user.id });
-    expect(result.id).toEqual(user.id);
+    expect(result.id).toBeTruthy();
   });
 
   it('should update a user', async () => {
@@ -92,8 +92,7 @@ describe('UserService', () => {
   });
 
   it('should remove a user', async () => {
-    user = userRepo.create(mockCreateUser);
-    await userRepo.save(user);
+    user = mockUser;
 
     const result = await service.remove(user.id);
 

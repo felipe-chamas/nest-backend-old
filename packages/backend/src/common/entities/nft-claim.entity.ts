@@ -1,4 +1,13 @@
-import { Column, Entity, Index, ObjectID, ObjectIdColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  Index,
+  ObjectID,
+  ObjectIdColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { Metadata } from '../../models/nft/interface';
 
 @Entity()
@@ -18,4 +27,13 @@ export class NftClaim {
 
   @Column()
   nftCollectionId: string;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+  @DeleteDateColumn()
+  deletedAt: Date;
 }

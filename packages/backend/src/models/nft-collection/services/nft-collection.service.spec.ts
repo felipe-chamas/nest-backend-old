@@ -75,7 +75,8 @@ describe('NftCollectionService', () => {
     await nftCollectionRepo.save(nftCollection);
 
     const result = await service.findOne({ id: nftCollection.id });
-    expect(result.id).toEqual(nftCollection.id);
+
+    expect(result.id).toBe(mockNftCollection.id);
   });
 
   it('should update a nftCollection', async () => {

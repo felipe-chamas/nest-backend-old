@@ -1,13 +1,15 @@
 import { Nft } from './nft.entity';
 import {
   BeforeInsert,
-  BeforeUpdate,
   Column,
+  CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   Index,
   ObjectID,
   ObjectIdColumn,
   OneToMany,
+  UpdateDateColumn,
 } from 'typeorm';
 import { AccountIdDto } from 'common/types';
 
@@ -29,25 +31,17 @@ export class User {
   @Column()
   accountIds: AccountIdDto[];
 
-  @Column()
+  @CreateDateColumn()
   createdAt: Date;
 
-  @Column()
+  @UpdateDateColumn()
   updatedAt: Date;
+
+  @DeleteDateColumn()
+  deletedAt: Date;
 
   @OneToMany(() => Nft, (nft) => nft.user)
   nfts: Nft[];
-
-  @BeforeInsert()
-  insert() {
-    this.createdAt = new Date();
-    this.updatedAt = new Date();
-  }
-
-  @BeforeUpdate()
-  update() {
-    this.updatedAt = new Date();
-  }
 
   @BeforeInsert()
   setIsAdmin() {

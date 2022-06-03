@@ -1,11 +1,12 @@
 import { Status } from '../types';
 import {
-  BeforeInsert,
-  BeforeUpdate,
   Column,
+  CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   ObjectID,
   ObjectIdColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 import { Nft } from '../../models/nft';
@@ -37,20 +38,12 @@ export class Order {
   @Column()
   expireAt: Date;
 
-  @Column()
+  @CreateDateColumn()
   createdAt: Date;
 
-  @Column()
+  @UpdateDateColumn()
   updatedAt: Date;
 
-  @BeforeInsert()
-  expire() {
-    this.createdAt = new Date();
-    this.updatedAt = new Date();
-  }
-
-  @BeforeUpdate()
-  update() {
-    this.updatedAt = new Date();
-  }
+  @DeleteDateColumn()
+  deletedAt: Date;
 }

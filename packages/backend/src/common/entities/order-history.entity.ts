@@ -1,10 +1,11 @@
 import {
-  BeforeInsert,
-  BeforeUpdate,
   Column,
+  CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   ObjectID,
   ObjectIdColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 import { Order } from './order.entity';
@@ -28,20 +29,12 @@ export class OrderHistory {
   @Column()
   lastStatus: Status;
 
-  @Column()
+  @CreateDateColumn()
   createdAt: Date;
 
-  @Column()
+  @UpdateDateColumn()
   updatedAt: Date;
 
-  @BeforeInsert()
-  expire() {
-    this.createdAt = new Date();
-    this.updatedAt = new Date();
-  }
-
-  @BeforeUpdate()
-  update() {
-    this.updatedAt = new Date();
-  }
+  @DeleteDateColumn()
+  deletedAt: Date;
 }

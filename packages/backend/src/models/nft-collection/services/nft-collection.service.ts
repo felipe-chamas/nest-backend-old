@@ -1,11 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindConditions, FindManyOptions, Repository } from 'typeorm';
+import { FindConditions, FindManyOptions, ObjectID, Repository } from 'typeorm';
 import { CreateNftCollectionDto } from '../dto/create-nft-collection.dto';
 import { UpdateNftCollectionDto } from '../dto/update-nft-collection.dto';
 import { NftCollection } from '../../../common/entities/nft-collection.entity';
 import { Pagination } from 'common/decorators';
+
+import { recoveryAgent } from 'common/utils';
 import { AssetType } from 'caip';
+
 
 @Injectable()
 export class NftCollectionService {
@@ -62,6 +65,10 @@ export class NftCollectionService {
     if (!nftCollection)
       throw new NotFoundException(`Nft with id ${id} not found`);
 
-    return this.nftCollectionRepo.remove(nftCollection);
+    return this.nftCollectionRepo.softRemove(nftCollection);
+  }
+
+  async recover(id?: ObjectID) {
+    return await recoveryAgent(this.nftCollectionRepo, id);
   }
 }

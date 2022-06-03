@@ -2,15 +2,16 @@ import { NftCollection } from './nft-collection.entity';
 import { User } from './user.entity';
 
 import {
-  BeforeInsert,
-  BeforeUpdate,
   Column,
+  CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   Index,
   JoinColumn,
   ManyToOne,
   ObjectID,
   ObjectIdColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Metadata } from '../../models/nft/interface';
 import { AssetIdDto } from 'common/types';
@@ -42,20 +43,12 @@ export class Nft {
   @JoinColumn()
   nftCollection: NftCollection;
 
-  @Column()
+  @CreateDateColumn()
   createdAt: Date;
 
-  @Column()
+  @UpdateDateColumn()
   updatedAt: Date;
 
-  @BeforeInsert()
-  expire() {
-    this.createdAt = new Date();
-    this.updatedAt = new Date();
-  }
-
-  @BeforeUpdate()
-  update() {
-    this.updatedAt = new Date();
-  }
+  @DeleteDateColumn()
+  deletedAt: Date;
 }

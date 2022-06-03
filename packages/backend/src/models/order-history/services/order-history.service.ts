@@ -1,10 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindConditions, FindManyOptions, Repository } from 'typeorm';
+import { FindConditions, FindManyOptions, ObjectID, Repository } from 'typeorm';
 import { CreateOrderHistoryDto } from '../dto/create-order-history.dto';
 import { UpdateOrderHistoryDto } from '../dto/update-order-history.dto';
 import { Order, OrderHistory } from 'common/entities';
 import { Pagination } from 'common/decorators';
+import { recoveryAgent } from 'common/utils';
 @Injectable()
 export class OrderHistoryService {
   constructor(
@@ -55,6 +56,10 @@ export class OrderHistoryService {
     if (!orderHistory)
       throw new NotFoundException(`OrderHistory with id ${id} not found`);
 
-    return await this.orderHistoryRepo.remove(orderHistory);
+    return await this.orderHistoryRepo.softRemove(orderHistory);
+  }
+
+  async recover(id?: ObjectID) {
+    return await recoveryAgent(this.orderHistoryRepo, id);
   }
 }

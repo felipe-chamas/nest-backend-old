@@ -14,6 +14,7 @@ import { UpdateNftDto } from '../dto/update-nft.dto';
 
 import { User, Nft } from 'common/entities';
 import { Pagination } from 'common/decorators';
+import { recoveryAgent } from 'common/utils';
 import { AssetId } from 'caip';
 
 @Injectable()
@@ -68,6 +69,10 @@ export class NftService {
     const nft = await this.nftRepo.findOne(id);
     if (!nft) throw new NotFoundException(`Nft with id ${id} not found`);
 
-    return await this.nftRepo.remove(nft);
+    return await this.nftRepo.softRemove(nft);
+  }
+
+  async recover(id?: ObjectID) {
+    return await recoveryAgent(this.nftRepo, id);
   }
 }

@@ -2,7 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Pagination } from 'common/decorators';
 import { NftClaim } from 'common/entities';
-import { FindConditions, FindManyOptions, Repository } from 'typeorm';
+import { recoveryAgent } from 'common/utils';
+import { FindConditions, FindManyOptions, ObjectID, Repository } from 'typeorm';
 import { CreateNftClaimDto } from '../dto/create-nft-claim.dto';
 import { UpdateNftClaimDto } from '../dto/update-nft-claim.dto';
 
@@ -75,6 +76,10 @@ export class NftClaimService {
     const nftClaim = await this.nftClaimRepo.findOne(id);
     if (!nftClaim) throw new NotFoundException(`Nft with id ${id} not found`);
 
-    return await this.nftClaimRepo.remove(nftClaim);
+    return await this.nftClaimRepo.softRemove(nftClaim);
+  }
+
+  async recover(id?: ObjectID) {
+    return await recoveryAgent(this.nftClaimRepo, id);
   }
 }

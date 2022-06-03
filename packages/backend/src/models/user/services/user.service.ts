@@ -5,6 +5,7 @@ import { AccountId, AccountIdParams } from 'caip';
 import { AccountIdDto } from 'common/types';
 import { Pagination } from 'common/decorators';
 import { Nft, User } from 'common/entities';
+import { recoveryAgent } from 'common/utils';
 
 import {
   FindConditions,
@@ -102,6 +103,10 @@ export class UserService {
   async remove(id: ObjectID) {
     const user = await this.userRepo.findOne(id);
     if (!user) throw new NotFoundException(`User with id ${id} not found`);
-    return this.userRepo.remove(user);
+    return this.userRepo.softRemove(user);
+  }
+
+  async recover(id?: ObjectID) {
+    return await recoveryAgent(this.userRepo, id);
   }
 }

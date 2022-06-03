@@ -88,8 +88,7 @@ describe('NftClaimService', () => {
   });
 
   it('should delete an nft claim', async () => {
-    const nftClaim = nftClaimRepo.create(mockCreateNftClaim);
-    await nftClaimRepo.save(nftClaim);
+    const nftClaim = mockNftClaim;
     const id = nftClaim.id as unknown as string;
 
     const result = await service.remove(id);

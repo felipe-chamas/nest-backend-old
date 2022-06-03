@@ -3,7 +3,11 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 
 import { ObjectID, Repository } from 'typeorm';
 import { Nft } from '../../../common/entities';
-import { mockCreateNft, mockUpdateNft } from '../../../test/mocks/nft.mock';
+import {
+  mockCreateNft,
+  mockUpdateNft,
+  mockNft,
+} from '../../../test/mocks/nft.mock';
 import { NftService } from './nft.service';
 
 export type MockType<T> = {
@@ -85,11 +89,11 @@ describe('NftService', () => {
   });
 
   it('should delete an nft', async () => {
-    const nft = neftRepo.create(mockCreateNft);
-    await neftRepo.save(nft);
+    const nft = mockNft;
     const id = nft.id as unknown as string;
 
     const result = await service.remove(id as unknown as ObjectID);
+
     expect(result).toBeUndefined();
   });
 });
