@@ -24,8 +24,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: yarn install --frozen-lockfile
-      - run: yarn nx run-many --target=lint --projects=backend "--ci"
-      - run: yarn nx run-many --target=test --projects=backend "--ci"
+      - run: yarn nx run-many --target=lint --projects=backend
+      - run: yarn nx run-many --target=test --projects=backend
   deploy:
     name: Deploy Develop
     needs: [test]
