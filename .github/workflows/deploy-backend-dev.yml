@@ -2,6 +2,11 @@ name: Backend-CI/CD Development Deploy
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'packages/backend/src/*'
 
 env:
   REGISTRY_NAME: 'webserver-develop-ecr'
@@ -22,8 +27,8 @@ jobs:
           fetch-depth: 0
       - uses: nrwl/nx-set-shas@v2
       - run: yarn install --frozen-lockfile
-      - run: npx nx run-many --target=lint --projects=backend --base=remotes/origin/main
-      - run: npx nx run-many --target=test --projects=backend --base=remotes/origin/main
+      - run: npx nx run-many --target=lint --projects=backend
+      - run: npx nx run-many --target=test --projects=backend
   deploy:
     name: Deploy Develop
     needs: [test]
