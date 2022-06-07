@@ -17,7 +17,9 @@ jobs:
     container:
       image: node
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - uses: nrwl/nx-set-shas@v2
       - run: yarn install --frozen-lockfile
       - run: npx nx run-many --target=lint --projects=backend --base=remotes/origin/main
