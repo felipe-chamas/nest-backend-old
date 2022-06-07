@@ -1,5 +1,4 @@
 import { UpdateUserDto } from '../../models/user/dto/update-user.dto';
-import { CreateUserDto } from '../../models/user/dto/create-user.dto';
 import { User } from '../../common/entities/user.entity';
 
 export const mockUser = {
@@ -9,7 +8,7 @@ export const mockUser = {
   account: '0x01',
 } as unknown as User;
 
-export const mockCreateUser: CreateUserDto = {
+export const mockCreateUser = {
   name: 'John Doe',
   email: 'joshn@email.com',
   isAdmin: false,

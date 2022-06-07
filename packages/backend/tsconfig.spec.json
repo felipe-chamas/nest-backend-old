@@ -5,6 +5,7 @@
     "module": "commonjs",
     "types": ["jest", "node"],
     "baseUrl": "./src",
+    "esModuleInterop": true,
     "paths": {
       "@*": ["src/*"],
       "@models/*": ["src/models/*"],
