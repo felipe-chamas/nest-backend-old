@@ -1,9 +1,6 @@
 name: NX Checks
 
-on:
-  push:
-    branches-ignore:
-      - main
+on: push
 
 jobs:
   workspace-lint:

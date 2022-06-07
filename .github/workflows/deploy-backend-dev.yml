@@ -1,11 +1,7 @@
 name: Backend-CI/CD Development Deploy
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'packages/backend/src/*'
+  workflow_dispatch:
 
 env:
   REGISTRY_NAME: 'webserver-develop-ecr'
