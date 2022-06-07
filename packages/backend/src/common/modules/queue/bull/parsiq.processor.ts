@@ -11,7 +11,7 @@ interface JobData {
 @Processor('parsiq')
 export class ParsiqProcessor {
   constructor(private queueService: QueueService) {
-    logger.info('Sqs consumer started');
+    logger.info('Queue consumer started');
   }
 
   @Process()
