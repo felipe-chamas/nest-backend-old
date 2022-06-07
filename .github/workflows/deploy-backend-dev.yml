@@ -20,8 +20,8 @@ jobs:
       - uses: actions/checkout@v2
       - uses: nrwl/nx-set-shas@v2
       - run: yarn install --frozen-lockfile
-      - run: npx nx run-many --target=lint --projects=backend
-      - run: npx nx run-many --target=test --projects=backend
+      - run: npx nx run-many --target=lint --projects=backend --base=remotes/origin/main
+      - run: npx nx run-many --target=test --projects=backend --base=remotes/origin/main
   deploy:
     name: Deploy Develop
     needs: [test]
