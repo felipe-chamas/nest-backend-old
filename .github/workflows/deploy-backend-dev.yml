@@ -23,13 +23,9 @@ jobs:
       image: node
     steps:
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - uses: nrwl/nx-set-shas@v2
       - run: yarn install --frozen-lockfile
-      - run: npx nx run-many --target=setup --projects=backend "--ci"
-      - run: npx nx run-many --target=lint --projects=backend "--ci"
-      - run: npx nx run-many --target=test --projects=backend "--ci"
+      - run: yarn nx run-many --target=lint --projects=backend "--ci"
+      - run: yarn nx run-many --target=test --projects=backend "--ci"
   deploy:
     name: Deploy Develop
     needs: [test]
