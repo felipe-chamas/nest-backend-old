@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts v4.4.1 (token/ERC20/extensions/draft-ERC20Permit.sol)
-
+// solhint-disable ordering
+// solhint-disable-next-line compiler-version
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/draft-EIP712Upgradeable.sol";
@@ -38,11 +39,13 @@ abstract contract ERC20PermitUpgradeable is
      *
      * It's a good idea to use the same `name` that is defined as the ERC20 token name.
      */
+    // solhint-disable-next-line func-name-mixedcase
     function __ERC20Permit_init(string memory name) internal onlyInitializing {
         __EIP712_init_unchained(name, "1");
         __ERC20Permit_init_unchained(name);
     }
 
+    // solhint-disable-next-line func-name-mixedcase
     function __ERC20Permit_init_unchained(string memory) internal onlyInitializing {
         _PERMIT_TYPEHASH = keccak256(
             "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
@@ -61,6 +64,7 @@ abstract contract ERC20PermitUpgradeable is
         bytes32 r,
         bytes32 s
     ) public virtual override {
+        // solhint-disable-next-line not-rely-on-time
         require(block.timestamp <= deadline, "ERC20Permit: expired deadline");
 
         bytes32 structHash = keccak256(abi.encode(_PERMIT_TYPEHASH, owner, spender, value, _useNonce(owner), deadline));

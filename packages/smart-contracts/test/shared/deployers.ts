@@ -1,11 +1,10 @@
 import { Signer } from 'ethers';
-import hre, { ethers } from 'hardhat';
+import hre, { ethers, upgrades } from 'hardhat';
 import {
   TASK_DEPLOY_ACL,
   TASK_DEPLOY_GAME_TOKEN,
   TASK_DEPLOY_MOCK_ERC20,
   TASK_DEPLOY_NFT,
-  TASK_DEPLOY_NFT_BOX,
   TASK_DEPLOY_NFT_BOX_UNBOXING,
   TASK_DEPLOY_NFT_CLAIM,
   TASK_DEPLOY_SPLITTER,
@@ -17,11 +16,10 @@ import {
   AtLeast,
   ERC20MockConstructor,
   GameTokenConstructor,
-  NFTBoxConstructor,
+  MarketplaceConstructor,
   NFTBoxUnboxingConstructor,
   NFTClaimConstructor,
   NFTConstructor,
-  SplitterConstructor,
   StakingConstructor,
   TokenSaleConstructor,
 } from '../../tasks/types';
@@ -29,8 +27,9 @@ import {
   ACL__factory,
   ERC20Mock__factory,
   GameToken__factory,
-  NFTBox__factory,
   NFTClaim__factory,
+  NFTMock,
+  NFTMock__factory,
   NFTUnboxing__factory,
   NFT__factory,
   Splitter__factory,
@@ -38,6 +37,9 @@ import {
   TokenSale__factory,
   VRFCoordinatorV2Mock__factory,
 } from '../../typechain';
+import { MarketplaceMock__factory } from '../../typechain/factories/MarketplaceMock__factory';
+import { OrderValidatorMock__factory } from '../../typechain/factories/OrderValidatorMock__factory';
+import { MarketplaceMock } from '../../typechain/MarketplaceMock';
 import { MAX_UINT256 } from './constants';
 
 export async function deployMockERC20(
@@ -78,7 +80,7 @@ export async function deployGameToken(
 }
 
 export async function deployACL(deployer: Signer, args: ACLConstructor) {
-  const acl = await hre.run(TASK_DEPLOY_ACL, args);
+  const acl = await hre.run(TASK_DEPLOY_ACL, { silent: true, ...args });
 
   return ACL__factory.connect(acl, deployer);
 }
@@ -119,23 +121,9 @@ export async function deployNFT(
 }
 
 export async function deployTokenSale(deployer: Signer, args: TokenSaleConstructor) {
-  const tokenSale = await hre.run(TASK_DEPLOY_TOKEN_SALE, args);
+  const tokenSale = await hre.run(TASK_DEPLOY_TOKEN_SALE, { silent: true, ...args });
 
   return TokenSale__factory.connect(tokenSale, deployer);
-}
-
-export async function deployNFTBox(
-  deployer: Signer,
-  { acl, name = 'Testing NFT Box', symbol = 'NFTBOX', baseUri = 'ipfs://' }: AtLeast<NFTBoxConstructor, 'acl'>,
-) {
-  const nft = await hre.run(TASK_DEPLOY_NFT_BOX, {
-    acl,
-    name,
-    symbol,
-    baseUri,
-  });
-
-  return NFTBox__factory.connect(nft, deployer);
 }
 
 export async function deployNFTClaim(deployer: Signer, { acl, nft, silent }: NFTClaimConstructor) {
@@ -163,7 +151,78 @@ export async function deployNFTUnboxing(
     nftBox,
     requestConfirmations,
     subscriptionId,
+    silent: true,
   });
 
   return NFTUnboxing__factory.connect(nftUnboxing, deployer);
+}
+
+export async function deployNFTMock(
+  deployer: Signer,
+  {
+    acl,
+    name = 'Testing NFT',
+    symbol = 'TNFT',
+    baseUri = 'ipfs://',
+    burnEnabled = true,
+    maxTokenSupply = MAX_UINT256.toString(10),
+  }: AtLeast<NFTConstructor, 'acl'>,
+): Promise<NFTMock> {
+  const nft = await upgrades.deployProxy(
+    await ethers.getContractFactory('NFTMock'),
+    [name, symbol, baseUri, maxTokenSupply, burnEnabled, acl],
+    {
+      kind: 'uups',
+      initializer: 'initialize',
+    },
+  );
+
+  return NFTMock__factory.connect(nft.address, deployer);
+}
+
+export async function deployNFTBoxMock(
+  deployer: Signer,
+  { acl, name = 'Testing NFT Box', symbol = 'NFTBOX', baseUri = 'ipfs://' }: AtLeast<NFTConstructor, 'acl'>,
+): Promise<NFTMock> {
+  const nft = await upgrades.deployProxy(await ethers.getContractFactory('NFTBoxMock'), [name, symbol, baseUri, acl], {
+    kind: 'uups',
+    initializer: 'initialize',
+  });
+
+  return NFTMock__factory.connect(nft.address, deployer);
+}
+
+export async function deployMarketplace(
+  deployer: Signer,
+  {
+    acl,
+    name = 'Marketplace',
+    gameToken,
+    erc20FeePercent = 20000,
+    nftFee = ethers.utils.parseEther('1'),
+    custody,
+  }: AtLeast<MarketplaceConstructor, 'acl'>,
+): Promise<MarketplaceMock> {
+  const marketplace = await upgrades.deployProxy(
+    await ethers.getContractFactory('MarketplaceMock'),
+    [gameToken, name, erc20FeePercent, nftFee, custody, acl],
+    {
+      kind: 'uups',
+      initializer: 'initialize',
+    },
+  );
+
+  return MarketplaceMock__factory.connect(marketplace.address, deployer);
+}
+
+export async function deployOrderValidatorMock(
+  deployer: Signer,
+  { acl, name = 'Marketplace' }: { acl: string; name?: string },
+) {
+  const validator = await upgrades.deployProxy(await ethers.getContractFactory('OrderValidatorMock'), [name, acl], {
+    kind: 'uups',
+    initializer: 'initialize',
+  });
+
+  return OrderValidatorMock__factory.connect(validator.address, deployer);
 }

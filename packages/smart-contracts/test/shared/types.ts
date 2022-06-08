@@ -5,19 +5,22 @@ import { ethers } from 'hardhat';
 import {
   AccessControllable,
   ACL,
-  Splitter,
   ERC20Mock,
   ERC20TokenRecoverable,
   GameToken,
   GodModeTokenSale,
+  INFTPermitMock,
+  MarketplaceMock,
   NFT,
-  NFTBox,
   NFTClaim,
   NFTUnboxing,
+  OrderValidatorMock,
+  Splitter,
   TokenSale,
   VRFCoordinatorV2Mock,
   Staking,
 } from '../../typechain';
+import { solidityId } from './utils';
 
 declare module 'mocha' {
   interface Context {
@@ -26,6 +29,7 @@ declare module 'mocha' {
     contracts: Contracts;
     mocks: Mocks;
     godMode: GodMode;
+    chainId: number;
   }
 }
 
@@ -39,11 +43,13 @@ export interface Contracts {
   recoverable: ERC20TokenRecoverable;
   accessControllable: AccessControllable;
   tokenSale: TokenSale;
-  nftBox: NFTBox;
   nftClaim: NFTClaim;
   nftUnboxing: NFTUnboxing;
   vrfCoordinator: VRFCoordinatorV2Mock;
   collection: NFT[];
+  nftPermit: INFTPermitMock;
+  marketplace: MarketplaceMock;
+  orderValidatorMock: OrderValidatorMock;
 }
 
 export interface Mocks {
@@ -70,3 +76,23 @@ export const Roles: Record<string, string> = {
   OWNER_ROLE: ethers.utils.keccak256(ethers.utils.toUtf8Bytes('OWNER_ROLE')),
   MINTER_ROLE: ethers.utils.keccak256(ethers.utils.toUtf8Bytes('MINTER_ROLE')),
 } as const;
+
+export const AssetsTypes: Record<string, string> = {
+  ERC20: solidityId('ERC20'),
+  ERC721: solidityId('ERC721'),
+  UNDEFINED: solidityId('UNDEFINED'),
+};
+
+export interface ERC4494PermitMessage {
+  spender: string;
+  tokenId: number | string;
+  nonce: number | string;
+  deadline: number | string;
+}
+
+export interface Domain {
+  name: string;
+  version: string;
+  chainId: number;
+  verifyingContract: string;
+}

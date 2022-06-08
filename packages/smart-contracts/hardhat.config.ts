@@ -4,6 +4,7 @@ import '@typechain/hardhat';
 import { HardhatUserConfig } from 'hardhat/config';
 import '@nomiclabs/hardhat-etherscan';
 import 'hardhat-gas-reporter';
+import 'hardhat-contract-sizer';
 import 'solidity-coverage';
 import '@nomiclabs/hardhat-ethers';
 import '@nomiclabs/hardhat-waffle';
@@ -42,15 +43,15 @@ const config: HardhatUserConfig = {
     },
   },
   networks: {
-    ropsten: {
-      url: process.env.ROPSTEN_URL || '',
-      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
-    },
-    localhost: {
+    hardhat: {
       chainId: 31337,
       accounts: {
         mnemonic: MNEMONIC,
       },
+    },
+    ropsten: {
+      url: process.env.ROPSTEN_URL || '',
+      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     binanceTestnet: {
       url: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
@@ -60,6 +61,10 @@ const config: HardhatUserConfig = {
   gasReporter: {
     currency: 'USD',
     enabled: !!process.env.REPORT_GAS,
+  },
+  contractSizer: {
+    runOnCompile: process.env.REPORT_SIZE ? true : false,
+    disambiguatePaths: false,
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY,

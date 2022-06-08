@@ -67,7 +67,7 @@ export function unitTestNFTUnboxing(): void {
       );
 
       this.contracts.acl = acl;
-      this.contracts.nftBox = nftBox;
+      this.contracts.nft = nftBox;
       this.contracts.nftUnboxing = nftUnboxing;
       this.contracts.vrfCoordinator = coordinator;
       this.contracts.recoverable = ERC20TokenRecoverable__factory.connect(nftUnboxing.address, this.signers.admin);

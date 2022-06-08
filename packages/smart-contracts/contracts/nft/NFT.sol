@@ -4,6 +4,7 @@ pragma solidity 0.8.12;
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 import "../BaseRecoverableContract.sol";
+import "../nft-permit/ERC721WithPermit.sol";
 import "./NFTStorage.sol";
 import "./INFT.sol";
 
@@ -11,7 +12,14 @@ error MaximumTotalSupplyReached(uint256 maximum);
 error BurningIsNotEnabled();
 
 // solhint-disable no-empty-blocks
-contract NFT is INFT, ERC721EnumerableUpgradeable, ERC721URIStorageUpgradeable, BaseRecoverableContract, NFTStorage {
+contract NFT is
+    INFT,
+    ERC721EnumerableUpgradeable,
+    ERC721URIStorageUpgradeable,
+    BaseRecoverableContract,
+    ERC721WithPermit,
+    NFTStorage
+{
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
     event BaseURIChanged(string baseURI);
@@ -33,8 +41,9 @@ contract NFT is INFT, ERC721EnumerableUpgradeable, ERC721URIStorageUpgradeable, 
         bool burnEnabled,
         address aclContract
     ) external initializer {
-        __ERC721_init(name, symbol);
-        __ERC721Enumerable_init();
+        __ERC721_init_unchained(name, symbol);
+        __ERC721Enumerable_init_unchained();
+        __ERC721WithPermit_init_unchained();
         __BaseContract_init(aclContract);
         _baseTokenURI = baseTokenURI;
         _maxTokenSupply = maxTokenSupply;
@@ -89,7 +98,8 @@ contract NFT is INFT, ERC721EnumerableUpgradeable, ERC721URIStorageUpgradeable, 
     function supportsInterface(bytes4 interfaceId)
         public
         view
-        override(IERC165Upgradeable, ERC721Upgradeable, ERC721EnumerableUpgradeable)
+        virtual
+        override(IERC165Upgradeable, ERC721WithPermit, ERC721Upgradeable, ERC721EnumerableUpgradeable)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
@@ -105,6 +115,14 @@ contract NFT is INFT, ERC721EnumerableUpgradeable, ERC721URIStorageUpgradeable, 
         uint256 tokenId
     ) internal override(ERC721Upgradeable, ERC721EnumerableUpgradeable) {
         super._beforeTokenTransfer(from, to, tokenId);
+    }
+
+    function _transfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal virtual override(ERC721Upgradeable, ERC721WithPermit) {
+        super._transfer(from, to, tokenId);
     }
 
     function _baseURI() internal view override returns (string memory) {

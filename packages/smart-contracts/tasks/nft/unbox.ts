@@ -20,6 +20,9 @@ task(TASK_NFT_BOX_UNBOX, 'Unbox NFT Box')
     console.log(`Transaction: ${tx.hash}`);
 
     const receipt = await tx.wait();
+    if (receipt.status !== 1) {
+      throw new Error(`Transaction ${tx.hash} failed!`);
+    }
 
     const events = await contract.queryFilter(contract.filters.Unboxed(), receipt.blockNumber);
     events

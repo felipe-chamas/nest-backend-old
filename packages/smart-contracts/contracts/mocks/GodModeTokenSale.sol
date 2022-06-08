@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.12;
 
-import "../tokenSale/TokenSale.sol";
+import "../token-sale/TokenSale.sol";
 
 // solhint-disable func-name-mixedcase,private-vars-leading-underscore
 contract GodModeTokenSale is TokenSale {

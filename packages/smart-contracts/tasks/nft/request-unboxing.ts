@@ -16,10 +16,14 @@ task(TASK_NFT_BOX_REQUEST_UNBOXING, 'Request NFT Box Unboxing')
     console.log(`Transaction: ${tx.hash}`);
 
     const receipt = await tx.wait();
+    if (receipt.status != 1) {
+      throw new Error(`Transaction ${tx.hash} failed!`);
+    }
 
     const events = await contract.queryFilter(contract.filters.UnboxingRequested(), receipt.blockNumber);
     events
       .filter(x => x.transactionHash === tx.hash)
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       .forEach(({ args }) => console.log(`Request ID: ${args!.requestId}`));
   });
 

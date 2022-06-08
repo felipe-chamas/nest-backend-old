@@ -1,4 +1,6 @@
-export type BaseConstructor = { silent: boolean };
+import { BigNumberish } from 'ethers';
+
+export type BaseConstructor = { silent?: boolean };
 export type ERC20MockConstructor = { name: string; symbol: string; decimals: number; supply: string };
 export type ACLConstructor = BaseConstructor & { admin: string; operator: string };
 export type SplitterConstructor = BaseConstructor;
@@ -41,6 +43,14 @@ export type NFTBoxUnboxingConstructor = BaseConstructor & {
   subscriptionId: string;
   keyHash: string;
   addToACL?: boolean;
+};
+export type MarketplaceConstructor = BaseConstructor & {
+  acl: string;
+  name: string;
+  erc20FeePercent: BigNumberish;
+  nftFee: BigNumberish;
+  custody: string;
+  gameToken: string;
 };
 
 export type AtLeast<T, K extends keyof T> = Partial<T> & Pick<T, K>;

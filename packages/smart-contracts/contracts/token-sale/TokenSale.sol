@@ -82,6 +82,7 @@ contract TokenSale is BaseRecoverableContract, TokenSaleStorage {
         _setCustody(custody);
     }
 
+    // solhint-disable-next-line code-complexity
     function addRound(
         uint64 start,
         uint32 duration,
@@ -310,6 +311,7 @@ contract TokenSale is BaseRecoverableContract, TokenSaleStorage {
         return uint112((uint256(_rounds[roundIndex].price) * amount) / _ONE);
     }
 
+    // solhint-disable-next-line code-complexity
     function _getCurrentRoundIndex() internal view returns (uint16) {
         uint256 lastRoundIndex = _rounds.length;
         if (lastRoundIndex == 0) revert NoRounds();

@@ -11,6 +11,7 @@ abstract contract BaseContract is AccessControllable, UUPSUpgradeable {
      * variables without shifting down storage in the inheritance chain.
      * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
      */
+    // slither-disable-next-line unused-state
     uint256[50] private __gap;
 
     function __BaseContract_init(address acl) internal onlyInitializing {

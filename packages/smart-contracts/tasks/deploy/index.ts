@@ -7,3 +7,4 @@ export * from './05_nft_claim';
 export * from './06_nft_unboxing';
 export * from './07_splitter';
 export * from './08_staking';
+export * from './08_marketplace';

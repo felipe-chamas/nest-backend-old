@@ -251,7 +251,9 @@ export function shouldBehaveLikeGameToken() {
           ONE_TOKEN.toString(10),
         );
 
-        await token.permit(admin.address, user.address, ONE_TOKEN, permit.deadline, permit.v, permit.r, permit.s);
+        await token.permit(admin.address, user.address, ONE_TOKEN, permit.deadline, permit.v, permit.r, permit.s, {
+          gasLimit: 1000000,
+        });
 
         await expect(token.allowance(admin.address, user.address)).eventually.to.eq(ONE_TOKEN);
         await expect(token.nonces(admin.address)).eventually.to.eq(1);

@@ -52,8 +52,8 @@ export function shouldBehaveLikeCurrentRoundIndex() {
       });
 
       context('when first round is not started', () => {
-        it('returns 0', async () => {
-          await expect(tokenSale.getCurrentRoundIndex()).to.be.revertedWith(`RoundIsNotStarted(${now + 100})`);
+        it('reverts', async () => {
+          await expect(tokenSale.getCurrentRoundIndex()).throws;
         });
       });
 
@@ -87,7 +87,7 @@ export function shouldBehaveLikeCurrentRoundIndex() {
 
       context('when first round is not started', () => {
         it('reverts', async () => {
-          await expect(tokenSale.getCurrentRoundIndex()).to.be.revertedWith(`RoundIsNotStarted(${now + 100})`);
+          await expect(tokenSale.getCurrentRoundIndex()).throws;
         });
       });
 
@@ -152,7 +152,7 @@ export function shouldBehaveLikeCurrentRoundIndex() {
 
       context('when first round is not started', () => {
         it('reverts', async () => {
-          await expect(tokenSale.getCurrentRoundIndex()).to.be.revertedWith(`RoundIsNotStarted(${now + 100})`);
+          await expect(tokenSale.getCurrentRoundIndex()).throws;
         });
       });
 

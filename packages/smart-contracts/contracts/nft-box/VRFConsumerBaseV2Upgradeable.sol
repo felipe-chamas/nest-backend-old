@@ -103,10 +103,12 @@ abstract contract VRFConsumerBaseV2Upgradeable is Initializable, ContextUpgradea
     /**
      * @param vrfCoordinator address of VRFCoordinator contract
      */
+    // solhint-disable-next-line func-name-mixedcase
     function __VRFConsumerBaseV2_init(address vrfCoordinator) internal onlyInitializing {
         __VRFConsumerBaseV2_init_unchained(vrfCoordinator);
     }
 
+    // solhint-disable-next-line func-name-mixedcase
     function __VRFConsumerBaseV2_init_unchained(address vrfCoordinator) internal onlyInitializing {
         __Context_init();
         _vrfCoordinator = vrfCoordinator;

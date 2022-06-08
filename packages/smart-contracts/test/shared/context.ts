@@ -15,6 +15,7 @@ export function baseContext(description: string, testSuite: () => void): void {
         custody,
         user,
       };
+      this.chainId = await admin.getChainId();
       this.contracts = {} as Contracts;
       this.mocks = {} as Mocks;
       this.godMode = {} as GodMode;

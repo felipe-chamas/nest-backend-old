@@ -5,17 +5,24 @@ import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "../dependencies/@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
 import "../dependencies/@openzeppelin/contracts-upgradeable/token/ERC20/extensions/draft-ERC20PermitUpgradeable.sol";
 import "../BaseRecoverableContract.sol";
+import "./IGameToken.sol";
 
 error BatchSizeTooLarge(uint256 maximum, uint256 actual);
 
 // solhint-disable no-empty-blocks
-contract GameToken is ERC20BurnableUpgradeable, PausableUpgradeable, ERC20PermitUpgradeable, BaseRecoverableContract {
+contract GameToken is
+    ERC20BurnableUpgradeable,
+    PausableUpgradeable,
+    ERC20PermitUpgradeable,
+    BaseRecoverableContract,
+    IGameToken
+{
     struct Payee {
         address account;
         uint256 amount;
     }
 
-    uint256 private constant BATCH_SIZE_LIMIT = 100;
+    uint256 private constant _BATCH_SIZE_LIMIT = 100;
 
     /**
      * @custom:oz-upgrades-unsafe-allow constructor
@@ -45,25 +52,19 @@ contract GameToken is ERC20BurnableUpgradeable, PausableUpgradeable, ERC20Permit
     }
 
     function transferBatch(Payee[] calldata payee) external {
-        if (payee.length > BATCH_SIZE_LIMIT) revert BatchSizeTooLarge(BATCH_SIZE_LIMIT, payee.length);
+        if (payee.length > _BATCH_SIZE_LIMIT) revert BatchSizeTooLarge(_BATCH_SIZE_LIMIT, payee.length);
 
         uint256 total = _getTotal(payee);
         _transferBatch(_msgSender(), total, payee);
     }
 
     function transferFromBatch(address from, Payee[] calldata payee) external {
-        if (payee.length > BATCH_SIZE_LIMIT) revert BatchSizeTooLarge(BATCH_SIZE_LIMIT, payee.length);
+        if (payee.length > _BATCH_SIZE_LIMIT) revert BatchSizeTooLarge(_BATCH_SIZE_LIMIT, payee.length);
 
         address spender = _msgSender();
         uint256 total = _getTotal(payee);
         _spendAllowance(from, spender, total);
         _transferBatch(from, total, payee);
-    }
-
-    function _getTotal(Payee[] calldata payee) internal pure returns (uint256 total) {
-        for (uint256 i = 0; i < payee.length; i++) {
-            total += payee[i].amount;
-        }
     }
 
     /**
@@ -103,5 +104,11 @@ contract GameToken is ERC20BurnableUpgradeable, PausableUpgradeable, ERC20Permit
         uint256 amount
     ) internal override whenNotPaused {
         super._beforeTokenTransfer(from, to, amount);
+    }
+
+    function _getTotal(Payee[] calldata payee) internal pure returns (uint256 total) {
+        for (uint256 i = 0; i < payee.length; i++) {
+            total += payee[i].amount;
+        }
     }
 }

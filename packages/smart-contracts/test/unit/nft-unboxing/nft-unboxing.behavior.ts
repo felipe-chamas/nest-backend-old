@@ -1,7 +1,7 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
 import { BigNumber } from 'ethers';
-import { ERC721Upgradeable, NFT, NFTBox, NFTUnboxing, VRFCoordinatorV2Mock } from '../../../typechain';
+import { ERC721Upgradeable, NFT, NFTUnboxing, VRFCoordinatorV2Mock } from '../../../typechain';
 import { Roles } from '../../shared/types';
 import { getTransferEvent, getUnboxedEvent } from '../../shared/utils';
 
@@ -9,7 +9,7 @@ export const NFT_BOX_BASE_URI = 'http://harvest.io/box/';
 
 export function shouldBehaveLikeNFTUnboxing() {
   context('NFT Unboxing', () => {
-    let nftBox: NFTBox;
+    let nft: NFT;
     let nftUnboxing: NFTUnboxing;
     let vrfCoordinator: VRFCoordinatorV2Mock;
     let stranger: SignerWithAddress;
@@ -20,12 +20,12 @@ export function shouldBehaveLikeNFTUnboxing() {
     let collection: NFT[];
 
     beforeEach(async function () {
-      ({ nftBox, nftUnboxing, vrfCoordinator, collection } = this.contracts);
+      ({ nft, nftUnboxing, vrfCoordinator, collection } = this.contracts);
       ({ stranger, operator, user, other } = this.signers);
 
-      const tx = await nftBox.connect(operator).mint(user.address);
+      const tx = await nft.connect(operator).mint(user.address);
 
-      ({ tokenId: nftBoxId } = await getTransferEvent(tx, nftBox as unknown as ERC721Upgradeable));
+      ({ tokenId: nftBoxId } = await getTransferEvent(tx, nft as unknown as ERC721Upgradeable));
     });
 
     context('when user requests unboxing', () => {
@@ -73,7 +73,7 @@ export function shouldBehaveLikeNFTUnboxing() {
     context('when user approves token', () => {
       context('for all', () => {
         beforeEach(async () => {
-          await nftBox.connect(user).setApprovalForAll(other.address, true);
+          await nft.connect(user).setApprovalForAll(other.address, true);
         });
 
         it('succeeds', async () => {
@@ -85,7 +85,7 @@ export function shouldBehaveLikeNFTUnboxing() {
 
       context('for tokenId', () => {
         beforeEach(async () => {
-          await nftBox.connect(user).approve(other.address, nftBoxId);
+          await nft.connect(user).approve(other.address, nftBoxId);
         });
 
         it('succeeds', async () => {
@@ -97,10 +97,10 @@ export function shouldBehaveLikeNFTUnboxing() {
 
       context('for tokenId, but other user uses wrong tokenId', () => {
         beforeEach(async () => {
-          const tx = await nftBox.connect(operator).mint(user.address);
-          const event = await getTransferEvent(tx, nftBox as unknown as ERC721Upgradeable);
+          const tx = await nft.connect(operator).mint(user.address);
+          const event = await getTransferEvent(tx, nft as unknown as ERC721Upgradeable);
 
-          await nftBox.connect(user).approve(other.address, event.tokenId);
+          await nft.connect(user).approve(other.address, event.tokenId);
         });
 
         it('reverts', async () => {
@@ -142,7 +142,7 @@ export function shouldBehaveLikeNFTUnboxing() {
           const tx = await nftUnboxing.connect(operator).completeUnboxing(
             requestId,
             collection.map(x => x.address),
-            collection.map(_ => 2),
+            collection.map(() => 2),
           );
 
           await expect(tx)
@@ -168,7 +168,7 @@ export function shouldBehaveLikeNFTUnboxing() {
           await nftUnboxing.connect(operator).completeUnboxing(
             requestId,
             collection.map(x => x.address),
-            collection.map(_ => 1),
+            collection.map(() => 1),
           );
         });
 
@@ -177,7 +177,7 @@ export function shouldBehaveLikeNFTUnboxing() {
             nftUnboxing.connect(operator).completeUnboxing(
               requestId,
               collection.map(x => x.address),
-              collection.map(_ => 1),
+              collection.map(() => 1),
             ),
           ).to.be.reverted;
         });
@@ -189,7 +189,7 @@ export function shouldBehaveLikeNFTUnboxing() {
             nftUnboxing.connect(stranger).completeUnboxing(
               requestId,
               collection.map(x => x.address),
-              collection.map(_ => 1),
+              collection.map(() => 1),
             ),
           ).to.be.revertedWith(
             `AccessControl: account ${stranger.address.toLowerCase()} is missing role ${Roles.OPERATOR_ROLE}`,
@@ -199,16 +199,14 @@ export function shouldBehaveLikeNFTUnboxing() {
 
       context('when user transfers NFT box to other user after requesting unboxing', () => {
         beforeEach(async () => {
-          await nftBox
-            .connect(user)
-            ['safeTransferFrom(address,address,uint256)'](user.address, other.address, nftBoxId);
+          await nft.connect(user)['safeTransferFrom(address,address,uint256)'](user.address, other.address, nftBoxId);
         });
 
         it('mints unboxed tokens to other user', async () => {
           await nftUnboxing.connect(operator).completeUnboxing(
             requestId,
             collection.map(x => x.address),
-            collection.map(_ => 1),
+            collection.map(() => 1),
           );
 
           await expect(collection[0].balanceOf(other.address)).eventually.eq(1);
@@ -234,7 +232,7 @@ export function shouldBehaveLikeNFTUnboxing() {
             nftUnboxing.connect(operator).completeUnboxing(
               999999,
               collection.map(x => x.address),
-              collection.map(_ => 1),
+              collection.map(() => 1),
             ),
           ).to.revertedWith(`UnregisteredRequestId(999999)`);
         });

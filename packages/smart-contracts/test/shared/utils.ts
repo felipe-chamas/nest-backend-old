@@ -1,7 +1,19 @@
-import { ContractTransaction } from 'ethers';
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+import { BigNumberish, ContractTransaction, Signer } from 'ethers';
+import { defaultAbiCoder, hexDataSlice, solidityKeccak256, solidityPack, _TypedDataEncoder } from 'ethers/lib/utils';
+import { TypedDataField } from 'ethers/node_modules/@ethersproject/abstract-signer';
 import { ethers } from 'hardhat';
 import { MerkleTree } from 'merkletreejs';
-import { ERC721Upgradeable, NFTUnboxing, Staking, TokenSale, VRFCoordinatorV2Mock } from '../../typechain';
+import {
+  ERC721Upgradeable,
+  IERC721MetadataUpgradeable__factory,
+  NFTUnboxing,
+  Staking,
+  TokenSale,
+  VRFCoordinatorV2Mock,
+} from '../../typechain';
+import { Assets, Orders } from '../../typechain/Marketplace';
+import { Domain, ERC4494PermitMessage } from './types';
 
 export const getTransferEvent = async (tx: ContractTransaction, erc721: ERC721Upgradeable) => {
   const receipt = await tx.wait();
@@ -60,3 +72,141 @@ export const getStakeEvent = async (ptx: Promise<ContractTransaction>, staking: 
 
   return events[0].args;
 };
+const NONCES_FN_SIG_HASH = '0x141a468c';
+const MAX_INT = '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+
+// helper to sign using (spender, tokenId, nonce, deadline) EIP 712
+export const signERC4494Permit = async function (
+  provider: SignerWithAddress,
+  token: string | Domain,
+  spender: string,
+  tokenId: string,
+  nonce?: number,
+  deadline: number | string = MAX_INT,
+) {
+  const tokenAddress = (token as Domain).verifyingContract || (token as string);
+
+  const message: ERC4494PermitMessage = {
+    spender,
+    tokenId,
+    nonce:
+      nonce ??
+      (await provider.call({
+        to: tokenAddress,
+        data: `${NONCES_FN_SIG_HASH}${BigInt(tokenId).toString(16).padStart(64, '0')}`,
+      })),
+    deadline: deadline ?? MAX_INT,
+  };
+
+  const domain = await getDomain(provider, token);
+  const typedData = createTypedERC4494Data(message, domain);
+  const sig = await signWithEthers(provider, typedData);
+
+  return { sig, ...message };
+};
+
+const createTypedERC4494Data = (message: ERC4494PermitMessage, domain: Domain) => ({
+  types: {
+    Permit: [
+      { name: 'spender', type: 'address' },
+      { name: 'tokenId', type: 'uint256' },
+      { name: 'nonce', type: 'uint256' },
+      { name: 'deadline', type: 'uint256' },
+    ],
+  },
+  primaryType: 'Permit',
+  domain,
+  message,
+});
+
+const getDomain = async (provider: Signer, token: string | Domain): Promise<Domain> => {
+  if (typeof token !== 'string') {
+    return token as Domain;
+  }
+
+  const tokenAddress = token as string;
+
+  const [name, chainId] = await Promise.all([getTokenName(provider, tokenAddress), provider.getChainId()]);
+
+  return { name, version: '1', chainId, verifyingContract: tokenAddress };
+};
+
+const getTokenName = async (provider: Signer, token: string) =>
+  await IERC721MetadataUpgradeable__factory.connect(token, provider).name();
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const signWithEthers = async (signer: any, typeData: any): Promise<string> => {
+  const rawSignature = await (signer.signTypedData
+    ? signer.signTypedData(typeData.domain, typeData.types, typeData.message)
+    : signer._signTypedData(typeData.domain, typeData.types, typeData.message));
+
+  return rawSignature;
+};
+
+/**
+ * Calculates ID by taking 4 byte of the provided string hashed value.
+ * @param value Arbitrary string.
+ */
+export const solidityId = (value: string) => hexDataSlice(ethers.utils.id(value), 0, 4);
+
+export class OrderSigner {
+  private readonly encoder: _TypedDataEncoder;
+  private readonly types: Record<string, TypedDataField[]>;
+  constructor(private readonly chainId: BigNumberish, private readonly contractAddress: string) {
+    // Order(address maker,Asset[] makeAssets,address taker,Asset[] takeAssets,uint256 salt,uint256 start,uint256 end)
+    this.types = {
+      Order: [
+        { name: 'maker', type: 'address' },
+        { name: 'makeAssets', type: 'Asset[]' },
+        { name: 'taker', type: 'address' },
+        { name: 'takeAssets', type: 'Asset[]' },
+        { name: 'salt', type: 'uint256' },
+        { name: 'start', type: 'uint256' },
+        { name: 'end', type: 'uint256' },
+      ],
+      Asset: [
+        // Asset(AssetId id,uint256 value)
+        { name: 'id', type: 'AssetId' },
+        { name: 'value', type: 'uint256' },
+      ],
+      AssetId: [
+        // AssetId(bytes4 class,bytes data)
+        { name: 'class', type: 'bytes4' },
+        { name: 'data', type: 'bytes' },
+      ],
+    };
+    this.encoder = new _TypedDataEncoder(this.types);
+  }
+
+  getOrderHash(order: Orders.OrderStruct) {
+    return this.encoder.hashStruct('Order', order);
+  }
+
+  getAssetHash(asset: Assets.AssetStruct) {
+    return this.encoder.hashStruct('Asset', asset);
+  }
+
+  getAssetsHash(assets: Assets.AssetStruct[]) {
+    const hashedAssets = assets.map(x => this.getAssetHash(x));
+    const encoded = solidityPack(['bytes32[]'], [hashedAssets]);
+    return solidityKeccak256(['bytes'], [encoded]);
+  }
+
+  getOrderKeyHash(order: Orders.OrderStruct) {
+    const encoded = defaultAbiCoder.encode(
+      ['address', 'bytes32', 'bytes32', 'uint256'],
+      [order.maker, this.getAssetsHash(order.makeAssets), this.getAssetsHash(order.takeAssets), order.salt],
+    );
+    return solidityKeccak256(['bytes'], [encoded]);
+  }
+
+  async signOrder(signer: SignerWithAddress, order: Orders.OrderStruct): Promise<string> {
+    const domain = {
+      chainId: this.chainId,
+      verifyingContract: this.contractAddress,
+      name: 'Marketplace',
+      version: '1',
+    };
+    return await signer._signTypedData(domain, this.types, order);
+  }
+}

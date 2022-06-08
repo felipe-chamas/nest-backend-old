@@ -8,9 +8,9 @@ interface INFT is IERC721Upgradeable {
 
     function burn(uint256 tokenId) external;
 
-    function isApprovedOrOwner(address spender, uint256 tokenId) external view returns (bool);
-
     function setBaseTokenURI(string calldata baseTokenURI) external;
 
     function setTokenURI(uint256 tokenId, string calldata _tokenURI) external;
+
+    function isApprovedOrOwner(address spender, uint256 tokenId) external view returns (bool);
 }

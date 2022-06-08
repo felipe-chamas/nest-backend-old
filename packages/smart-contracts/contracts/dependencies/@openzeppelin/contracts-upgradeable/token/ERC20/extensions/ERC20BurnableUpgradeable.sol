@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts (last updated v4.5.0) (token/ERC20/extensions/ERC20Burnable.sol)
-
+// solhint-disable ordering
+// solhint-disable-next-line compiler-version
 pragma solidity ^0.8.0;
 
 import "../ERC20Upgradeable.sol";
@@ -13,8 +14,10 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
  * recognized off-chain (via event analysis).
  */
 abstract contract ERC20BurnableUpgradeable is Initializable, ContextUpgradeable, ERC20Upgradeable {
+    // solhint-disable-next-line func-name-mixedcase
     function __ERC20Burnable_init() internal onlyInitializing {}
 
+    // solhint-disable-next-line func-name-mixedcase
     function __ERC20Burnable_init_unchained() internal onlyInitializing {}
 
     /**

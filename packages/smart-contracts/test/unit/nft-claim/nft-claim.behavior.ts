@@ -49,7 +49,7 @@ export function shouldBehaveLikeNFTClaim() {
     beforeEach(async () => {
       root = tree.getHexRoot();
       await nftClaim.connect(operator).addMerkleRoot(root);
-      const leaf = createNFTClaimMerkleTreeLeaf(await user.getChainId(), nftClaim.address, user.address, 2);
+      const leaf = createNFTClaimMerkleTreeLeaf(await operator.getChainId(), nftClaim.address, user.address, 2);
       userProof = tree.getHexProof(leaf);
     });
 
