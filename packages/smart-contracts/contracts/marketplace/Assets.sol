@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.12;
+pragma solidity 0.8.14;
 
 library Assets {
     error AssetsLengthDoNotMatch(uint256 leftAssetLength, uint256 rightAssetLength);
