@@ -1,4 +1,5 @@
 import { AgreementSession } from 'auth/providers/signature/models';
+import { Role } from '../enums/role.enum';
 import { ObjectID } from 'typeorm';
 
 declare module 'express-session' {
@@ -6,6 +7,7 @@ declare module 'express-session' {
     agreement?: AgreementSession;
     user?: {
       id: ObjectID;
+      roles: Role[];
     };
   }
 }

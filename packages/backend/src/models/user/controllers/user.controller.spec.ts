@@ -3,9 +3,11 @@ import { UpdateUserDto } from '../dto/update-user.dto';
 import { UserController } from './user.controller';
 import { UserService } from '../services/user.service';
 
-import { mockUser } from '../../../test/mocks/user.mock';
+import { mockUser, mockAdmin } from '../../../test/mocks/user.mock';
 import { ObjectID } from 'typeorm';
 import { User } from '../../../common/entities';
+import { UserDto } from '../dto/user.dto';
+import { Role } from 'common/enums/role.enum';
 
 describe('UserController', () => {
   let controller: UserController;
@@ -17,11 +19,10 @@ describe('UserController', () => {
       findOne: jest.fn().mockImplementation(async (id) => {
         return { ...mockUser, id: id as unknown as ObjectID } as User;
       }),
-      update: jest.fn().mockImplementation(async () => {
-        return {
-          ...mockUser,
-        } as unknown as User;
-      }),
+      update: (_: ObjectID, updatedUser: Partial<UpdateUserDto>) =>
+        Promise.resolve({
+          ...updatedUser,
+        } as unknown as User),
       remove: jest.fn(),
     };
 
@@ -40,5 +41,49 @@ describe('UserController', () => {
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
+  });
+
+  it('should fetch an user', async () => {
+    const result = await controller.findOne(mockUser.id);
+
+    expect(result).toMatchObject({
+      email: mockUser.email,
+      name: mockUser.name,
+    });
+  });
+
+  describe('Update', () => {
+    it('should update an user', async () => {
+      const updatedUser = {
+        email: 'testEmail@test.com',
+        roles: [Role.USER_ADMIN],
+      } as UpdateUserDto;
+
+      const result = await controller.update(
+        mockUser.id,
+        updatedUser,
+        mockAdmin
+      );
+
+      expect(result).toMatchObject(updatedUser);
+    });
+
+    it('should not update roles when logged in user is not ROLES_ADMIN', async () => {
+      const result = await controller.update(
+        mockUser.id,
+        {
+          email: 'testEmail@test.com',
+          roles: [Role.USER_ADMIN],
+        } as UpdateUserDto,
+        mockUser
+      );
+
+      expect(result).toMatchObject({ roles: null });
+    });
+  });
+
+  it('should delete an user', () => {
+    controller.remove(mockUser.id);
+    expect(service.remove).toHaveBeenCalledWith(mockUser.id);
   });
 });

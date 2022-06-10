@@ -12,6 +12,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { AccountIdDto } from 'common/types';
+import { Role } from '../enums/role.enum';
 
 @Entity()
 @Index(['email'])
@@ -26,7 +27,7 @@ export class User {
   email?: string;
 
   @Column()
-  isAdmin: boolean;
+  roles: Role[];
 
   @Column()
   accountIds: AccountIdDto[];
@@ -42,9 +43,4 @@ export class User {
 
   @OneToMany(() => Nft, (nft) => nft.user)
   nfts: Nft[];
-
-  @BeforeInsert()
-  setIsAdmin() {
-    this.isAdmin = this.isAdmin || false;
-  }
 }

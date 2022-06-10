@@ -5,35 +5,35 @@ import {
   Patch,
   Param,
   Delete,
-  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 
 import { ObjectID } from 'typeorm';
-// import { AuthGuard, Serialize, User } from 'common';
 
 import { UserService } from '../services/user.service';
 
 import { UserDto } from '../dto/user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 
-import { CurrentUser } from '../decorators';
 import { Serialize } from 'common/interceptors';
 
 import { AuthGuard } from 'common/guards';
-import { User } from 'common/entities';
 import { GetPagination, Pagination } from 'common/decorators';
+import { Roles } from 'common/decorators/roles.decorators';
+import { Role } from 'common/enums/role.enum';
+import { CurrentUser } from '../decorators';
+
+import { User } from 'common/entities';
 
 @Controller('user')
 @Serialize(UserDto)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @Roles(Role.USER_ADMIN)
   @UseGuards(AuthGuard)
   @Get()
-  findAll(@CurrentUser() user: User, @GetPagination() pagination: Pagination) {
-    if (!user?.isAdmin) throw new UnauthorizedException();
-
+  findAll(@GetPagination() pagination: Pagination) {
     return this.userService.findAll(pagination);
   }
 
@@ -42,17 +42,25 @@ export class UserController {
     return this.userService.findOne({ id });
   }
 
+  @Roles(Role.USER_ADMIN, Role.ROLES_ADMIN)
   @UseGuards(AuthGuard)
   @Patch(':id')
-  update(@Param('id') id: ObjectID, @Body() updateUserDto: UpdateUserDto) {
+  update(
+    @Param('id') id: ObjectID,
+    @Body() updateUserDto: UpdateUserDto,
+    @CurrentUser() user: User
+  ) {
+    if (!user.roles.includes(Role.ROLES_ADMIN)) {
+      updateUserDto.roles = null;
+    }
+
     return this.userService.update(id, updateUserDto);
   }
 
+  @Roles(Role.USER_ADMIN)
   @UseGuards(AuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: ObjectID, @CurrentUser() user: User) {
-    if (!user?.isAdmin) throw new UnauthorizedException();
-
+  remove(@Param('id') id: ObjectID) {
     return this.userService.remove(id);
   }
 }

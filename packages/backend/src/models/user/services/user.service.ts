@@ -96,6 +96,10 @@ export class UserService {
     const user = await this.userRepo.findOne(id);
     if (!user) throw new NotFoundException(`User with id ${id} not found`);
 
+    if (updatedUser.roles === null) {
+      updatedUser.roles = user.roles;
+    }
+
     Object.assign(user, updatedUser);
     return await this.userRepo.save(user);
   }

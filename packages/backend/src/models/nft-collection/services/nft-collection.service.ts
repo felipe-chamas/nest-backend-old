@@ -9,7 +9,6 @@ import { Pagination } from 'common/decorators';
 import { recoveryAgent } from 'common/utils';
 import { AssetType } from 'caip';
 
-
 @Injectable()
 export class NftCollectionService {
   constructor(
