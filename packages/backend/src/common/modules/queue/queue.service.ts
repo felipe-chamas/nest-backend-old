@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { logger } from 'common/providers';
-import { ChainId } from 'common/types';
+import { ChainIdReference } from 'common/types';
 import { ethers } from 'ethers';
 import { SQSMessage } from 'sqs-consumer';
 import tokenClaimed from './listeners/token-claimed';
@@ -11,8 +12,7 @@ type EventType = 'TokenClaimed' | 'Transfer';
 export interface ParsiqEvent {
   tx: string;
   event: EventType;
-  contractAddress: string;
-  chainId: ChainId;
+  assetType: string;
 }
 
 const TokenClaimedABI = [
@@ -48,6 +48,28 @@ export function parseLogs(logs: ethers.providers.Log[]): Array<{
     })
     .filter((x) => x.event);
 }
+
+const config = new ConfigService();
+
+export const getSolanaCluster = (network: string) => {
+  switch (network) {
+    case ChainIdReference.SOLANA_TESTNET:
+      return 'testnet';
+    case ChainIdReference.SOLANA_DEVNET:
+      return 'devnet';
+    case ChainIdReference.SOLANA_MAINNET:
+      return 'mainnet-beta';
+    default:
+      throw new Error(`Unimplemented network: ${network}`);
+  }
+};
+
+export const getEthereumJSONRPC = (reference: string) => {
+  const jsonRpcProvider = config.get<string>(
+    `blockchain.jsonRpcProvider.${reference}`
+  );
+  return jsonRpcProvider;
+};
 
 const handlers: Record<EventType, (event: ParsiqEvent) => Promise<void>> = {
   TokenClaimed: tokenClaimed,

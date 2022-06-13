@@ -1,9 +1,10 @@
 import { ethers } from 'ethers';
+
 import { ConfigService } from '@nestjs/config';
 
 import { getRepository } from 'typeorm';
 
-import { parseLogs, ParsiqEvent } from '../queue.service';
+import { getEthereumJSONRPC, parseLogs, ParsiqEvent } from '../queue.service';
 import { logger } from 'common/providers/logger';
 import { NftClaim } from 'common/entities/nft-claim.entity';
 import { NftCollection, NftCollectionService } from 'models/nft-collection';
@@ -11,31 +12,26 @@ import { UserService } from 'models/user/services';
 import { Nft, NftService } from 'models/nft';
 import { User } from 'common/entities';
 import { NftClaimService } from 'models/nft-claim/services/nft-claim.service';
-import { AccountId, AssetId, AssetType, ChainId } from 'caip';
+import { AccountId, AssetId, AssetType } from 'caip';
 
 const config = new ConfigService();
 
-// TODO: dynamic with chain ID
+// TODO: Implement for Solana once minting is done internally
 export default async function tokenClaimed(
   parsiqEvent: ParsiqEvent
 ): Promise<void> {
-  const chainId = new ChainId(parsiqEvent.chainId);
-  const jsonRpcProvider =
-    config.get<string>('blockchain.jsonRpcProvider') ||
-    process.env.JSON_RPC_PROVIDER;
+  const assetType = new AssetType(parsiqEvent.assetType);
+  const chainId = assetType.chainId;
+  const assetName = assetType.assetName;
+
+  const jsonRpcProvider = getEthereumJSONRPC(chainId.reference);
   const provider = new ethers.providers.JsonRpcProvider(jsonRpcProvider);
 
   const receipt = await provider.waitForTransaction(parsiqEvent.tx);
   const logs = parseLogs(receipt.logs);
-  const transferLog = logs.find((log) => log.event.name === 'Transfer');
   const tokenClaimedLogs = logs.filter(
     (log) => log.event.name === 'TokenClaimed'
   );
-
-  const assetName = {
-    namespace: 'erc721',
-    reference: transferLog.address,
-  };
 
   for (const log of tokenClaimedLogs) {
     const { account, merkleRoot, tokenId } = log.event.args;
@@ -55,11 +51,6 @@ export default async function tokenClaimed(
     const nftService = new NftService(nftRepo);
     const nftClaimService = new NftClaimService(nftClaimRepo);
     const nftCollectionService = new NftCollectionService(nftCollectionRepo);
-
-    const assetType = new AssetType({
-      chainId,
-      assetName,
-    });
 
     const assetId = new AssetId({
       chainId,

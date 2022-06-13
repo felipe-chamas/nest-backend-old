@@ -31,6 +31,7 @@
     "@nrwl/linter": "13.8.5",
     "@nrwl/tao": "13.8.5",
     "@nrwl/workspace": "13.8.5",
+    "@solana/web3.js": "^1.44.0",
     "aws-sdk": "^2.1115.0",
     "bs58": "^5.0.0",
     "bull": "^4.8.3",

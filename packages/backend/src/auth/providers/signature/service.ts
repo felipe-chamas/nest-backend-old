@@ -3,7 +3,7 @@ import { v4 as uuid } from 'uuid';
 import { sign } from 'tweetnacl';
 import { decode } from 'bs58';
 import { utils } from 'ethers';
-import { ChainId } from 'common/types';
+import { ChainIdReference } from 'common/types';
 
 @Injectable()
 export class SignatureAuthService {
@@ -24,9 +24,14 @@ export class SignatureAuthService {
     address: string
   ): boolean {
     switch (network) {
-      case ChainId.ETHEREUM_MAINNET:
+      case ChainIdReference.ETHEREUM_MAINNET:
+      case ChainIdReference.BINANCE_MAINNET:
+      case ChainIdReference.BINANCE_TESTNET:
+      case ChainIdReference.GOERLI_TESTNET:
         return this.verifyEthereumSignature(message, signature, address);
-      case ChainId.SOLANA_MAINNET:
+      case ChainIdReference.SOLANA_MAINNET:
+      case ChainIdReference.SOLANA_DEVNET:
+      case ChainIdReference.SOLANA_TESTNET:
         return this.verifySolanaSignature(message, signature, address);
       default:
         throw new Error(`Unimplemented network: ${network}`);
