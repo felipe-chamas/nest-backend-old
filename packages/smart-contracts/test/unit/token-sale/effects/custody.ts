@@ -1,6 +1,5 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
-import { beforeEach } from 'mocha';
 import { TokenSale } from '../../../../typechain';
 import { AddressZero } from '../../../shared/constants';
 import { Roles } from '../../../shared/types';

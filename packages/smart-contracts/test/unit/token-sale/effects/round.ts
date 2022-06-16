@@ -2,7 +2,6 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
 import { BigNumberish, ContractTransaction } from 'ethers';
 import { ethers } from 'hardhat';
-import { beforeEach } from 'mocha';
 import { GameToken, TokenSale } from '../../../../typechain';
 import { EMPTY_MERKLE_ROOT, ONE_TOKEN } from '../../../shared/constants';
 import { Roles } from '../../../shared/types';

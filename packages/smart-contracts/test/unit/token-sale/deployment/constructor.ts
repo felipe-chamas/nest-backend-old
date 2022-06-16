@@ -1,7 +1,6 @@
 import { MockContract } from '@defi-wonderland/smock';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
-import { beforeEach } from 'mocha';
 import { ACL, ERC20Mock, GameToken } from '../../../../typechain';
 import { AddressZero } from '../../../shared/constants';
 import { deployTokenSale } from '../../../shared/deployers';

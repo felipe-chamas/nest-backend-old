@@ -1,7 +1,6 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
 import MerkleTree from 'merkletreejs';
-import { beforeEach } from 'mocha';
 import { createAllowlistMerkleTree, createAllowlistMerkleTreeLeaf } from '../../../../scripts/utils';
 import { GameToken, TokenSale } from '../../../../typechain';
 import { EMPTY_MERKLE_ROOT, ONE_TOKEN } from '../../../shared/constants';

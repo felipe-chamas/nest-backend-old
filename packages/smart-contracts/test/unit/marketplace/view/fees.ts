@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { BigNumberish } from 'ethers';
 import { MarketplaceMock } from '../../../../typechain';
-import { Orders } from '../../../../typechain/Marketplace';
+import { Orders } from '../../../../typechain/contracts/marketplace/Marketplace';
 import { AddressZero, ONE_TOKEN } from '../../../shared/constants';
 import { AssetsTypes } from '../../../shared/types';
 import { createOrder, getOrderFee, makeAsset, makeERC20Asset, makeERC721Asset } from '../marketplace.utils';

@@ -5,7 +5,7 @@ import { defaultAbiCoder } from 'ethers/lib/utils';
 import { ethers } from 'hardhat';
 import { AtLeast } from '../../../tasks/types';
 import { MarketplaceMock } from '../../../typechain';
-import { Assets, Orders, Permits } from '../../../typechain/Marketplace';
+import { Assets, Orders, Permits } from '../../../typechain/contracts/marketplace/Marketplace';
 import { AddressZero } from '../../shared/constants';
 import { AssetsTypes } from '../../shared/types';
 import { OrderSigner, signERC4494Permit } from '../../shared/utils';
@@ -65,13 +65,13 @@ export const makeERC20Asset = (token: string, value: BigNumberish) =>
 export const makeERC721Asset = (token: string, tokenId: BigNumberish, value: BigNumberish = 1) =>
   makeAsset(AssetsTypes.ERC721, defaultAbiCoder.encode(['address', 'uint256'], [token, tokenId]), value);
 
-export const decodeERC20Asset = (asset: Assets.AssetStruct) => ({
-  token: defaultAbiCoder.decode(['address'], asset.id.data)[0],
+export const decodeERC20Asset = async (asset: Assets.AssetStruct) => ({
+  token: defaultAbiCoder.decode(['address'], await asset.id.data)[0],
   value: asset.value,
 });
 
-export const decodeERC721Asset = (asset: Assets.AssetStruct) => {
-  const result = defaultAbiCoder.decode(['address', 'uint256'], asset.id.data);
+export const decodeERC721Asset = async (asset: Assets.AssetStruct) => {
+  const result = defaultAbiCoder.decode(['address', 'uint256'], await asset.id.data);
   return {
     token: result[0],
     tokenId: BigNumber.from(result[1]),
@@ -104,7 +104,7 @@ export const makePermits = async (
 
 export async function makePermit(signer: SignerWithAddress, spender: string, asset: Assets.AssetStruct) {
   if (asset.id.class === AssetsTypes.ERC20) {
-    const data = decodeERC20Asset(asset);
+    const data = await decodeERC20Asset(asset);
     const permit = await signERC2612Permit(signer, data.token, signer.address, spender, data.value.toString(10));
     return {
       asset,
@@ -118,7 +118,7 @@ export async function makePermit(signer: SignerWithAddress, spender: string, ass
   }
 
   if (asset.id.class === AssetsTypes.ERC721) {
-    const data = decodeERC721Asset(asset);
+    const data = await decodeERC721Asset(asset);
     const permit = await signERC4494Permit(signer, data.token, spender, data.tokenId.toString());
 
     return {

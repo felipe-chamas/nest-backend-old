@@ -2,7 +2,7 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
 import { BigNumberish } from 'ethers';
 import { ERC20Mock, ERC721Upgradeable, GameToken, MarketplaceMock, NFT } from '../../../../../typechain';
-import { Orders, Permits } from '../../../../../typechain/Marketplace';
+import { Orders, Permits } from '../../../../../typechain/contracts/marketplace/Marketplace';
 import { ONE_TOKEN } from '../../../../shared/constants';
 import { AssetsTypes } from '../../../../shared/types';
 import { getTransferEvent, OrderSigner } from '../../../../shared/utils';

@@ -3,7 +3,6 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
 import { BigNumberish, ContractTransaction } from 'ethers';
 import MerkleTree from 'merkletreejs';
-import { beforeEach } from 'mocha';
 import forEach from 'mocha-each';
 import { createAllowlistMerkleTree, createAllowlistMerkleTreeLeaf } from '../../../../scripts/utils';
 import { ERC20Mock, GameToken, GodModeTokenSale, TokenSale } from '../../../../typechain';

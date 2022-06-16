@@ -12,7 +12,7 @@ import {
   TokenSale,
   VRFCoordinatorV2Mock,
 } from '../../typechain';
-import { Assets, Orders } from '../../typechain/Marketplace';
+import { Assets, Orders } from '../../typechain/contracts/marketplace/Marketplace';
 import { Domain, ERC4494PermitMessage } from './types';
 
 export const getTransferEvent = async (tx: ContractTransaction, erc721: ERC721Upgradeable) => {

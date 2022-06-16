@@ -27,19 +27,20 @@ import {
   ACL__factory,
   ERC20Mock__factory,
   GameToken__factory,
+  MarketplaceMock,
+  MarketplaceMock__factory,
   NFTClaim__factory,
   NFTMock,
   NFTMock__factory,
   NFTUnboxing__factory,
   NFT__factory,
+  OrderValidatorMock__factory,
   Splitter__factory,
   Staking__factory,
   TokenSale__factory,
   VRFCoordinatorV2Mock__factory,
 } from '../../typechain';
-import { MarketplaceMock__factory } from '../../typechain/factories/MarketplaceMock__factory';
-import { OrderValidatorMock__factory } from '../../typechain/factories/OrderValidatorMock__factory';
-import { MarketplaceMock } from '../../typechain/MarketplaceMock';
+
 import { MAX_UINT256 } from './constants';
 
 export async function deployMockERC20(

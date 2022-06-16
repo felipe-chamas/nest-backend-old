@@ -1,7 +1,7 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
 import { GameToken, NFT, OrderValidatorMock } from '../../../../../typechain';
-import { Orders } from '../../../../../typechain/Marketplace';
+import { Orders } from '../../../../../typechain/contracts/marketplace/Marketplace';
 import { AddressZero, ONE_TOKEN } from '../../../../shared/constants';
 import { currentTime, OrderSigner } from '../../../../shared/utils';
 import { createOrder, createTakerOrder, makeERC20Asset, makeERC721Asset } from '../../marketplace.utils';

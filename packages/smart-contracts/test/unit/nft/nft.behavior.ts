@@ -111,7 +111,7 @@ export function shouldBehaveLikeNFT(burnEnabled: boolean) {
   });
 }
 
-export function shouldBehaveLikeNFTWithLimitedSupply(maxTokenSupply: BigInt) {
+export function shouldBehaveLikeNFTWithLimitedSupply(maxTokenSupply: bigint) {
   context(`Max Token Supply: ${maxTokenSupply}`, function () {
     let nft: NFT;
     let other: SignerWithAddress;
