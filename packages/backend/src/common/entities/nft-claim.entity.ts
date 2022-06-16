@@ -9,6 +9,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Metadata } from '../../models/nft/interface';
+import { MerkleProofs } from '../../models/nft-claim/types';
+import { NftCollection } from './nft-collection.entity';
 
 @Entity()
 @Index(['nftCollectionId'])
@@ -20,13 +22,13 @@ export class NftClaim {
   merkleRoot: string;
 
   @Column()
-  merkleProofs: Record<string, { tokens: string; proof: string[] }>;
+  merkleProofs: MerkleProofs;
 
   @Column()
   metadata: Metadata;
 
   @Column()
-  nftCollectionId: string;
+  nftCollectionId: NftCollection['id'];
 
   @CreateDateColumn()
   createdAt: Date;

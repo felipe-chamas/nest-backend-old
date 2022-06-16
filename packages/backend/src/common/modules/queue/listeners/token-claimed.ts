@@ -1,7 +1,5 @@
 import { ethers } from 'ethers';
 
-import { ConfigService } from '@nestjs/config';
-
 import { getRepository } from 'typeorm';
 
 import { getEthereumJSONRPC, parseLogs, ParsiqEvent } from '../queue.service';
@@ -14,11 +12,9 @@ import { User } from 'common/entities';
 import { NftClaimService } from 'models/nft-claim/services/nft-claim.service';
 import { AccountId, AssetId, AssetType } from 'caip';
 
-const config = new ConfigService();
-
 // TODO: Implement for Solana once minting is done internally
 export default async function tokenClaimed(
-  parsiqEvent: ParsiqEvent
+  parsiqEvent: ParsiqEvent,
 ): Promise<void> {
   const assetType = new AssetType(parsiqEvent.assetType);
   const chainId = assetType.chainId;
@@ -30,23 +26,17 @@ export default async function tokenClaimed(
   const receipt = await provider.waitForTransaction(parsiqEvent.tx);
   const logs = parseLogs(receipt.logs);
   const tokenClaimedLogs = logs.filter(
-    (log) => log.event.name === 'TokenClaimed'
+    (log) => log.event.name === 'TokenClaimed',
   );
 
   for (const log of tokenClaimedLogs) {
     const { account, merkleRoot, tokenId } = log.event.args;
 
     logger.info({ account, merkleRoot, tokenId });
-    const userRepo = getRepository(User, config.get<string>('database.dbName'));
-    const nftRepo = getRepository(Nft, config.get<string>('database.dbName'));
-    const nftClaimRepo = getRepository(
-      NftClaim,
-      config.get<string>('database.dbName')
-    );
-    const nftCollectionRepo = getRepository(
-      NftCollection,
-      config.get<string>('database.dbName')
-    );
+    const userRepo = getRepository(User);
+    const nftRepo = getRepository(Nft);
+    const nftClaimRepo = getRepository(NftClaim);
+    const nftCollectionRepo = getRepository(NftCollection);
     const userService = new UserService(userRepo);
     const nftService = new NftService(nftRepo);
     const nftClaimService = new NftClaimService(nftClaimRepo);

@@ -10,7 +10,10 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app/app.module';
 import { ConfigService } from '@nestjs/config';
 import { HttpExceptionFilter, LoggerInterceptor } from 'common/interceptors';
-import { RedisClient, RedisStore, Swagger } from 'common/providers';
+import { logger, Swagger } from 'common/providers';
+
+import ConnectRedis from 'connect-redis';
+import { createClient } from 'redis';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -28,15 +31,29 @@ async function bootstrap() {
   app.useGlobalInterceptors(new LoggerInterceptor());
   app.useGlobalFilters(new HttpExceptionFilter());
 
+  logger.info(config.get<string>('redis_url'));
+
+  const RedisStore = ConnectRedis(session);
+  const redisClient = createClient({
+    url: config.get<string>('redis_url', 'redis://localhost:6379'),
+    legacyMode: true,
+  });
+
   app.use(
     session({
-      secret: config.get<string>('SESSION_SECRET'),
+      secret: config.get<string>('session_secret'),
       resave: false,
       saveUninitialized: false,
-      store: new RedisStore({ client: RedisClient }),
+      store: new RedisStore({ client: redisClient }),
       cookie: { secure: config.get<string>('env') === 'production' },
-    })
+    }),
   );
+
+  redisClient.on('ready', () => {
+    logger.info('Redis client is ready');
+  });
+  redisClient.on('error', (err) => logger.error(`Redis error: ${err}`));
+  await redisClient.connect();
 
   if (config.get<string>('env') === 'development') {
     Swagger.init(app);
@@ -45,7 +62,7 @@ async function bootstrap() {
   const port = process.env.PORT || 3000;
   await app.listen(port);
   Logger.log(
-    `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`
+    `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`,
   );
 }
 

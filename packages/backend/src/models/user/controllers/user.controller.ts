@@ -30,7 +30,6 @@ import { User } from 'common/entities';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Roles(Role.USER_ADMIN)
   @UseGuards(AuthGuard)
   @Get()
   findAll(@GetPagination() pagination: Pagination) {
@@ -48,7 +47,7 @@ export class UserController {
   update(
     @Param('id') id: ObjectID,
     @Body() updateUserDto: UpdateUserDto,
-    @CurrentUser() user: User
+    @CurrentUser() user: User,
   ) {
     if (!user.roles.includes(Role.ROLES_ADMIN)) {
       updateUserDto.roles = null;

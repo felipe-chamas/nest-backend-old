@@ -13,12 +13,12 @@ import { AssetType } from 'caip';
 export class NftCollectionService {
   constructor(
     @InjectRepository(NftCollection)
-    private readonly nftCollectionRepo: Repository<NftCollection>
+    private readonly nftCollectionRepo: Repository<NftCollection>,
   ) {}
 
   async create(createNftCollectionDto: CreateNftCollectionDto) {
     const newNftCollection = this.nftCollectionRepo.create(
-      createNftCollectionDto
+      createNftCollectionDto,
     );
     await this.nftCollectionRepo.save(newNftCollection);
     return newNftCollection;
@@ -32,7 +32,7 @@ export class NftCollectionService {
     let nftCollection: NftCollection;
     if (conditions?.id)
       nftCollection = await this.nftCollectionRepo.findOne(
-        String(conditions.id)
+        String(conditions.id),
       );
     else nftCollection = await this.nftCollectionRepo.findOne(conditions);
 

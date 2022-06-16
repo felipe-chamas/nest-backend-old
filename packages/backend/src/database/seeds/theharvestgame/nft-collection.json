@@ -1,0 +1,38 @@
+[
+  {
+    "name": "Ability Card",
+    "slug": "ability-card",
+    "externalUrl": "https://theharvestgame.com/nft/ability-card/",
+    "icon": "https://nft.theharvestgame.xyz/icon/ability-card.png"
+  },
+  {
+    "name": "Companion Card",
+    "slug": "companion-card",
+    "externalUrl": "https://theharvestgame.com/nft/companion-card/",
+    "icon": "https://nft.theharvestgame.xyz/icon/all-collections.png"
+  },
+  {
+    "name": "Skin",
+    "slug": "skin",
+    "externalUrl": "https://theharvestgame.com/nft/skin/",
+    "icon": "https://nft.theharvestgame.xyz/icon/skin.png"
+  },
+  {
+    "name": "Battle Tag",
+    "slug": "battle-tag",
+    "externalUrl": "https://theharvestgame.com/nft/battle-tag/",
+    "icon": "https://nft.theharvestgame.xyz/icon/all-collections.png"
+  },
+  {
+    "name": "Emote",
+    "slug": "emote",
+    "externalUrl": "https://theharvestgame.com/nft/emote/",
+    "icon": "https://nft.theharvestgame.xyz/icon/emote.png"
+  },
+  {
+    "name": "Box",
+    "slug": "box",
+    "externalUrl": "https://theharvestgame.com/nft/box/",
+    "icon": "https://nft.theharvestgame.xyz/icon/all-collections.png"
+  }
+]

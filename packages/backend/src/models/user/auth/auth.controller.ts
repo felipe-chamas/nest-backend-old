@@ -7,6 +7,7 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
+  NotFoundException,
 } from '@nestjs/common';
 
 import { AuthService } from '../auth/auth-service';
@@ -17,6 +18,7 @@ import { AuthGuard } from 'common/guards';
 import { UserDto } from '../dto/user.dto';
 import { LoginDto } from '../dto/login.dto';
 import { CreateUserDto } from '../dto/create-user.dto';
+import { SessionData } from 'express-session';
 
 @Controller('auth')
 @Serialize(UserDto)
@@ -25,8 +27,11 @@ export class AuthController {
 
   @UseGuards(AuthGuard)
   @Get('/whoami')
-  async whoAmI() {
-    return `Service to be implemented`;
+  async whoAmI(@Session() session: SessionData) {
+    if (!session.user) throw new NotFoundException('No user set in session');
+
+    const id = session.user.id;
+    return this.authService.whoAmI(id);
   }
 
   @Post('/register')

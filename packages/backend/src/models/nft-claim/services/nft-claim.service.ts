@@ -11,7 +11,7 @@ import { UpdateNftClaimDto } from '../dto/update-nft-claim.dto';
 export class NftClaimService {
   constructor(
     @InjectRepository(NftClaim)
-    private readonly nftClaimRepo: Repository<NftClaim>
+    private readonly nftClaimRepo: Repository<NftClaim>,
   ) {}
 
   async create(createNftClaimDto: CreateNftClaimDto) {
@@ -34,14 +34,14 @@ export class NftClaimService {
       }
       case typeof idOrNftClaim === 'object': {
         nftClaim = await this.nftClaimRepo.findOne(
-          idOrNftClaim as FindConditions<NftClaim>
+          idOrNftClaim as FindConditions<NftClaim>,
         );
         break;
       }
     }
     if (!nftClaim)
       throw new NotFoundException(
-        `NftClaim ${JSON.stringify(idOrNftClaim)} not found`
+        `NftClaim ${JSON.stringify(idOrNftClaim)} not found`,
       );
 
     return nftClaim;
@@ -49,7 +49,7 @@ export class NftClaimService {
 
   async update(
     idOrNftClaim: string | NftClaim,
-    updateNftClaimDto: UpdateNftClaimDto
+    updateNftClaimDto: UpdateNftClaimDto,
   ) {
     let nftClaim: NftClaim;
 
@@ -58,7 +58,7 @@ export class NftClaimService {
         nftClaim = await this.nftClaimRepo.findOne(idOrNftClaim as string);
         if (!nftClaim)
           throw new NotFoundException(
-            `NftClaim with id ${idOrNftClaim} not found`
+            `NftClaim with id ${idOrNftClaim} not found`,
           );
         break;
       }

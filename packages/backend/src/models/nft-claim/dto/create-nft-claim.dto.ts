@@ -1,4 +1,5 @@
 import { IsObject, IsString } from 'class-validator';
+import { ObjectID } from 'typeorm';
 import { Metadata } from '../../../models/nft/interface';
 
 export class CreateNftClaimDto {
@@ -12,5 +13,5 @@ export class CreateNftClaimDto {
   metadata: Metadata;
 
   @IsString()
-  nftCollectionId: string;
+  nftCollectionId: ObjectID;
 }

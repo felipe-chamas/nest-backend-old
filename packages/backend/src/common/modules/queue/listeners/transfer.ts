@@ -7,7 +7,6 @@ import {
   parseLogs,
   ParsiqEvent,
 } from '../queue.service';
-import { ConfigService } from '@nestjs/config';
 import { logger } from 'common/providers/logger';
 import { getRepository } from 'typeorm';
 import { Nft, User } from 'common/entities';
@@ -15,8 +14,6 @@ import { UserService } from 'models/user';
 import { NftService } from 'models/nft';
 import { AccountId, AssetId, AssetType } from 'caip';
 import { ChainIdReference } from 'common/types';
-
-const config = new ConfigService();
 
 const parseEthereumData = async (parsiqEvent: ParsiqEvent) => {
   const assetId = new AssetId(parsiqEvent.assetType);
@@ -43,14 +40,14 @@ const parseSolanaData = async (parsiqEvent: ParsiqEvent) => {
     ?.filter((balance) => balance.mint === tokenId)
     .filter(
       (balance) =>
-        balance.uiTokenAmount.uiAmount && balance.uiTokenAmount.uiAmount > 0
+        balance.uiTokenAmount.uiAmount && balance.uiTokenAmount.uiAmount > 0,
     )[0]?.owner;
 
   const to = transaction.meta.postTokenBalances
     .filter((balance) => balance.mint === tokenId)
     .filter(
       (balance) =>
-        balance.uiTokenAmount.uiAmount && balance.uiTokenAmount.uiAmount > 0
+        balance.uiTokenAmount.uiAmount && balance.uiTokenAmount.uiAmount > 0,
     )[0]?.owner;
 
   if (!from || !to) throw new Error();
@@ -78,7 +75,7 @@ const parseData = async (parsiqEvent: ParsiqEvent) => {
 };
 
 export default async function transfer(
-  parsiqEvent: ParsiqEvent
+  parsiqEvent: ParsiqEvent,
 ): Promise<void> {
   const logs = await parseData(parsiqEvent);
 
@@ -95,8 +92,8 @@ export default async function transfer(
 
     logger.info({ from, to, tokenId });
 
-    const userRepo = getRepository(User, config.get<string>('database.dbName'));
-    const nftRepo = getRepository(Nft, config.get<string>('database.dbName'));
+    const userRepo = getRepository(User);
+    const nftRepo = getRepository(Nft);
 
     const userService = new UserService(userRepo);
     const nftService = new NftService(nftRepo);

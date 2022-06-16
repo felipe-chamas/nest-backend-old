@@ -6,7 +6,12 @@
     "prepare": "husky install",
     "test": "nx run-many --target=test --all",
     "lint": "nx run-many --target=lint --all",
-    "build:backend": "nx build backend"
+    "build:backend": "nx build backend",
+    "serve:backend": "nx serve backend",
+    "seed:config": "ts-node --project packages/backend/tsconfig.app.json -r tsconfig-paths/register ./node_modules/typeorm-seeding/dist/cli.js config",
+    "seed:run": "ts-node --project packages/backend/tsconfig.app.json -r tsconfig-paths/register ./node_modules/typeorm-seeding/dist/cli.js seed",
+    "seed:random": "yarn seed:run --seed RandomSeeder",
+    "seed:harvest": "yarn seed:run --seed TheHarvestGameSeeder"
   },
   "lint-staged": {
     "packages/**/*": "yarn lint",
@@ -26,7 +31,6 @@
     "@nestjs/typeorm": "^8.0.3",
     "@nrwl/cli": "13.8.5",
     "@nrwl/eslint-plugin-nx": "13.8.5",
-    "@nrwl/jest": "13.8.5",
     "@nrwl/js": "13.8.5",
     "@nrwl/linter": "13.8.5",
     "@nrwl/tao": "13.8.5",
@@ -58,15 +62,18 @@
     "tslib": "^2.0.0",
     "tweetnacl": "^1.0.3",
     "typeorm": "0.2",
+    "typeorm-seeding": "^1.6.1",
     "uuid": "^8.3.2",
     "winston": "^3.7.2"
   },
   "devDependencies": {
+    "@ethersproject/testcases": "^5.6.1",
+    "@faker-js/faker": "^7.2.0",
     "@nestjs/schematics": "^8.0.0",
     "@nestjs/testing": "^8.0.0",
     "@nrwl/cli": "13.9.6",
     "@nrwl/eslint-plugin-nx": "13.9.6",
-    "@nrwl/jest": "13.9.6",
+    "@nrwl/jest": "13.8.5",
     "@nrwl/js": "13.8.5",
     "@nrwl/linter": "13.9.6",
     "@nrwl/nest": "13.9.6",

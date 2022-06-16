@@ -1,0 +1,35 @@
+version: '3.9'
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    environment:
+      - SESSION_SECRET=secret
+      - MONGODB_URI=mongodb://mongo:27017/database
+      - REDIS_URL=redis://redis:6379
+    ports:
+      - 3000:3000
+    depends_on:
+      - mongo
+      - redis
+    links:
+      - mongo
+      - redis
+    volumes:
+      - .:/usr/src/app
+    command: yarn serve:backend
+  redis:
+    image: redis
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    restart: always
+    ports:
+      - 6379:6379
+  mongo:
+    image: mongo
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_DATABASE: 'database'

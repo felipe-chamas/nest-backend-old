@@ -1,9 +1,6 @@
 export default () => ({
   port: parseInt(process.env.PORT, 10) || 3000,
   env: process.env.NODE_ENV || 'development',
-  database: {
-    dbName: process.env.DB_NAME,
-  },
   sqs: {
     queueUrl: process.env.EVENTS_QUEUE_URL,
   },
@@ -20,10 +17,6 @@ export default () => ({
     limit: process.env.THROTTLER_LIMIT || '10/1m',
     throttler: process.env.THROTTLER_MAX || '100/1m',
   },
-  session_secret: process.env.SESSION_SECRET || 'secret',
-  redis: {
-    host: process.env.REDIS_HOST || 'localhost',
-    port: process.env.REDIS_PORT || 6379,
-    url: process.env.REDIS_URL || 'redis://localhost:6379',
-  },
+  session_secret: process.env.SESSION_SECRET,
+  redis_url: process.env.REDIS_URL,
 });

@@ -13,13 +13,13 @@ import { UpdateNftDto } from '../dto/update-nft.dto';
 import { ObjectID } from 'typeorm';
 import { NftCollectionService } from 'models/nft-collection';
 import { GetPagination, Pagination } from 'common/decorators';
-import { AssetId, AssetType } from 'caip';
+import { AssetId } from 'caip';
 
 @Controller('nft')
 export class NftController {
   constructor(
     private readonly nftCollectionService: NftCollectionService,
-    private readonly nftService: NftService
+    private readonly nftService: NftService,
   ) {}
 
   @Post()
@@ -36,7 +36,7 @@ export class NftController {
   async findOneByParams(
     @Param('chainId') chainId: string,
     @Param('assetName') assetName: string,
-    @Param('tokenId') tokenId: string
+    @Param('tokenId') tokenId: string,
   ) {
     const assetId = new AssetId({ chainId, assetName, tokenId });
     const nft = await this.nftService.findByAssetId(assetId);

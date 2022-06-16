@@ -20,7 +20,7 @@ export class NftCollection {
   id: ObjectID;
 
   @Column()
-  AssetTypes: AssetTypeDto[];
+  assetTypes: AssetTypeDto[];
 
   @Column()
   slug: string;
@@ -51,6 +51,6 @@ export class NftCollection {
 
   @BeforeInsert()
   beforeSave() {
-    this.slug = slugify(this.name);
+    this.slug = slugify(this.name, { lower: true });
   }
 }

@@ -1,6 +1,5 @@
 import { Nft } from './nft.entity';
 import {
-  BeforeInsert,
   Column,
   CreateDateColumn,
   DeleteDateColumn,

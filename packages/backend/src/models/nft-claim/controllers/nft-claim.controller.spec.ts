@@ -32,7 +32,7 @@ describe('NftClaimController', () => {
         Promise.resolve({
           ...mockNftClaim,
           ...updatedNftClaim,
-        } as unknown as NftClaim),
+        } as NftClaim),
       remove: jest.fn(),
     };
     const module: TestingModule = await Test.createTestingModule({
@@ -71,7 +71,9 @@ describe('NftClaimController', () => {
   });
 
   it('should fetch a nft claim', async () => {
-    const result = await controller.findOne(mockCreateNftClaimResponse.id);
+    const result = await controller.findOne(
+      mockCreateNftClaimResponse.id.toString(),
+    );
     expect(result).toEqual({
       ...mockCreateNftClaim,
       ...mockCreateNftClaimResponse,
@@ -79,9 +81,12 @@ describe('NftClaimController', () => {
   });
 
   it('should update a nft claim', async () => {
-    const result = await controller.update(mockCreateNftClaimResponse.id, {
-      merkleRoot: '0x1',
-    } as UpdateNftClaimDto);
+    const result = await controller.update(
+      mockCreateNftClaimResponse.id.toString(),
+      {
+        merkleRoot: '0x1',
+      } as UpdateNftClaimDto,
+    );
 
     expect(result).toEqual({
       ...mockNftClaim,
