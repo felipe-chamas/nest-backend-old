@@ -12,6 +12,7 @@ import { NftService } from '../services/nft.service';
 import { mockUser } from '../../../test/mocks/user.mock';
 import { Nft } from '../../../common/entities';
 import { NftCollectionService } from 'models/nft-collection';
+import { Request } from 'express';
 
 describe('NftController', () => {
   let controller: NftController;
@@ -66,7 +67,8 @@ describe('NftController', () => {
   });
 
   it('should fetch all nfts', async () => {
-    const result = await controller.findAll({
+    const query = {} as unknown as Request;
+    const result = await controller.findAll(query, {
       skip: 0,
       take: 10,
       sort: [],
@@ -85,7 +87,7 @@ describe('NftController', () => {
       mockCreateNftResponse.id as unknown as ObjectID,
       {
         userId: '123' as unknown as ObjectID,
-      } as UpdateNftDto
+      } as UpdateNftDto,
     );
 
     expect(result).toEqual({

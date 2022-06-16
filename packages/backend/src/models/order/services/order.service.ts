@@ -4,7 +4,6 @@ import { FindConditions, FindManyOptions, ObjectID, Repository } from 'typeorm';
 import { CreateOrderDto } from '../dto/create-order.dto';
 import { UpdateOrderDto } from '../dto/update-order.dto';
 import { Order, OrderHistory } from 'common/entities';
-import { OrderStatus } from 'common/enums';
 import { Pagination } from 'common/decorators';
 import { recoveryAgent } from 'common/utils';
 
@@ -13,33 +12,49 @@ export class OrderService {
   constructor(
     @InjectRepository(Order) private readonly orderRepo: Repository<Order>,
     @InjectRepository(OrderHistory)
-    private readonly orderHistoryRepo: Repository<OrderHistory>
+    private readonly orderHistoryRepo: Repository<OrderHistory>,
   ) {}
 
   async create(createOrderDto: CreateOrderDto) {
-    const order = this.orderRepo.create(createOrderDto);
-    const newOrder = await this.orderRepo.save(order);
+    const newOrder = this.orderRepo.create(createOrderDto);
+    const savedOrder = await this.orderRepo.save(newOrder);
 
     const orderHistory = this.orderHistoryRepo.create({
-      orderId: newOrder.id,
-      currentStatus: OrderStatus.OPEN,
+      orderId: savedOrder.id,
+      currentStatus: savedOrder.status,
     });
 
-    await this.orderRepo.save(orderHistory);
+    await this.orderHistoryRepo.save(orderHistory);
 
-    return newOrder;
+    const createdOrder = {
+      id: savedOrder.id,
+      status: savedOrder.status,
+    };
+
+    return {
+      message: 'Order created successfully',
+      createdOrder,
+    };
   }
 
   async findAll(options?: FindManyOptions<Order> | Pagination) {
     const orders = await this.orderRepo.find(options);
     const orderHistories = await this.orderHistoryRepo.find();
 
-    return orders.map((order) => {
-      const orderHistory = orderHistories.find(
-        (orderHistory) => orderHistory.orderId === order.id
-      );
-      return { ...order, ...orderHistory };
+    const res = [];
+
+    orders.forEach((order) => {
+      orderHistories.find((orderHistory) => {
+        if (orderHistory.orderId.toString() === order.id.toString()) {
+          res.push({
+            ...order,
+            status: orderHistory.currentStatus,
+            orderHistoryId: orderHistory.id,
+          });
+        }
+      });
     });
+    return res;
   }
 
   async findOne(conditions: FindConditions<Order>) {
@@ -54,7 +69,8 @@ export class OrderService {
       orderId: order.id,
     });
 
-    return { order, orderHistory };
+    const nft = await this.orderRepo.findOne({ nftId: order.nftId });
+    return { ...order, status: orderHistory.currentStatus, nft };
   }
 
   async update(id: string, updateOrderDto: UpdateOrderDto) {

@@ -1,3 +1,4 @@
+import { Request } from 'express';
 import {
   Controller,
   Get,
@@ -6,6 +7,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { OrderHistoryService } from '../services/order-history.service';
 import { CreateOrderHistoryDto } from '../dto/create-order-history.dto';
@@ -22,8 +24,8 @@ export class OrderHistoryController {
   }
 
   @Get()
-  findAll(@GetPagination() pagination: Pagination) {
-    return this.orderHistoryService.findAll(pagination);
+  findAll(@Query() query: Request, @GetPagination() pagination: Pagination) {
+    return this.orderHistoryService.findAll({ ...query, ...pagination });
   }
 
   @Get(':id')
@@ -34,7 +36,7 @@ export class OrderHistoryController {
   @Patch(':id')
   update(
     @Param('id') id: string,
-    @Body() updateOrderHistoryDto: UpdateOrderHistoryDto
+    @Body() updateOrderHistoryDto: UpdateOrderHistoryDto,
   ) {
     return this.orderHistoryService.update(id, updateOrderHistoryDto);
   }

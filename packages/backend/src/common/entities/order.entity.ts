@@ -1,5 +1,6 @@
 import { Status } from '../types';
 import {
+  BeforeInsert,
   Column,
   CreateDateColumn,
   DeleteDateColumn,
@@ -46,4 +47,9 @@ export class Order {
 
   @DeleteDateColumn()
   deletedAt: Date;
+
+  @BeforeInsert()
+  setStatus() {
+    this.status = 'open';
+  }
 }

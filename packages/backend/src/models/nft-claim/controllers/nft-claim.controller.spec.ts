@@ -10,6 +10,7 @@ import { UpdateNftClaimDto } from '../dto/update-nft-claim.dto';
 import { NftClaim } from '../../../common/entities/nft-claim.entity';
 import { NftClaimController } from './nft-claim.controller';
 import { NftClaimService } from '../services/nft-claim.service';
+import { Request } from 'express';
 
 describe('NftClaimController', () => {
   let controller: NftClaimController;
@@ -61,7 +62,7 @@ describe('NftClaimController', () => {
   });
 
   it('should fetch all nft claims', async () => {
-    const result = await controller.findAll({
+    const result = await controller.findAll({} as unknown as Request, {
       skip: 0,
       take: 10,
       sort: [],

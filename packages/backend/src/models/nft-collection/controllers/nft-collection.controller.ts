@@ -1,3 +1,4 @@
+import { Request } from 'express';
 import {
   Controller,
   Get,
@@ -6,6 +7,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { NftCollectionService } from '../services/nft-collection.service';
 import { CreateNftCollectionDto } from '../dto/create-nft-collection.dto';
@@ -22,8 +24,8 @@ export class NftCollectionController {
   }
 
   @Get()
-  findAll(@GetPagination() pagination: Pagination) {
-    return this.nftCollectionService.findAll(pagination);
+  findAll(@Query() query: Request, @GetPagination() pagination: Pagination) {
+    return this.nftCollectionService.findAll({ ...query, ...pagination });
   }
 
   @Get(':id')
@@ -34,7 +36,7 @@ export class NftCollectionController {
   @Patch(':id')
   update(
     @Param('id') id: string,
-    @Body() updateNftCollectionDto: UpdateNftCollectionDto
+    @Body() updateNftCollectionDto: UpdateNftCollectionDto,
   ) {
     return this.nftCollectionService.update(id, updateNftCollectionDto);
   }

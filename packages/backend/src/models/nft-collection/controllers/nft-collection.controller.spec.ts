@@ -9,6 +9,7 @@ import {
 import { CreateNftCollectionDto } from '../dto/create-nft-collection.dto';
 import { ObjectID } from 'typeorm';
 import { NftCollection } from '../../../common/entities';
+import { Request } from 'express';
 
 describe('NftCollectionController', () => {
   let controller: NftCollectionController;
@@ -31,7 +32,7 @@ describe('NftCollectionController', () => {
       update: jest.fn().mockImplementation(async () =>
         Promise.resolve({
           ...mockNftCollection,
-        })
+        }),
       ),
       remove: jest.fn(),
     };
@@ -59,7 +60,7 @@ describe('NftCollectionController', () => {
   });
 
   it('should fetch all nftCollections', async () => {
-    const result = await controller.findAll({
+    const result = await controller.findAll({} as unknown as Request, {
       skip: 0,
       take: 10,
       sort: [],

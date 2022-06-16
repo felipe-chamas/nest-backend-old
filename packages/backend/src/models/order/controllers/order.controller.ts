@@ -1,3 +1,4 @@
+import { Request } from 'express';
 import {
   Controller,
   Get,
@@ -6,12 +7,14 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 
 import { OrderService } from '../services/order.service';
 
 import { CreateOrderDto } from '../dto/create-order.dto';
 import { UpdateOrderDto } from '../dto/update-order.dto';
+import { GetPagination, Pagination } from 'common/decorators';
 
 @Controller('order')
 export class OrderController {
@@ -23,8 +26,8 @@ export class OrderController {
   }
 
   @Get()
-  findAll() {
-    return this.orderService.findAll();
+  findAll(@Query() query: Request, @GetPagination() pagination: Pagination) {
+    return this.orderService.findAll({ ...query, ...pagination });
   }
 
   @Get(':id')

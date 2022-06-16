@@ -1,3 +1,4 @@
+import { Request } from 'express';
 import {
   Controller,
   Get,
@@ -6,6 +7,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { GetPagination, Pagination } from 'common/decorators';
 import { CreateNftClaimDto } from '../dto/create-nft-claim.dto';
@@ -22,8 +24,8 @@ export class NftClaimController {
   }
 
   @Get()
-  findAll(@GetPagination() pagination: Pagination) {
-    return this.nftClaimService.findAll(pagination);
+  findAll(@Query() query: Request, @GetPagination() pagination: Pagination) {
+    return this.nftClaimService.findAll({ ...query, ...pagination });
   }
 
   @Get(':id')
@@ -34,7 +36,7 @@ export class NftClaimController {
   @Patch(':id')
   update(
     @Param('id') id: string,
-    @Body() updateNftClaimDto: UpdateNftClaimDto
+    @Body() updateNftClaimDto: UpdateNftClaimDto,
   ) {
     return this.nftClaimService.update(id, updateNftClaimDto);
   }

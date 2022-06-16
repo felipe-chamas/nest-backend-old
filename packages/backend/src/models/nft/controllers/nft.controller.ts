@@ -1,3 +1,4 @@
+import { Request } from 'express';
 import {
   Controller,
   Get,
@@ -6,6 +7,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { NftService } from '../services/nft.service';
 import { CreateNftDto } from '../dto/create-nft.dto';
@@ -28,8 +30,8 @@ export class NftController {
   }
 
   @Get()
-  findAll(@GetPagination() pagination: Pagination) {
-    return this.nftService.findAll(pagination);
+  findAll(@Query() query: Request, @GetPagination() pagination: Pagination) {
+    return this.nftService.findAll({ ...query, ...pagination });
   }
 
   @Get(':chainId/:assetName/:tokenId')
