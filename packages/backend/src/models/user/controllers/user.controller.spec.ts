@@ -6,8 +6,8 @@ import { UserService } from '../services/user.service';
 import { mockUser, mockAdmin } from '../../../test/mocks/user.mock';
 import { ObjectID } from 'typeorm';
 import { User } from '../../../common/entities';
-import { UserDto } from '../dto/user.dto';
 import { Role } from 'common/enums/role.enum';
+import { SessionData } from 'express-session';
 
 describe('UserController', () => {
   let controller: UserController;
@@ -59,11 +59,9 @@ describe('UserController', () => {
         roles: [Role.USER_ADMIN],
       } as UpdateUserDto;
 
-      const result = await controller.update(
-        mockUser.id,
-        updatedUser,
-        mockAdmin
-      );
+      const result = await controller.update(mockUser.id, updatedUser, {
+        user: mockAdmin,
+      } as unknown as SessionData);
 
       expect(result).toMatchObject(updatedUser);
     });
@@ -75,10 +73,10 @@ describe('UserController', () => {
           email: 'testEmail@test.com',
           roles: [Role.USER_ADMIN],
         } as UpdateUserDto,
-        mockUser
+        { user: mockUser } as unknown as SessionData,
       );
 
-      expect(result).toMatchObject({ roles: null });
+      expect(result).toMatchObject({ roles: [] });
     });
   });
 

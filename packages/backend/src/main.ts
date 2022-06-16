@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import helmet from 'helmet';
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import session from 'express-session';
 import cookieParser from 'cookie-parser';
 import compression from 'compression';
@@ -14,6 +14,7 @@ import { logger, Swagger } from 'common/providers';
 
 import ConnectRedis from 'connect-redis';
 import { createClient } from 'redis';
+import { AuthGuard } from 'common/guards';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -30,6 +31,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   app.useGlobalInterceptors(new LoggerInterceptor());
   app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalGuards(new AuthGuard(new Reflector()));
 
   logger.info(config.get<string>('redis_url'));
 

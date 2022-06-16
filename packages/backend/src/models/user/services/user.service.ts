@@ -22,7 +22,7 @@ import { UpdateUserDto } from '../dto/update-user.dto';
 @Injectable()
 export class UserService {
   constructor(
-    @InjectRepository(User) private readonly userRepo: Repository<User>
+    @InjectRepository(User) private readonly userRepo: Repository<User>,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -30,7 +30,7 @@ export class UserService {
       ...createUserDto,
       accountIds: createUserDto.accountIds.map(
         (accountId: string | AccountIdParams) =>
-          new AccountId(accountId).toJSON() as AccountIdDto
+          new AccountId(accountId).toJSON() as AccountIdDto,
       ),
     };
     const user = this.userRepo.create(userData);
@@ -44,12 +44,6 @@ export class UserService {
 
   async findByEmail(email: string) {
     return await this.userRepo.find({ email });
-  }
-
-  async whoAmI(id: string) {
-    const user = await this.userRepo.findOne(id);
-    if (!user) throw new NotFoundException(`User with id ${id} not found`);
-    return user;
   }
 
   async findById(id: ObjectID) {

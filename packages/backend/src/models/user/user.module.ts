@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
@@ -8,15 +7,13 @@ import { MongoEntityManager, MongoRepository } from 'typeorm';
 import { GlobalConfigModule } from 'common/providers';
 
 import { UserController } from './controllers';
-import { CurrentUserInterceptor } from './interceptors';
 
 import { User, Nft } from 'common/entities';
 
-import { AuthController, AuthService } from './auth';
 import { UserService } from './services';
 
 @Module({
-  controllers: [UserController, AuthController],
+  controllers: [UserController],
   imports: [
     ThrottlerModule.forRootAsync({
       imports: [GlobalConfigModule],
@@ -30,15 +27,7 @@ import { UserService } from './services';
     TypeOrmModule.forFeature([User, Nft]),
     MongoEntityManager,
   ],
-  exports: [UserService, AuthService, TypeOrmModule],
-  providers: [
-    UserService,
-    AuthService,
-    MongoRepository,
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: CurrentUserInterceptor,
-    },
-  ],
+  exports: [UserService, TypeOrmModule],
+  providers: [UserService, MongoRepository],
 })
 export class UserModule {}

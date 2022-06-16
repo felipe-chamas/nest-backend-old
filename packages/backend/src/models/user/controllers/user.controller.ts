@@ -5,7 +5,7 @@ import {
   Patch,
   Param,
   Delete,
-  UseGuards,
+  Session,
 } from '@nestjs/common';
 
 import { ObjectID } from 'typeorm';
@@ -17,20 +17,16 @@ import { UpdateUserDto } from '../dto/update-user.dto';
 
 import { Serialize } from 'common/interceptors';
 
-import { AuthGuard } from 'common/guards';
 import { GetPagination, Pagination } from 'common/decorators';
 import { Roles } from 'common/decorators/roles.decorators';
 import { Role } from 'common/enums/role.enum';
-import { CurrentUser } from '../decorators';
-
-import { User } from 'common/entities';
+import { SessionData } from 'express-session';
 
 @Controller('user')
 @Serialize(UserDto)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @UseGuards(AuthGuard)
   @Get()
   findAll(@GetPagination() pagination: Pagination) {
     return this.userService.findAll(pagination);
@@ -42,22 +38,18 @@ export class UserController {
   }
 
   @Roles(Role.USER_ADMIN, Role.ROLES_ADMIN)
-  @UseGuards(AuthGuard)
   @Patch(':id')
   update(
     @Param('id') id: ObjectID,
     @Body() updateUserDto: UpdateUserDto,
-    @CurrentUser() user: User,
+    @Session() session: SessionData,
   ) {
-    if (!user.roles.includes(Role.ROLES_ADMIN)) {
-      updateUserDto.roles = null;
-    }
-
+    if (!session.user.roles.includes(Role.ROLES_ADMIN))
+      updateUserDto.roles = [];
     return this.userService.update(id, updateUserDto);
   }
 
   @Roles(Role.USER_ADMIN)
-  @UseGuards(AuthGuard)
   @Delete(':id')
   remove(@Param('id') id: ObjectID) {
     return this.userService.remove(id);

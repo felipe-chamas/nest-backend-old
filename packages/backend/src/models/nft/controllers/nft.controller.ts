@@ -16,6 +16,8 @@ import { ObjectID } from 'typeorm';
 import { NftCollectionService } from 'models/nft-collection';
 import { GetPagination, Pagination } from 'common/decorators';
 import { AssetId } from 'caip';
+import { Roles } from 'common/decorators/roles.decorators';
+import { Role } from 'common/enums/role.enum';
 
 @Controller('nft')
 export class NftController {
@@ -24,6 +26,7 @@ export class NftController {
     private readonly nftService: NftService,
   ) {}
 
+  @Roles(Role.NFT_ADMIN)
   @Post()
   create(@Body() createNftDto: CreateNftDto) {
     return this.nftService.create(createNftDto);
@@ -50,11 +53,13 @@ export class NftController {
     return this.nftService.findOne({ id });
   }
 
+  @Roles(Role.NFT_ADMIN)
   @Patch(':id')
   update(@Param('id') id: ObjectID, @Body() updateNftDto: UpdateNftDto) {
     return this.nftService.update(id, updateNftDto);
   }
 
+  @Roles(Role.NFT_ADMIN)
   @Delete(':id')
   remove(@Param('id') id: ObjectID) {
     return this.nftService.remove(id);

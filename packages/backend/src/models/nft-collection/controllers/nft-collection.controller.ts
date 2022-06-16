@@ -13,11 +13,14 @@ import { NftCollectionService } from '../services/nft-collection.service';
 import { CreateNftCollectionDto } from '../dto/create-nft-collection.dto';
 import { UpdateNftCollectionDto } from '../dto/update-nft-collection.dto';
 import { GetPagination, Pagination } from 'common/decorators';
+import { Roles } from 'common/decorators/roles.decorators';
+import { Role } from 'common/enums/role.enum';
 
 @Controller('nft-collection')
 export class NftCollectionController {
   constructor(private readonly nftCollectionService: NftCollectionService) {}
 
+  @Roles(Role.NFT_ADMIN)
   @Post()
   create(@Body() createNftCollectionDto: CreateNftCollectionDto) {
     return this.nftCollectionService.create(createNftCollectionDto);
@@ -33,6 +36,7 @@ export class NftCollectionController {
     return this.nftCollectionService.findOne({ id });
   }
 
+  @Roles(Role.NFT_ADMIN)
   @Patch(':id')
   update(
     @Param('id') id: string,
@@ -41,6 +45,7 @@ export class NftCollectionController {
     return this.nftCollectionService.update(id, updateNftCollectionDto);
   }
 
+  @Roles(Role.NFT_ADMIN)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.nftCollectionService.remove(id);

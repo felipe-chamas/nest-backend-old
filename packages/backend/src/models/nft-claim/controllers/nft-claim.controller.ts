@@ -10,6 +10,8 @@ import {
   Query,
 } from '@nestjs/common';
 import { GetPagination, Pagination } from 'common/decorators';
+import { Roles } from 'common/decorators/roles.decorators';
+import { Role } from 'common/enums/role.enum';
 import { CreateNftClaimDto } from '../dto/create-nft-claim.dto';
 import { UpdateNftClaimDto } from '../dto/update-nft-claim.dto';
 import { NftClaimService } from '../services/nft-claim.service';
@@ -18,6 +20,7 @@ import { NftClaimService } from '../services/nft-claim.service';
 export class NftClaimController {
   constructor(private readonly nftClaimService: NftClaimService) {}
 
+  @Roles(Role.NFT_ADMIN)
   @Post()
   create(@Body() createNftClaimDto: CreateNftClaimDto) {
     return this.nftClaimService.create(createNftClaimDto);
@@ -33,6 +36,7 @@ export class NftClaimController {
     return this.nftClaimService.findOne(id);
   }
 
+  @Roles(Role.NFT_ADMIN)
   @Patch(':id')
   update(
     @Param('id') id: string,
@@ -41,6 +45,7 @@ export class NftClaimController {
     return this.nftClaimService.update(id, updateNftClaimDto);
   }
 
+  @Roles(Role.NFT_ADMIN)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.nftClaimService.remove(id);
