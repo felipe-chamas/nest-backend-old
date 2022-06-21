@@ -51,15 +51,12 @@ async function bootstrap() {
     }),
   );
 
+  Swagger.init(app);
   redisClient.on('ready', () => {
     logger.info('Redis client is ready');
   });
   redisClient.on('error', (err) => logger.error(`Redis error: ${err}`));
   await redisClient.connect();
-
-  if (config.get<string>('env') === 'development') {
-    Swagger.init(app);
-  }
 
   const port = process.env.PORT || 3000;
   await app.listen(port);

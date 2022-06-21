@@ -20,6 +20,12 @@ import { Serialize } from 'common/interceptors';
 import { GetPagination, Pagination } from 'common/decorators';
 import { Roles } from 'common/decorators/roles.decorators';
 import { Role } from 'common/enums/role.enum';
+import {
+  ApiBody,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+} from '@nestjs/swagger';
 import { SessionData } from 'express-session';
 
 @Controller('user')
@@ -27,18 +33,27 @@ import { SessionData } from 'express-session';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @ApiOperation({ description: 'Returns a list of Users' })
+  @ApiOkResponse({ type: [UserDto] })
   @Get()
   findAll(@GetPagination() pagination: Pagination) {
     return this.userService.findAll(pagination);
   }
 
   @Get(':id')
+  @ApiOperation({ description: 'Returns a User' })
+  @ApiParam({ name: 'id', type: String })
+  @ApiOkResponse({ type: UserDto })
   findOne(@Param('id') id: ObjectID) {
     return this.userService.findOne({ id });
   }
 
   @Roles(Role.USER_ADMIN, Role.ROLES_ADMIN)
   @Patch(':id')
+  @ApiOperation({ description: 'Updates a User' })
+  @ApiParam({ name: 'id', type: String })
+  @ApiBody({ type: UpdateUserDto })
+  @ApiOkResponse({ type: UserDto })
   update(
     @Param('id') id: ObjectID,
     @Body() updateUserDto: UpdateUserDto,
@@ -50,6 +65,10 @@ export class UserController {
   }
 
   @Roles(Role.USER_ADMIN)
+  @ApiOperation({ description: 'Deletes a User' })
+  @ApiParam({ name: 'id', type: String })
+  @ApiBody({ type: UpdateUserDto })
+  @ApiOkResponse({ type: UserDto })
   @Delete(':id')
   remove(@Param('id') id: ObjectID) {
     return this.userService.remove(id);
