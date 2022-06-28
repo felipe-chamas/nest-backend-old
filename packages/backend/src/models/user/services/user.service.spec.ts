@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 
-import { Repository } from 'typeorm';
+import { MongoRepository } from 'typeorm';
 import { Nft, User } from '../../../common/entities';
 import {
   mockCreateUser,
@@ -15,25 +15,24 @@ export type MockType<T> = {
   [P in keyof T]?: jest.Mock<Nft>;
 };
 
-export const repositoryMockFactory: () => MockType<Repository<User>> = jest.fn(
-  () => ({
+export const repositoryMockFactory: () => MockType<MongoRepository<User>> =
+  jest.fn(() => ({
     findOne: jest.fn((entity) => entity),
     find: jest.fn().mockReturnValue([mockUser, mockUser]),
     create: jest.fn().mockReturnValue(mockUser),
     save: jest.fn().mockReturnValue(mockUser),
-  })
-);
+  }));
 
 describe('UserService', () => {
   let user;
   let service: Partial<UserService>;
-  let userRepo: Repository<User>;
+  let userRepo: MongoRepository<User>;
 
   beforeEach(async () => {
     service = {
       create: jest.fn().mockReturnValue(mockUser),
       findAll: jest.fn().mockReturnValue([mockUser, mockUser]),
-      findOne: jest.fn().mockReturnValue(mockUser),
+      findById: jest.fn().mockReturnValue(mockUser),
       update: jest.fn().mockReturnValue(mockUser),
       remove: jest.fn(),
     };
@@ -68,14 +67,14 @@ describe('UserService', () => {
 
   it('should fetch all users', async () => {
     const users = await userRepo.find();
-    const result = await service.findAll();
+    const result = await service.findAll({ query: [] });
     expect(result).toEqual(users);
   });
 
   it('should fetch a user', async () => {
     user = userRepo.create(mockCreateUser);
     await userRepo.save(user);
-    const result = await service.findOne({ id: user.id });
+    const result = await service.findById(user.id);
     expect(result.id).toBeTruthy();
   });
 
@@ -85,7 +84,7 @@ describe('UserService', () => {
 
     const result = await service.update(
       user.id,
-      mockUpdateUser as UpdateUserDto
+      mockUpdateUser as UpdateUserDto,
     );
 
     expect(result.name).toEqual(mockUpdateUser.name);

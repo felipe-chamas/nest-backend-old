@@ -6,9 +6,8 @@ import {
   Param,
   Delete,
   Session,
+  UnauthorizedException,
 } from '@nestjs/common';
-
-import { ObjectID } from 'typeorm';
 
 import { UserService } from '../services/user.service';
 
@@ -40,12 +39,19 @@ export class UserController {
     return this.userService.findAll(pagination);
   }
 
+  @Get('whoami')
+  whoAmI(@Session() session: SessionData) {
+    if (!session.user) throw new UnauthorizedException();
+    const { id } = session.user;
+    return this.userService.findById(id);
+  }
+
   @Get(':id')
   @ApiOperation({ description: 'Returns a User' })
   @ApiParam({ name: 'id', type: String })
   @ApiOkResponse({ type: UserDto })
-  findOne(@Param('id') id: ObjectID) {
-    return this.userService.findOne({ id });
+  findOne(@Param('id') id: string) {
+    return this.userService.findById(id);
   }
 
   @Roles(Role.USER_ADMIN, Role.ROLES_ADMIN)
@@ -55,11 +61,11 @@ export class UserController {
   @ApiBody({ type: UpdateUserDto })
   @ApiOkResponse({ type: UserDto })
   update(
-    @Param('id') id: ObjectID,
+    @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
     @Session() session: SessionData,
   ) {
-    if (!session.user.roles.includes(Role.ROLES_ADMIN))
+    if (!session.user?.roles.includes(Role.ROLES_ADMIN))
       updateUserDto.roles = [];
     return this.userService.update(id, updateUserDto);
   }
@@ -70,7 +76,7 @@ export class UserController {
   @ApiBody({ type: UpdateUserDto })
   @ApiOkResponse({ type: UserDto })
   @Delete(':id')
-  remove(@Param('id') id: ObjectID) {
+  remove(@Param('id') id: string) {
     return this.userService.remove(id);
   }
 }

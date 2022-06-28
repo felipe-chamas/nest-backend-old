@@ -1,27 +1,22 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import {
-  FindConditions,
-  FindManyOptions,
-  getMongoRepository,
-  ObjectID,
-  Repository,
-} from 'typeorm';
+import { MongoRepository } from 'typeorm';
 
 import { CreateNftDto } from '../dto/create-nft.dto';
 import { UpdateNftDto } from '../dto/update-nft.dto';
 
-import { User, Nft } from 'common/entities';
+import { Nft } from 'common/entities';
 import { Pagination } from 'common/decorators';
 import { recoveryAgent } from 'common/utils';
 import { AssetId } from 'caip';
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class NftService {
   constructor(
     @InjectRepository(Nft)
-    private readonly nftRepo: Repository<Nft>
+    private readonly nftRepo: MongoRepository<Nft>,
   ) {}
 
   async create(createNftDto: CreateNftDto) {
@@ -30,49 +25,88 @@ export class NftService {
     return nft;
   }
 
-  async findAll(options?: FindManyOptions<Nft> | Pagination) {
-    const nft = await this.nftRepo.find(options);
-    return nft;
+  async findAll({ query, ...match }: Pagination & Partial<Nft>) {
+    const [nfts] = await this.nftRepo
+      .aggregate<Nft[]>([
+        {
+          $match: match,
+        },
+        {
+          $addFields: {
+            id: '$_id',
+          },
+        },
+        {
+          $facet: {
+            metadata: [{ $count: 'total' }],
+            data: query,
+          },
+        },
+        {
+          $project: {
+            data: 1,
+            total: { $arrayElemAt: ['$metadata.total', 0] },
+          },
+        },
+      ])
+      .toArray();
+
+    return nfts;
   }
 
-  async findOne(conditions: FindConditions<Nft>) {
-    let nft: Nft;
-    if (conditions?.id) nft = await this.nftRepo.findOne(String(conditions.id));
-    else nft = await this.nftRepo.findOne(conditions);
+  async findById(id: string) {
+    const [nft] = await this.nftRepo
+      .aggregate<Nft>([
+        {
+          $match: {
+            _id: new ObjectId(id),
+          },
+        },
+        {
+          $addFields: {
+            id: '$_id',
+          },
+        },
+      ])
+      .toArray();
 
-    if (!nft) throw new NotFoundException(`Nft not found`);
+    if (!nft) throw new NotFoundException(`NFT with id ${id} not found`);
 
-    const user = await getMongoRepository(User).findOne(nft.userId);
-
-    return { ...nft, user };
+    return nft;
   }
 
   async findByAssetId(assetId: AssetId) {
-    const nft = await this.nftRepo.findOne({
-      where: {
-        assetIds: { $elemMatch: assetId.toJSON() },
-      },
-    });
+    const [nft] = await this.nftRepo
+      .aggregate<Nft>([
+        {
+          $match: {
+            accountIds: {
+              $elemMatch: assetId.toJSON(),
+            },
+          },
+        },
+        {
+          $addFields: {
+            id: '$_id',
+          },
+        },
+      ])
+      .toArray();
     return nft;
   }
 
-  async update(id: ObjectID, updateNftDto: UpdateNftDto) {
-    const nft = await this.nftRepo.findOne(id);
-
-    if (!nft) throw new NotFoundException(`Nft with id ${id} not found`);
-
+  async update(id: string, updateNftDto: UpdateNftDto) {
+    const nft = await this.findById(id);
     const newNft = { ...nft, ...updateNftDto };
     return await this.nftRepo.save(newNft);
   }
 
-  async remove(id: ObjectID) {
-    const nft = await this.nftRepo.findOne(id);
-    if (!nft) throw new NotFoundException(`Nft with id ${id} not found`);
-
+  async remove(id: string) {
+    const nft = await this.findById(id);
     return await this.nftRepo.softRemove(nft);
   }
 
-  async recover(id?: ObjectID) {
+  async recover(id?: string) {
     return await recoveryAgent(this.nftRepo, id);
   }
 }

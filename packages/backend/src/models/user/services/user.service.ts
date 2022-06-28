@@ -4,25 +4,20 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { AccountId, AccountIdParams } from 'caip';
 import { AccountIdDto } from 'common/types';
 import { Pagination } from 'common/decorators';
-import { Nft, User } from 'common/entities';
+import { User } from 'common/entities';
 import { recoveryAgent } from 'common/utils';
 
-import {
-  FindConditions,
-  FindManyOptions,
-  getMongoRepository,
-  ObjectID,
-  Repository,
-} from 'typeorm';
+import { MongoRepository } from 'typeorm';
 
 import { CreateUserDto } from '../dto/create-user.dto';
 
 import { UpdateUserDto } from '../dto/update-user.dto';
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class UserService {
   constructor(
-    @InjectRepository(User) private readonly userRepo: Repository<User>,
+    @InjectRepository(User) private readonly userRepo: MongoRepository<User>,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -38,57 +33,100 @@ export class UserService {
     return user;
   }
 
-  async findAll(options?: FindManyOptions<User> | Pagination) {
-    return await this.userRepo.find(options);
+  async findAll({ query, ...match }: Pagination & Partial<User>) {
+    const [users] = await this.userRepo
+      .aggregate<User[]>([
+        {
+          $match: match,
+        },
+        {
+          $addFields: {
+            id: '$_id',
+          },
+        },
+        {
+          $facet: {
+            metadata: [{ $count: 'total' }],
+            data: query,
+          },
+        },
+        {
+          $project: {
+            data: 1,
+            total: { $arrayElemAt: ['$metadata.total', 0] },
+          },
+        },
+      ])
+      .toArray();
+
+    return users;
   }
 
   async findByEmail(email: string) {
-    return await this.userRepo.find({ email });
+    const [user] = await this.userRepo
+      .aggregate<User>([
+        {
+          $match: {
+            email,
+          },
+        },
+        {
+          $addFields: {
+            id: '$_id',
+          },
+        },
+      ])
+      .toArray();
+
+    if (!user)
+      throw new NotFoundException(`User with email ${email} not found`);
+
+    return user;
   }
 
-  async findById(id: ObjectID) {
-    const user = await this.userRepo.findOne(id);
+  async findById(id: string) {
+    const [user] = await this.userRepo
+      .aggregate<User>([
+        {
+          $match: {
+            _id: new ObjectId(id),
+          },
+        },
+        {
+          $addFields: {
+            id: '$_id',
+          },
+        },
+      ])
+      .toArray();
 
     if (!user) throw new NotFoundException(`User with id ${id} not found`);
 
     return user;
   }
 
-  async findByAccountId(accountId: AccountId): Promise<User | undefined> {
-    const user = await this.userRepo.findOne({
-      where: {
-        accountIds: { $elemMatch: accountId.toJSON() },
-      },
-    });
+  async findByAccountId(accountId: AccountId) {
+    const [user] = await this.userRepo
+      .aggregate<User>([
+        {
+          $match: {
+            accountIds: {
+              $elemMatch: accountId.toJSON(),
+            },
+          },
+        },
+        {
+          $addFields: {
+            id: '$_id',
+          },
+        },
+      ])
+      .toArray();
     return user;
   }
 
-  async findOne(conditions: FindConditions<User>) {
-    let user: User;
-    if (conditions?.id)
-      user = await this.userRepo.findOne(String(conditions.id));
-    else user = await this.userRepo.findOne(conditions);
-
-    if (!user) throw new NotFoundException(`user not found`);
-
-    const nfts = await getMongoRepository(Nft).find({
-      userId: user.id,
-    });
-
-    const res = {
-      ...user,
-      nfts: nfts.map((nft) => ({
-        ...nft,
-        id: nft.id.toHexString(),
-      })),
-    };
-
-    return res;
-  }
-
-  async update(id: ObjectID, updatedUser: UpdateUserDto) {
-    const user = await this.userRepo.findOne(id);
-    if (!user) throw new NotFoundException(`User with id ${id} not found`);
+  async update(id: string, updatedUser: UpdateUserDto) {
+    const user = await this.findById(id);
 
     if (updatedUser.roles === null) {
       updatedUser.roles = user.roles;
@@ -98,13 +136,12 @@ export class UserService {
     return await this.userRepo.save(user);
   }
 
-  async remove(id: ObjectID) {
-    const user = await this.userRepo.findOne(id);
-    if (!user) throw new NotFoundException(`User with id ${id} not found`);
+  async remove(id: string) {
+    const user = await this.findById(id);
     return this.userRepo.softRemove(user);
   }
 
-  async recover(id?: ObjectID) {
+  async recover(id?: string) {
     return await recoveryAgent(this.userRepo, id);
   }
 }

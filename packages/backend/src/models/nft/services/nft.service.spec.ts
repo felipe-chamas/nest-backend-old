@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 
-import { ObjectID, Repository } from 'typeorm';
+import { MongoRepository } from 'typeorm';
 import { Nft } from '../../../common/entities';
 import {
   mockCreateNft,
@@ -14,24 +14,23 @@ export type MockType<T> = {
   [P in keyof T]?: jest.Mock<Nft>;
 };
 
-export const repositoryMockFactory: () => MockType<Repository<Nft>> = jest.fn(
-  () => ({
+export const repositoryMockFactory: () => MockType<MongoRepository<Nft>> =
+  jest.fn(() => ({
     findOne: jest.fn((entity) => entity),
     find: jest.fn().mockReturnValue([mockCreateNft, mockCreateNft]),
     create: jest.fn().mockReturnValue(mockCreateNft),
     save: jest.fn().mockReturnValue(mockCreateNft),
-  })
-);
+  }));
 
 describe('NftService', () => {
   let service: Partial<NftService>;
-  let neftRepo: MockType<Repository<Nft>>;
+  let neftRepo: MockType<MongoRepository<Nft>>;
 
   beforeEach(async () => {
     service = {
       create: jest.fn().mockReturnValue(mockCreateNft),
       findAll: jest.fn().mockReturnValue([mockCreateNft, mockCreateNft]),
-      findOne: jest.fn().mockReturnValue(mockCreateNft),
+      findById: jest.fn().mockReturnValue(mockCreateNft),
       update: jest.fn().mockReturnValue(mockUpdateNft),
       remove: jest.fn(),
     };
@@ -65,14 +64,14 @@ describe('NftService', () => {
     const nft = neftRepo.create(mockCreateNft);
     await neftRepo.save(nft);
 
-    const id = nft.id as unknown as ObjectID;
-    const result = await service.findOne({ id });
+    const id = nft.id;
+    const result = await service.findById(id.toString());
     expect(result).toEqual({ ...mockCreateNft, ...result });
   });
 
   it('should find all nfts', async () => {
     const nfts = await neftRepo.find();
-    const result = await service.findAll();
+    const result = await service.findAll({ query: [] });
     expect(result).toEqual(nfts);
   });
 
@@ -81,10 +80,7 @@ describe('NftService', () => {
     await neftRepo.save(nft);
 
     const nftId = nft.id as unknown as string;
-    const result = await service.update(
-      nftId as unknown as ObjectID,
-      mockUpdateNft
-    );
+    const result = await service.update(nftId, mockUpdateNft);
     expect(result).toEqual({ ...mockUpdateNft, ...result });
   });
 
@@ -92,7 +88,7 @@ describe('NftService', () => {
     const nft = mockNft;
     const id = nft.id as unknown as string;
 
-    const result = await service.remove(id as unknown as ObjectID);
+    const result = await service.remove(id);
 
     expect(result).toBeUndefined();
   });

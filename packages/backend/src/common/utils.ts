@@ -4,12 +4,12 @@ import {
   ValidationError,
   isInstance,
 } from 'class-validator';
-import { ObjectID, Repository } from 'typeorm';
+import { MongoRepository, ObjectLiteral, DeepPartial } from 'typeorm';
 import { UnknownClass } from './types';
 
 export const validateSync = (
   object: object,
-  ObjectClass?: UnknownClass
+  ObjectClass?: UnknownClass,
 ): ValidationError[] => {
   if (ObjectClass && !isInstance(object, ObjectClass)) {
     const error = new ValidationError();
@@ -22,17 +22,18 @@ export const validateSync = (
   return baseValidateSync(object);
 };
 
-export const recoveryAgent = async (repo: Repository<any>, id?: ObjectID) => {
+export const recoveryAgent = async <T extends ObjectLiteral>(
+  repo: MongoRepository<T>,
+  id?: string,
+) => {
   const removedObjects = await repo.find({ withDeleted: true });
 
   if (id) {
-    const item = removedObjects.find(
-      (nft) => nft.id.toString() === id.toString()
-    );
+    const item = removedObjects.find((object) => object.id.toString() === id);
 
     if (!item) throw new NotFoundException(`Item not found`);
-    return await repo.recover(item);
+    return await repo.recover(item as DeepPartial<T>);
   }
 
-  return await repo.recover(removedObjects);
+  return await repo.recover(removedObjects as DeepPartial<T>[]);
 };

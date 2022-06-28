@@ -39,15 +39,13 @@ const randomMerkleProofs = (users: User[]): MerkleProofs => {
   return merkleProofs;
 };
 
-define(NftClaim, (_, { seeder = 'random', users, nftCollections }: Context) => {
+define(NftClaim, (_, { users, nftCollections }: Context) => {
   const nftClaim = new NftClaim();
 
-  if (seeder === 'random') {
-    nftClaim.merkleRoot = randomMerkleRoot();
-    nftClaim.metadata = randomMetadata();
-    nftClaim.merkleProofs = randomMerkleProofs(users);
-    nftClaim.nftCollectionId = faker.helpers.arrayElement(nftCollections).id;
-  }
+  nftClaim.merkleRoot = randomMerkleRoot();
+  nftClaim.metadata = randomMetadata();
+  nftClaim.merkleProofs = randomMerkleProofs(users);
+  nftClaim.nftCollectionId = faker.helpers.arrayElement(nftCollections).id;
 
   return nftClaim;
 });

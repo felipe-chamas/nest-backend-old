@@ -1,4 +1,3 @@
-import { Request } from 'express';
 import {
   Controller,
   Get,
@@ -34,7 +33,7 @@ export class NftCollectionController {
   @Get()
   @ApiOperation({ description: 'Returns a list of Nft Collection' })
   @ApiOkResponse({ type: [NftCollectionDto], schema: { type: 'array' } })
-  findAll(@Query() query: Request, @GetPagination() pagination: Pagination) {
+  findAll(@Query() query, @GetPagination() pagination: Pagination) {
     return this.nftCollectionService.findAll({ ...query, ...pagination });
   }
 
@@ -42,7 +41,7 @@ export class NftCollectionController {
   @ApiOperation({ description: 'Returns an Nft Collection with given `id`' })
   @ApiOkResponse({ type: NftCollectionDto })
   findOne(@Param('id') id: string) {
-    return this.nftCollectionService.findOne({ id });
+    return this.nftCollectionService.findById(id);
   }
 
   @Roles(Role.NFT_ADMIN)

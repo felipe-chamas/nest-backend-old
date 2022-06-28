@@ -8,7 +8,7 @@ import {
   ParsiqEvent,
 } from '../queue.service';
 import { logger } from 'common/providers/logger';
-import { getRepository } from 'typeorm';
+import { getMongoRepository } from 'typeorm';
 import { Nft, User } from 'common/entities';
 import { UserService } from 'models/user';
 import { NftService } from 'models/nft';
@@ -92,8 +92,8 @@ export default async function transfer(
 
     logger.info({ from, to, tokenId });
 
-    const userRepo = getRepository(User);
-    const nftRepo = getRepository(Nft);
+    const userRepo = getMongoRepository(User);
+    const nftRepo = getMongoRepository(Nft);
 
     const userService = new UserService(userRepo);
     const nftService = new NftService(nftRepo);
@@ -115,7 +115,7 @@ export default async function transfer(
     const nft = await nftService.findByAssetId(assetId);
     logger.debug({ nft });
 
-    const nftUpdated = await nftService.update(nft.id, { userId });
+    const nftUpdated = await nftService.update(nft.id.toString(), { userId });
     console.debug(nftUpdated);
   }
 }

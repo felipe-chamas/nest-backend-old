@@ -1,4 +1,3 @@
-import { Request } from 'express';
 import {
   Controller,
   Get,
@@ -34,7 +33,7 @@ export class NftClaimController {
   @Get()
   @ApiOperation({ description: 'Returns a list of Nft Claimed ' })
   @ApiOkResponse({ type: [NftClaimDto] })
-  findAll(@Query() query: Request, @GetPagination() pagination: Pagination) {
+  findAll(@Query() query, @GetPagination() pagination: Pagination) {
     return this.nftClaimService.findAll({ ...query, ...pagination });
   }
 
@@ -42,7 +41,7 @@ export class NftClaimController {
   @ApiOperation({ description: 'Gets an Nft Claimed with given `id`' })
   @ApiOkResponse({ type: NftClaimDto })
   async findOne(@Param('id') id: string) {
-    return this.nftClaimService.findOne(id);
+    return this.nftClaimService.findById(id);
   }
 
   @Roles(Role.NFT_ADMIN)

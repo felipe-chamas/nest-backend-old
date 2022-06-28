@@ -6,11 +6,12 @@ services:
       dockerfile: Dockerfile
       target: builder
     environment:
+      - PORT=8080
       - SESSION_SECRET=secret
-      - MONGODB_URI=mongodb://mongo:27017/database
       - REDIS_URL=redis://redis:6379
+      - MONGODB_URI=mongodb://mongo:27017/database
     ports:
-      - 3000:3000
+      - 8080:8080
     depends_on:
       - mongo
       - redis
@@ -31,5 +32,6 @@ services:
     image: mongo
     ports:
       - 27017:27017
+    command: mongod --quiet --logpath /dev/null
     environment:
       MONGO_INITDB_DATABASE: 'database'

@@ -17,7 +17,7 @@ export class UpdateUserDto {
 
   @ApiProperty()
   @IsAccountIdArray
-  account: string[] | AccountIdParams[];
+  accountIds: string[] | AccountIdParams[];
 
   @ApiProperty()
   @IsOptional()

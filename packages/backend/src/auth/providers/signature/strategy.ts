@@ -20,7 +20,7 @@ import { MAX_WAIT_FOR_SIGNED_AGREEMENT } from './constants';
 export class SignatureStrategy extends PassportStrategy(Strategy, 'signature') {
   constructor(
     private userService: UserService,
-    private service: SignatureAuthService
+    private service: SignatureAuthService,
   ) {
     super();
   }
@@ -38,7 +38,7 @@ export class SignatureStrategy extends PassportStrategy(Strategy, 'signature') {
       return done(
         new RequestTimeoutException({
           message: 'Session request timeout, please sign a new message',
-        })
+        }),
       );
 
     const accountId = new AccountId(agreement.accountId);
@@ -46,28 +46,29 @@ export class SignatureStrategy extends PassportStrategy(Strategy, 'signature') {
       accountId.chainId.toString(),
       agreement.message,
       body.signature,
-      accountId.address
+      accountId.address,
     );
     if (!correctSignature)
       return done(
         new BadRequestException(
-          'Provided signature does not match address of agreement request'
-        )
+          'Provided signature does not match address of agreement request',
+        ),
       );
 
     const foundUser = await this.userService.findByAccountId(accountId);
-    const existingUser = foundUser
+
+    const user = foundUser
       ? foundUser
       : await this.userService.create({
           accountIds: [accountId.toJSON()],
         });
 
     req.session.user = {
-      id: existingUser.id,
-      roles: existingUser.roles,
+      id: user.id.toString(),
+      roles: user.roles,
     };
 
     delete req.session.agreement;
-    return done(undefined, existingUser);
+    return done(undefined, user);
   }
 }

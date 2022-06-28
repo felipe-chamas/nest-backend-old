@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 
-import { Repository } from 'typeorm';
+import { MongoRepository } from 'typeorm';
 import {
   mockCreateNftClaim,
   mockNftClaim,
@@ -14,7 +14,7 @@ export type MockType<T> = {
   [P in keyof T]?: jest.Mock<NftClaim>;
 };
 
-export const repositoryMockFactory: () => MockType<Repository<NftClaim>> =
+export const repositoryMockFactory: () => MockType<MongoRepository<NftClaim>> =
   jest.fn(() => ({
     findOne: jest.fn((entity) => entity),
     find: jest.fn().mockReturnValue([mockNftClaim, mockNftClaim]),
@@ -24,13 +24,13 @@ export const repositoryMockFactory: () => MockType<Repository<NftClaim>> =
 
 describe('NftClaimService', () => {
   let service: Partial<NftClaimService>;
-  let nftClaimRepo: Repository<NftClaim>;
+  let nftClaimRepo: MongoRepository<NftClaim>;
 
   beforeEach(async () => {
     service = {
       create: jest.fn().mockReturnValue(mockNftClaim),
       findAll: jest.fn().mockReturnValue([mockNftClaim, mockNftClaim]),
-      findOne: jest.fn().mockReturnValue(mockNftClaim),
+      findById: jest.fn().mockReturnValue(mockNftClaim),
       update: jest.fn().mockReturnValue(mockNftClaim),
       remove: jest.fn(),
     };
@@ -67,14 +67,14 @@ describe('NftClaimService', () => {
     const nftClaim = nftClaimRepo.create(mockCreateNftClaim);
     await nftClaimRepo.save(nftClaim);
 
-    const id = nftClaim.id as unknown as string;
-    const result = await service.findOne(id);
+    const id = nftClaim.id.toString();
+    const result = await service.findById(id);
     expect(result).toEqual({ ...mockCreateNftClaim, ...result });
   });
 
   it('should find all nft claims', async () => {
     const nftClaims = await nftClaimRepo.find();
-    const result = await service.findAll();
+    const result = await service.findAll({ query: [] });
     expect(result).toEqual(nftClaims);
   });
 

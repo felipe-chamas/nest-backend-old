@@ -27,13 +27,13 @@ describe('NftController', () => {
           ...createNftDto,
         } as unknown as Nft),
       findAll: () => Promise.resolve([]),
-      findOne: jest.fn().mockImplementation(async () => {
+      findById: jest.fn().mockImplementation(async () => {
         return {
           ...mockNft,
           user: mockUser,
         };
       }),
-      update: (_: ObjectID, updatedNft: UpdateNftDto) =>
+      update: (_: string, updatedNft: UpdateNftDto) =>
         Promise.resolve({
           ...mockNft,
           ...updatedNft,
@@ -67,28 +67,21 @@ describe('NftController', () => {
   });
 
   it('should fetch all nfts', async () => {
-    const query = {} as unknown as Request;
-    const result = await controller.findAll(query, {
-      skip: 0,
-      take: 10,
-      sort: [],
-      search: [],
+    const result = await controller.findAll({} as Request, {
+      query: [{ $skip: 0 }, { $limit: 10 }],
     });
     expect(result).toEqual([]);
   });
 
   it('should fetch a nft', async () => {
-    const result = await controller.findOne('123' as unknown as ObjectID);
+    const result = await controller.findOne('123');
     expect(result.metadata).toBe(mockNft.metadata);
   });
 
   it('should update a nft', async () => {
-    const result = await controller.update(
-      mockCreateNftResponse.id as unknown as ObjectID,
-      {
-        userId: '123' as unknown as ObjectID,
-      } as UpdateNftDto,
-    );
+    const result = await controller.update(mockCreateNftResponse.id, {
+      userId: '123' as unknown as ObjectID,
+    } as UpdateNftDto);
 
     expect(result).toEqual({
       ...mockNft,
@@ -97,7 +90,7 @@ describe('NftController', () => {
   });
 
   it('should delete a nft', async () => {
-    await controller.remove('123' as unknown as ObjectID);
+    await controller.remove('123');
     expect(service.remove).toHaveBeenCalledWith('123');
   });
 });

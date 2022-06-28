@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 
-import { getRepository } from 'typeorm';
+import { getMongoRepository } from 'typeorm';
 
 import { getEthereumJSONRPC, parseLogs, ParsiqEvent } from '../queue.service';
 import { logger } from 'common/providers/logger';
@@ -33,10 +33,10 @@ export default async function tokenClaimed(
     const { account, merkleRoot, tokenId } = log.event.args;
 
     logger.info({ account, merkleRoot, tokenId });
-    const userRepo = getRepository(User);
-    const nftRepo = getRepository(Nft);
-    const nftClaimRepo = getRepository(NftClaim);
-    const nftCollectionRepo = getRepository(NftCollection);
+    const userRepo = getMongoRepository(User);
+    const nftRepo = getMongoRepository(Nft);
+    const nftClaimRepo = getMongoRepository(NftClaim);
+    const nftCollectionRepo = getMongoRepository(NftCollection);
     const userService = new UserService(userRepo);
     const nftService = new NftService(nftRepo);
     const nftClaimService = new NftClaimService(nftClaimRepo);
@@ -71,9 +71,9 @@ export default async function tokenClaimed(
 
     const nft = await nftService.create({
       metadata,
-      userId: user.id,
+      userId: user.id.toString(),
       assetIds: [assetId],
-      nftCollectionId: nftCollection.id,
+      nftCollectionId: nftCollection.id.toString(),
     });
     logger.debug(nft);
   }

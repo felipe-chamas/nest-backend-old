@@ -31,6 +31,9 @@ export class User {
   @Column()
   accountIds: AccountIdDto[];
 
+  @Column()
+  avatarUrl?: string;
+
   @CreateDateColumn()
   createdAt: Date;
 

@@ -47,7 +47,10 @@ async function bootstrap() {
       resave: false,
       saveUninitialized: false,
       store: new RedisStore({ client: redisClient }),
-      cookie: { secure: config.get<string>('env') === 'production' },
+      cookie: {
+        secure: config.get<string>('env') === 'production',
+        maxAge: 1000 * 60 * 60 * 24,
+      },
     }),
   );
 

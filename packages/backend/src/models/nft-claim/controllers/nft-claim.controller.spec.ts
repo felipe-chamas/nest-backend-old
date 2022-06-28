@@ -1,5 +1,4 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ObjectID } from 'typeorm';
 import {
   mockNftClaim,
   mockCreateNftClaim,
@@ -24,16 +23,16 @@ describe('NftClaimController', () => {
           ...createNftClaimDto,
         } as unknown as NftClaim),
       findAll: () => Promise.resolve([]),
-      findOne: (id: string) =>
+      findById: (id: string) =>
         Promise.resolve({
           ...mockCreateNftClaim,
-          id: id as unknown as ObjectID,
-        } as NftClaim),
-      update: (_: string, updatedNftClaim: Partial<UpdateNftClaimDto>) =>
+          id,
+        } as unknown as NftClaim),
+      update: (_: string, updatedNftClaim: UpdateNftClaimDto) =>
         Promise.resolve({
           ...mockNftClaim,
           ...updatedNftClaim,
-        } as NftClaim),
+        } as unknown as NftClaim),
       remove: jest.fn(),
     };
     const module: TestingModule = await Test.createTestingModule({
@@ -62,11 +61,8 @@ describe('NftClaimController', () => {
   });
 
   it('should fetch all nft claims', async () => {
-    const result = await controller.findAll({} as unknown as Request, {
-      skip: 0,
-      take: 10,
-      sort: [],
-      search: [],
+    const result = await controller.findAll({} as Request, {
+      query: [{ $skip: 0 }, { $limit: 10 }],
     });
     expect(result).toEqual([]);
   });

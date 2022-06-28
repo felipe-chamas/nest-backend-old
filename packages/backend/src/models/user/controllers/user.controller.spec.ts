@@ -16,10 +16,10 @@ describe('UserController', () => {
   beforeEach(async () => {
     service = {
       findAll: () => Promise.resolve([mockUser as User]),
-      findOne: jest.fn().mockImplementation(async (id) => {
+      findById: jest.fn().mockImplementation(async (id) => {
         return { ...mockUser, id: id as unknown as ObjectID } as User;
       }),
-      update: (_: ObjectID, updatedUser: Partial<UpdateUserDto>) =>
+      update: (_: string, updatedUser: Partial<UpdateUserDto>) =>
         Promise.resolve({
           ...updatedUser,
         } as unknown as User),
@@ -44,7 +44,7 @@ describe('UserController', () => {
   });
 
   it('should fetch an user', async () => {
-    const result = await controller.findOne(mockUser.id);
+    const result = await controller.findOne(mockUser.id.toString());
 
     expect(result).toMatchObject({
       email: mockUser.email,
@@ -59,16 +59,20 @@ describe('UserController', () => {
         roles: [Role.USER_ADMIN],
       } as UpdateUserDto;
 
-      const result = await controller.update(mockUser.id, updatedUser, {
-        user: mockAdmin,
-      } as unknown as SessionData);
+      const result = await controller.update(
+        mockUser.id.toString(),
+        updatedUser,
+        {
+          user: mockAdmin,
+        } as unknown as SessionData,
+      );
 
       expect(result).toMatchObject(updatedUser);
     });
 
     it('should not update roles when logged in user is not ROLES_ADMIN', async () => {
       const result = await controller.update(
-        mockUser.id,
+        mockUser.id.toString(),
         {
           email: 'testEmail@test.com',
           roles: [Role.USER_ADMIN],
@@ -81,7 +85,7 @@ describe('UserController', () => {
   });
 
   it('should delete an user', () => {
-    controller.remove(mockUser.id);
+    controller.remove(mockUser.id.toString());
     expect(service.remove).toHaveBeenCalledWith(mockUser.id);
   });
 });

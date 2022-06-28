@@ -13,6 +13,7 @@ import { Factory, Seeder } from 'typeorm-seeding';
 import { Keypair } from '@solana/web3.js';
 import { AssetId, AssetType } from 'caip';
 
+import UserData from './theharvestgame/user.json';
 import NftCollectionData from './theharvestgame/nft-collection.json';
 import NftClaimData from './theharvestgame/nft-claim.json';
 import { faker } from '@faker-js/faker';
@@ -42,10 +43,23 @@ export default class TheHarvestGameSeeder implements Seeder {
 
   nfts: Nft[];
 
+  userId: string;
+
+  total = 0;
+
   public async run(factory: Factory, connection: Connection): Promise<void> {
     this.users = await factory(User)({
       chainId: ChainIdReference.SOLANA_DEVNET,
-    }).createMany(20);
+    }).createMany(10);
+
+    UserData.forEach((user) =>
+      factory(User)({ accountIds: user.accountIds })
+        .create()
+        .then((value) => {
+          this.userId = value.id.toString();
+          this.users.push(value);
+        }),
+    );
 
     const nftCollectionRepo = connection.getRepository(NftCollection);
     this.nftCollections = nftCollectionRepo.create(
@@ -63,7 +77,7 @@ export default class TheHarvestGameSeeder implements Seeder {
     this.nfts = nftRepo.create(
       this.nftClaims.map((data) => this.createNfts(data)).flat(),
     );
-    this.nfts = await nftClaimRepo.save(this.nfts);
+    this.nfts = await nftRepo.save(this.nfts);
 
     const orders = await factory(Order)({
       nfts: this.nfts,
@@ -99,9 +113,9 @@ export default class TheHarvestGameSeeder implements Seeder {
   }
 
   private createNftClaim(data: NftClaimInput): CreateNftClaimDto {
-    const nftCollectionId = this.nftCollections.find(
-      (nftCollection) => nftCollection.slug === data.slug,
-    ).id;
+    const nftCollectionId = this.nftCollections
+      .find((nftCollection) => nftCollection.slug === data.slug)
+      .id.toString();
 
     delete data.slug;
 
@@ -121,7 +135,7 @@ export default class TheHarvestGameSeeder implements Seeder {
 
     const count =
       nftCollection.slug === 'emote'
-        ? faker.datatype.float({ min: 1, max: 10, precision: 1 })
+        ? faker.datatype.float({ min: 1, max: 3, precision: 1 })
         : 1;
 
     return Array(count)
@@ -135,7 +149,11 @@ export default class TheHarvestGameSeeder implements Seeder {
         nftCollection.id.toString() === data.nftCollectionId.toString(),
     );
 
-    const userId = faker.helpers.arrayElement(this.users).id;
+    const userId =
+      this.total > 15
+        ? faker.helpers.arrayElement(this.users).id.toString()
+        : this.userId;
+    if (this.total <= 15) this.total += 1;
     const assetType = nftCollection.assetTypes[0];
     const tokenId = Keypair.generate().publicKey.toBase58();
 
@@ -149,7 +167,7 @@ export default class TheHarvestGameSeeder implements Seeder {
       userId,
       assetIds,
       metadata: data.metadata,
-      nftCollectionId: data.nftCollectionId,
+      nftCollectionId: data.nftCollectionId.toString(),
     };
   }
 }

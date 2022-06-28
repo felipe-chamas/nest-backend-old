@@ -4,7 +4,7 @@ import { NftClaim } from 'common/entities';
 import { CreateNftClaimDto } from 'models/nft-claim/dto/create-nft-claim.dto';
 
 export const mockCreateNftClaim: CreateNftClaimDto = {
-  nftCollectionId: '624b40189c5293c6f75945f1' as unknown as ObjectID,
+  nftCollectionId: '624b40189c5293c6f75945f1',
   merkleRoot:
     '0x0000000000000000000000000000000000000000000000000000000000000000',
   merkleProofs: {

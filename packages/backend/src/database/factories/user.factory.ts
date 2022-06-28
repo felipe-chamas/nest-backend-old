@@ -5,10 +5,11 @@ import { Keypair } from '@solana/web3.js';
 import { AccountId } from 'caip';
 
 import { Role } from 'common/enums/role.enum';
-import { ChainIdReference } from 'common/types';
+import { AccountIdDto, ChainIdReference } from 'common/types';
 
 interface Context {
   chainId?: ChainIdReference;
+  accountIds?: AccountIdDto[];
 }
 
 const getAddress = (chainId: ChainIdReference): string => {
@@ -36,22 +37,20 @@ const getChainId = () =>
     ChainIdReference.SOLANA_MAINNET,
   ]);
 
-define(User, ({ chainId = getChainId() }: Context) => {
+define(User, (_, { chainId = getChainId(), accountIds }: Context) => {
   const firstName = faker.name.firstName();
   const lastName = faker.name.lastName();
 
-  // TODO: Change random to list from dev addresses
   const address = getAddress(chainId);
+  const accountId = new AccountId({
+    chainId,
+    address,
+  });
 
   const user = new User();
   user.name = `${firstName} ${lastName}`;
   user.email = faker.internet.email();
-  user.accountIds = [
-    new AccountId({
-      chainId,
-      address,
-    }),
-  ];
+  user.accountIds = accountIds ? accountIds : [accountId];
   user.roles = faker.helpers.arrayElements(
     [Role.MARKETPLACE_ADMIN, Role.NFT_ADMIN, Role.ROLES_ADMIN, Role.USER_ADMIN],
     faker.datatype.float({ min: 0, max: 1, precision: 1 }),

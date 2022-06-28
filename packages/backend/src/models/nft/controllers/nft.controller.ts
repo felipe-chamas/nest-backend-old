@@ -1,4 +1,3 @@
-import { Request } from 'express';
 import {
   Controller,
   Get,
@@ -12,21 +11,15 @@ import {
 import { NftService } from '../services/nft.service';
 import { CreateNftDto } from '../dto/create-nft.dto';
 import { UpdateNftDto } from '../dto/update-nft.dto';
-import { ObjectID } from 'typeorm';
-import { NftCollectionService } from 'models/nft-collection';
 import { GetPagination, Pagination } from 'common/decorators';
 import { ApiBody, ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 import { NftDto } from '../dto/nft.dto';
 import { AssetId } from 'caip';
 import { Roles } from 'common/decorators/roles.decorators';
 import { Role } from 'common/enums/role.enum';
-
 @Controller('nft')
 export class NftController {
-  constructor(
-    private readonly nftCollectionService: NftCollectionService,
-    private readonly nftService: NftService,
-  ) {}
+  constructor(private readonly nftService: NftService) {}
 
   @Roles(Role.NFT_ADMIN)
   @Post()
@@ -40,7 +33,7 @@ export class NftController {
   @Get()
   @ApiOperation({ description: 'Returns a list of Nfts' })
   @ApiOkResponse({ type: [NftDto], schema: { type: 'array' } })
-  findAll(@Query() query: Request, @GetPagination() pagination: Pagination) {
+  findAll(@Query() query, @GetPagination() pagination: Pagination) {
     return this.nftService.findAll({ ...query, ...pagination });
   }
 
@@ -60,15 +53,15 @@ export class NftController {
   @Get(':id')
   @ApiOperation({ description: 'Returns an Nft with provided `id`' })
   @ApiOkResponse({ type: NftDto })
-  findOne(@Param('id') id: ObjectID) {
-    return this.nftService.findOne({ id });
+  findOne(@Param('id') id: string) {
+    return this.nftService.findById(id);
   }
 
   @Roles(Role.NFT_ADMIN)
   @Patch(':id')
   @ApiOperation({ description: 'Update an Nft with provided i`d`' })
   @ApiOkResponse({ type: NftDto })
-  update(@Param('id') id: ObjectID, @Body() updateNftDto: UpdateNftDto) {
+  update(@Param('id') id: string, @Body() updateNftDto: UpdateNftDto) {
     return this.nftService.update(id, updateNftDto);
   }
 
@@ -76,7 +69,7 @@ export class NftController {
   @Delete(':id')
   @ApiOperation({ description: 'Delete an Nft with provided `id`' })
   @ApiOkResponse({ type: NftDto })
-  remove(@Param('id') id: ObjectID) {
+  remove(@Param('id') id: string) {
     return this.nftService.remove(id);
   }
 }

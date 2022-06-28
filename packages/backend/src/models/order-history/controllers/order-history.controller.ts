@@ -1,4 +1,3 @@
-import { Request } from 'express';
 import {
   Controller,
   Get,
@@ -40,7 +39,7 @@ export class OrderHistoryController {
   @Get()
   @ApiOperation({ description: 'Returns a list of order histories' })
   @ApiOkResponse({ type: [OrderHistoryDto], schema: { type: 'array' } })
-  findAll(@Query() query: Request, @GetPagination() pagination: Pagination) {
+  findAll(@Query() query, @GetPagination() pagination: Pagination) {
     return this.orderHistoryService.findAll({ ...query, ...pagination });
   }
 
@@ -48,7 +47,7 @@ export class OrderHistoryController {
   @ApiOperation({ description: 'Returns an order history with given `id`' })
   @ApiOkResponse({ type: FindOneOrderHistoryDto })
   findOne(@Param('id') id: string) {
-    return this.orderHistoryService.findOne({ id });
+    return this.orderHistoryService.findById(id);
   }
 
   @Roles(Role.MARKETPLACE_ADMIN)

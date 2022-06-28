@@ -15,13 +15,13 @@ import { UserService } from 'models/user';
 export class SignatureAuthController {
   constructor(
     private service: SignatureAuthService,
-    private userService: UserService
+    private userService: UserService,
   ) {}
 
   @Post('/request')
   async requestAgreement(
     @Body() { accountId }: RequestForAgreementDto,
-    @Session() session: SessionData
+    @Session() session: SessionData,
   ): Promise<AgreementSession> {
     const agreementSession = new AgreementSession();
     agreementSession.message = this.service.getMessageToSign(accountId.address);
@@ -33,7 +33,7 @@ export class SignatureAuthController {
 
   @UseGuards(AuthGuard('signature'))
   @Post('/login')
-  async submitAgreement(@Session() session) {
+  async submitAgreement(@Session() session: SessionData) {
     const user = this.userService.findById(session.user.id);
     return user;
   }

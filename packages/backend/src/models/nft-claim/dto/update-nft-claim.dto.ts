@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsObject, IsString } from 'class-validator';
-import { ObjectID } from 'typeorm';
+import { NftCollection } from 'models/nft-collection';
 import { Metadata } from '../../../models/nft/interface';
 
 export class UpdateNftClaimDto {
@@ -18,5 +18,5 @@ export class UpdateNftClaimDto {
 
   @ApiProperty()
   @IsString()
-  nftCollectionId: ObjectID;
+  nftCollectionId: NftCollection['id'];
 }

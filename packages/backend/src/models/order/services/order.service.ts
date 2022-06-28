@@ -1,18 +1,19 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindConditions, FindManyOptions, ObjectID, Repository } from 'typeorm';
+import { FindManyOptions, MongoRepository } from 'typeorm';
 import { CreateOrderDto } from '../dto/create-order.dto';
 import { UpdateOrderDto } from '../dto/update-order.dto';
 import { Order, OrderHistory } from 'common/entities';
 import { Pagination } from 'common/decorators';
 import { recoveryAgent } from 'common/utils';
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class OrderService {
   constructor(
-    @InjectRepository(Order) private readonly orderRepo: Repository<Order>,
+    @InjectRepository(Order) private readonly orderRepo: MongoRepository<Order>,
     @InjectRepository(OrderHistory)
-    private readonly orderHistoryRepo: Repository<OrderHistory>,
+    private readonly orderHistoryRepo: MongoRepository<OrderHistory>,
   ) {}
 
   async create(createOrderDto: CreateOrderDto) {
@@ -37,7 +38,7 @@ export class OrderService {
     };
   }
 
-  async findAll(options?: FindManyOptions<Order> | Pagination) {
+  async findAll({ query, ...options }: FindManyOptions<Order> & Pagination) {
     const orders = await this.orderRepo.find(options);
     const orderHistories = await this.orderHistoryRepo.find();
 
@@ -57,26 +58,29 @@ export class OrderService {
     return res;
   }
 
-  async findOne(conditions: FindConditions<Order>) {
-    let order: Order;
-    if (conditions?.id)
-      order = await this.orderRepo.findOne(String(conditions.id));
-    else order = await this.orderRepo.findOne(conditions);
+  async findById(id: string) {
+    const [order] = await this.orderRepo
+      .aggregate<Order>([
+        {
+          $match: {
+            _id: new ObjectId(id),
+          },
+        },
+        {
+          $addFields: {
+            id: '$_id',
+          },
+        },
+      ])
+      .toArray();
 
-    if (!order) throw new NotFoundException(`Order not found`);
+    if (!order) throw new NotFoundException(`Order with id ${id} not found`);
 
-    const orderHistory = await this.orderHistoryRepo.findOne({
-      orderId: order.id,
-    });
-
-    const nft = await this.orderRepo.findOne({ nftId: order.nftId });
-    return { ...order, status: orderHistory.currentStatus, nft };
+    return order;
   }
 
   async update(id: string, updateOrderDto: UpdateOrderDto) {
-    const order = await this.orderRepo.findOne(id);
-
-    if (!order) throw new NotFoundException(`Order with id ${id} not found`);
+    const order = await this.findById(id);
 
     Object.assign(order, updateOrderDto);
 
@@ -94,14 +98,11 @@ export class OrderService {
   }
 
   async remove(id: string) {
-    const order = await this.orderRepo.findOne(id);
-
-    if (!order) throw new NotFoundException(`Order with id ${id} not found`);
-
+    const order = await this.findById(id);
     return await this.orderRepo.softRemove(order);
   }
 
-  async recover(id?: ObjectID) {
+  async recover(id?: string) {
     return await recoveryAgent(this.orderRepo, id);
   }
 }

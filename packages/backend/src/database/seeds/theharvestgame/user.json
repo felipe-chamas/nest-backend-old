@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "accountIds": [
+      {
+        "chainId": {
+          "namespace": "solana",
+          "reference": "EtWTRABZaYq6iMfeYKouRu166VU2xqa1"
+        },
+        "address": "GUa8mVe6dwfyoRqjHntQFBKchjWAqUW9WnTtohcPwpJE"
+      }
+    ]
+  }
+]

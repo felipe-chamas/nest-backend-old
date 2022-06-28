@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { MongoRepository } from 'typeorm';
 import {
   mockCreateNftCollection,
   mockNftCollection,
@@ -12,18 +12,19 @@ export type MockType<T> = {
   [P in keyof T]?: jest.Mock<Nft>;
 };
 
-export const repositoryMockFactory: () => MockType<Repository<NftCollection>> =
-  jest.fn(() => ({
-    findOne: jest.fn((entity) => entity),
-    find: jest.fn().mockReturnValue([mockNftCollection, mockNftCollection]),
-    create: jest.fn().mockReturnValue(mockNftCollection),
-    save: jest.fn().mockReturnValue(mockNftCollection),
-  }));
+export const repositoryMockFactory: () => MockType<
+  MongoRepository<NftCollection>
+> = jest.fn(() => ({
+  findOne: jest.fn((entity) => entity),
+  find: jest.fn().mockReturnValue([mockNftCollection, mockNftCollection]),
+  create: jest.fn().mockReturnValue(mockNftCollection),
+  save: jest.fn().mockReturnValue(mockNftCollection),
+}));
 
 describe('NftCollectionService', () => {
   let nftCollection;
   let service: Partial<NftCollectionService>;
-  let nftCollectionRepo: Repository<NftCollection>;
+  let nftCollectionRepo: MongoRepository<NftCollection>;
 
   beforeEach(async () => {
     service = {
@@ -31,7 +32,7 @@ describe('NftCollectionService', () => {
       findAll: jest
         .fn()
         .mockReturnValue([mockNftCollection, mockNftCollection]),
-      findOne: jest.fn().mockReturnValue(mockNftCollection),
+      findById: jest.fn().mockReturnValue(mockNftCollection),
       update: jest.fn().mockReturnValue(mockNftCollection),
       remove: jest.fn(),
     };
@@ -66,7 +67,7 @@ describe('NftCollectionService', () => {
 
   it('should fetch all nftCollections', async () => {
     const nftCollections = await nftCollectionRepo.find();
-    const result = await service.findAll();
+    const result = await service.findAll({ query: [] });
     expect(result).toEqual(nftCollections);
   });
 
@@ -74,7 +75,7 @@ describe('NftCollectionService', () => {
     nftCollection = nftCollectionRepo.create(mockCreateNftCollection);
     await nftCollectionRepo.save(nftCollection);
 
-    const result = await service.findOne({ id: nftCollection.id });
+    const result = await service.findById(nftCollection.id);
 
     expect(result.id).toBe(mockNftCollection.id);
   });
