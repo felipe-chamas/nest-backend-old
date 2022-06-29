@@ -106,26 +106,124 @@
   {
     "metadata": {
       "name": "Mystery Box",
-      "description": "10 Card Box",
-      "image": "https://nft.theharvestgame.xyz/box/mystery.png",
+      "description": "This box will contain a total of 10 random cards whose drop rates will be according to the following percentages: 85% Rare, 10% Epic, 2.5% Legendary and 2.5% Shiny (2.0% Shiny Rare, 0.4% Shiny Epic and 0.1% Shiny Legendary)",
+      "image": "https://nft.theharvestgame.io/box/mystery.png",
+      "external_url": "https://theharvestgame.com",
+      "seller_fee_basis_points": 500,
+      "symbol": "THB",
       "attributes": [
-        { "trait_type": "Rarity", "value": "Mystery" },
-        { "trait_type": "Civilization", "value": "Ancients" },
-        { "trait_type": "Category", "value": "Community" }
-      ]
+        {
+          "trait_type": "Total Cards",
+          "value": "10"
+        },
+        {
+          "trait_type": "Rare Card Rate",
+          "value": "85%"
+        },
+        {
+          "trait_type": "Epic Card Rate",
+          "value": "10%"
+        },
+        {
+          "trait_type": "Legendary Card Rate",
+          "value": "2.5%"
+        },
+        {
+          "trait_type": "Shiny Card Rate",
+          "value": "2.5%"
+        },
+        {
+          "trait_type": "Shiny Rare Card Rate",
+          "value": "2.0%"
+        },
+        {
+          "trait_type": "Shiny Epic Card Rate",
+          "value": "0.4%"
+        },
+        {
+          "trait_type": "Shiny Legendary Card Rate",
+          "value": "0.1%"
+        }
+      ],
+      "properties": {
+        "files": [
+          {
+            "uri": "https://nft.theharvestgame.io/box/mystery.png",
+            "type": "image/jpg"
+          }
+        ],
+        "category": "image",
+        "creators": [
+          {
+            "address": "6mm4gskSRRKnQkaFDazAccYFgnjdUvV4PANw1LD6Fepb",
+            "share": 95
+          },
+          {
+            "address": "HMduKVo3A19U5EpQdEhPjo9hq9zfZXn8aGVYZp7Vc7fX",
+            "share": 5
+          }
+        ],
+        "collection": {
+          "family": "The Harvest",
+          "filename": "Card Boxes"
+        }
+      }
     },
     "slug": "box"
   },
   {
     "metadata": {
       "name": "Legendary Box",
-      "description": "40 Card Box",
-      "image": "https://nft.theharvestgame.xyz/box/legendary.png",
+      "description": "This box will contain a total of 40 random cards of guaranteed rarities: 34 Rare, 4 Epic, 1 Legendary and 1 Shiny.",
+      "image": "https://nft.theharvestgame.io/box/legendary.png",
+      "external_url": "https://theharvestgame.com",
+      "seller_fee_basis_points": 500,
+      "symbol": "THB",
       "attributes": [
-        { "trait_type": "Rarity", "value": "Legendary" },
-        { "trait_type": "Civilization", "value": "Ancients" },
-        { "trait_type": "Category", "value": "Community" }
-      ]
+        {
+          "trait_type": "Total Cards",
+          "value": "40"
+        },
+        {
+          "trait_type": "Rare Cards",
+          "value": "34"
+        },
+        {
+          "trait_type": "Epic Cards",
+          "value": "4"
+        },
+        {
+          "trait_type": "Legendary Cards",
+          "value": "1"
+        },
+        {
+          "trait_type": "Shiny Cards",
+          "value": "1"
+        }
+      ],
+      "properties": {
+        "files": [
+          {
+            "uri": "https://nft.theharvestgame.io/box/legendary.png",
+            "type": "image/jpg"
+          }
+        ],
+        "category": "image",
+        "creators": [
+          {
+            "address": "6mm4gskSRRKnQkaFDazAccYFgnjdUvV4PANw1LD6Fepb",
+            "share": 95
+          },
+          {
+            "address": "HMduKVo3A19U5EpQdEhPjo9hq9zfZXn8aGVYZp7Vc7fX",
+            "share": 5
+          }
+        ],
+        "collection": {
+          "family": "The Harvest",
+          "filename": "Card Boxes"
+        }
+      }
     },
     "slug": "box"
   },

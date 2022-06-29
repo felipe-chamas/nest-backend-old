@@ -43,22 +43,15 @@ export default class TheHarvestGameSeeder implements Seeder {
 
   nfts: Nft[];
 
-  userId: string;
-
-  total = 0;
-
   public async run(factory: Factory, connection: Connection): Promise<void> {
     this.users = await factory(User)({
       chainId: ChainIdReference.SOLANA_DEVNET,
-    }).createMany(10);
+    }).createMany(5);
 
     UserData.forEach((user) =>
       factory(User)({ accountIds: user.accountIds })
         .create()
-        .then((value) => {
-          this.userId = value.id.toString();
-          this.users.push(value);
-        }),
+        .then((value) => this.users.push(value)),
     );
 
     const nftCollectionRepo = connection.getRepository(NftCollection);
@@ -134,26 +127,29 @@ export default class TheHarvestGameSeeder implements Seeder {
     );
 
     const count =
-      nftCollection.slug === 'emote'
-        ? faker.datatype.float({ min: 1, max: 3, precision: 1 })
+      nftCollection.slug === 'box'
+        ? faker.datatype.float({ min: 10, max: 50, precision: 1 })
         : 1;
 
     return Array(count)
       .fill(null)
-      .map(() => this.createNft(data));
+      .map((_, index) => this.createNft(data, index));
   }
 
-  private createNft(data: NftClaim): CreateNftDto {
+  private createNft(data: NftClaim, index: number): CreateNftDto {
     const nftCollection = this.nftCollections.find(
       (nftCollection) =>
         nftCollection.id.toString() === data.nftCollectionId.toString(),
     );
 
-    const userId =
-      this.total > 15
-        ? faker.helpers.arrayElement(this.users).id.toString()
-        : this.userId;
-    if (this.total <= 15) this.total += 1;
+    const metadata = data.metadata;
+
+    if (nftCollection.slug === 'box') {
+      metadata.name = `${metadata.name} - #${String(index).padStart(3, '0')}`;
+    }
+
+    const userId = faker.helpers.arrayElement(this.users).id.toString();
+
     const assetType = nftCollection.assetTypes[0];
     const tokenId = Keypair.generate().publicKey.toBase58();
 
@@ -166,7 +162,7 @@ export default class TheHarvestGameSeeder implements Seeder {
     return {
       userId,
       assetIds,
-      metadata: data.metadata,
+      metadata,
       nftCollectionId: data.nftCollectionId.toString(),
     };
   }

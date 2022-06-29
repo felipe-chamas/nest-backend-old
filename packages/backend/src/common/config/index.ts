@@ -22,6 +22,6 @@ export default () => ({
   discord: {
     clientID: process.env.DISCORD_CLIENT_ID,
     clientSecret: process.env.DISCORD_CLIENT_SECRET,
-    redirectURL: process.env.DISCORD_REDIRECT_URL,
+    redirectURL: process.env.DISCORD_REDIRECT_URI,
   },
 });

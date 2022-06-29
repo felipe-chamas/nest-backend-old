@@ -11,7 +11,10 @@ resource "aws_secretsmanager_secret_version" "secret_variables_version" {
   secret_string = <<EOF
     {
       "mongodb_uri": "${var.mongodb_uri}",
-      "secret_value": "${random_string.random.result}"
+      "discord_client_id": "${var.discord_client_id}",
+      "discord_client_secret": "${var.discord_client_secret}",
+      "discord_redirect_uri": "${var.discord_redirect_uri}",
+      "secret_value": "${random_string.random.result}",
     }
   EOF
 }
@@ -62,9 +65,21 @@ resource "aws_ecs_task_definition" "main" {
           valueFrom: "${aws_secretsmanager_secret.secret_variables.arn}:mongodb_uri::"
         },
         {
+          name: "DISCORD_CLIENT_ID",
+          valueFrom: "${aws_secretsmanager_secret.secret_variables.arn}:discord_client_id::"
+        },
+        {
+          name: "DISCORD_CLIENT_SECRET",
+          valueFrom: "${aws_secretsmanager_secret.secret_variables.arn}:discord_client_secret::"
+        },
+        {
+          name: "DISCORD_REDIRECT_URI",
+          valueFrom: "${aws_secretsmanager_secret.secret_variables.arn}:discord_redirect_uri::"
+        },
+        {
           name: "SESSION_SECRET",
           valueFrom: "${aws_secretsmanager_secret.secret_variables.arn}:secret_value::"
-        }
+        },
       ]
     },
     {
