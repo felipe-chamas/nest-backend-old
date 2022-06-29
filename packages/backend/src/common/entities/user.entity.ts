@@ -32,6 +32,12 @@ export class User {
   accountIds: AccountIdDto[];
 
   @Column()
+  discord: {
+    id: string;
+    username: string;
+  };
+
+  @Column()
   avatarUrl?: string;
 
   @CreateDateColumn()

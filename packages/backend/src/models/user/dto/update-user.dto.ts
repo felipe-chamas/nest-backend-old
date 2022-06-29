@@ -8,18 +8,26 @@ export class UpdateUserDto {
   @ApiProperty()
   @IsOptional()
   @IsEmail()
-  email: string;
+  email?: string;
 
   @ApiProperty()
   @IsOptional()
   @IsString()
-  name: string;
-
-  @ApiProperty()
-  @IsAccountIdArray
-  accountIds: string[] | AccountIdParams[];
+  name?: string;
 
   @ApiProperty()
   @IsOptional()
-  roles: Role[];
+  @IsAccountIdArray
+  accountIds?: string[] | AccountIdParams[];
+
+  @ApiProperty()
+  @IsOptional()
+  roles?: Role[];
+
+  @ApiProperty()
+  @IsOptional()
+  discord?: {
+    id: string;
+    username: string;
+  };
 }

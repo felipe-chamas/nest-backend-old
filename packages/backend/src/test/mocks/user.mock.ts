@@ -30,6 +30,12 @@ export const mockCreateUser = {
   accountIds: [
     { chainId: { namespace: 'eip155', reference: '1' }, address: '0x12345' },
   ],
+  socialAccounts: {
+    discordUser: '',
+    instagramUser: '',
+    twitterUser: '',
+    youtubeUser: '',
+  },
 };
 
 export const mockUpdateUser: Partial<UpdateUserDto> = {

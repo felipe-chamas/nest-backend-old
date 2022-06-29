@@ -9,6 +9,9 @@ services:
       - PORT=8080
       - SESSION_SECRET=secret
       - REDIS_URL=redis://redis:6379
+      - DISCORD_CLIENT_ID=${DISCORD_CLIENT_ID}
+      - DISCORD_CLIENT_SECRET=${DISCORD_CLIENT_SECRET}
+      - DISCORD_REDIRECT_URL=${DISCORD_REDIRECT_URL}
       - MONGODB_URI=mongodb://mongo:27017/database
     ports:
       - 8080:8080

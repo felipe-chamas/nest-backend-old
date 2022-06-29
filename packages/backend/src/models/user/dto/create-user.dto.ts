@@ -19,6 +19,13 @@ export class CreateUserDto {
   roles?: Role[];
 
   @ApiProperty()
+  @IsOptional()
+  discord?: {
+    id: string;
+    username: string;
+  };
+
+  @ApiProperty()
   @IsAccountIdArray
   accountIds: string[] | AccountIdParams[];
 }

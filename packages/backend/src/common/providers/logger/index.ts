@@ -26,8 +26,8 @@ if (env === 'development') {
       format: combine(
         colorize({ all: true }),
         align(),
-        printf((info) => `[${info.timestamp}] ${info.level}: ${info.message}`)
+        printf((info) => `[${info.timestamp}] ${info.level}: ${info.message}`),
       ),
-    })
+    }),
   );
 }
