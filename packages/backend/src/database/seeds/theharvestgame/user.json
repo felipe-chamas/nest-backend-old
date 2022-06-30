@@ -9,5 +9,16 @@
         "address": "GUa8mVe6dwfyoRqjHntQFBKchjWAqUW9WnTtohcPwpJE"
       }
     ]
+  },
+  {
+    "accountIds": [
+      {
+        "chainId": {
+          "namespace": "solana",
+          "reference": "EtWTRABZaYq6iMfeYKouRu166VU2xqa1"
+        },
+        "address": "9crsgHnDc68uRpMtzQR4v4N4PDwMdwfY33h5h3jsXBRd"
+      }
+    ]
   }
 ]

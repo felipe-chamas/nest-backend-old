@@ -17,7 +17,7 @@ import { createClient } from 'redis';
 import { AuthGuard } from 'common/guards';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { cors: true });
   app.enableCors();
   app.use(helmet());
   app.use(cookieParser());

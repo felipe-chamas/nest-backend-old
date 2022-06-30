@@ -46,7 +46,7 @@ export default class TheHarvestGameSeeder implements Seeder {
   public async run(factory: Factory, connection: Connection): Promise<void> {
     this.users = await factory(User)({
       chainId: ChainIdReference.SOLANA_DEVNET,
-    }).createMany(5);
+    }).createMany(2);
 
     UserData.forEach((user) =>
       factory(User)({ accountIds: user.accountIds })
