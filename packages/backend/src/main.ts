@@ -58,6 +58,7 @@ async function bootstrap() {
       cookie: {
         secure: config.get<string>('env') === 'production',
         maxAge: 1000 * 60 * 60 * 24,
+        httpOnly: false,
       },
     }),
   );
