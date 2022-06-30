@@ -14,7 +14,7 @@ resource "aws_secretsmanager_secret_version" "secret_variables_version" {
       "discord_client_id": "${var.discord_client_id}",
       "discord_client_secret": "${var.discord_client_secret}",
       "discord_redirect_uri": "${var.discord_redirect_uri}",
-      "secret_value": "${random_string.random.result}",
+      "secret_value": "${random_string.random.result}"
     }
   EOF
 }
