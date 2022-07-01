@@ -14,8 +14,8 @@ export class QueueModule {
   static register(): DynamicModule {
     const imports: Imports = [DiscoveryModule];
 
-    const env = process.env.STAGE || 'development';
-    if (env === 'development') {
+    const stage = process.env.STAGE;
+    if (stage === 'local') {
       imports.push(BullModule.forRoot({}));
       imports.push(ParsiqModule);
     } else {

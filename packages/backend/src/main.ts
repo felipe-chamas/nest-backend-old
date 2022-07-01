@@ -15,9 +15,10 @@ import { logger, Swagger } from 'common/providers';
 import ConnectRedis from 'connect-redis';
 import { createClient } from 'redis';
 import { AuthGuard } from 'common/guards';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   app.enableCors({
     origin: true,
@@ -48,6 +49,8 @@ async function bootstrap() {
     url: config.get<string>('redis_url', 'redis://localhost:6379'),
     legacyMode: true,
   });
+
+  app.set('trust proxy', 1);
 
   app.use(
     session({

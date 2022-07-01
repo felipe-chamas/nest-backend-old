@@ -2,7 +2,7 @@ import * as winston from 'winston';
 const { format, createLogger } = winston;
 const { combine, timestamp, json, colorize, align, printf } = format;
 
-const env = process.env.STAGE || 'development';
+const stage = process.env.STAGE;
 
 const loggerOptions: winston.LoggerOptions = {
   level: 'info',
@@ -20,7 +20,7 @@ const loggerOptions: winston.LoggerOptions = {
 
 export const logger = createLogger(loggerOptions);
 
-if (env === 'development') {
+if (stage === 'local') {
   logger.add(
     new winston.transports.Console({
       format: combine(
