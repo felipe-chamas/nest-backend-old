@@ -2,7 +2,7 @@ import * as winston from 'winston';
 const { format, createLogger } = winston;
 const { combine, timestamp, json, colorize, align, printf } = format;
 
-const env = process.env.NODE_ENV || 'development';
+const env = process.env.STAGE || 'development';
 
 const loggerOptions: winston.LoggerOptions = {
   level: 'info',

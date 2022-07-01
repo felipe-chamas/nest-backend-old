@@ -57,6 +57,10 @@ resource "aws_ecs_task_definition" "main" {
         {
           name: "AWS_REGION",
           value: var.region
+        },
+        {
+          name: "STAGE",
+          value: terraform.workspace
         }
       ],
       secrets: [

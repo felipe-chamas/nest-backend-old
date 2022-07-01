@@ -15,7 +15,7 @@ import { getConnectionOptions } from 'typeorm';
           useUnifiedTopology: true,
           autoLoadEntities: true,
           synchronize:
-            config.get<string>('env') === 'development' ? true : false,
+            config.get<string>('stage') === 'development' ? true : false,
         }),
     }),
   ],

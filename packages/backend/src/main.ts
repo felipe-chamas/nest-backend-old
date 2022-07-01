@@ -56,11 +56,10 @@ async function bootstrap() {
       saveUninitialized: false,
       store: new RedisStore({ client: redisClient }),
       cookie: {
-        secure: config.get<string>('env') === 'production',
+        secure: config.get<string>('stage') !== 'local',
         maxAge: 1000 * 60 * 60 * 24,
         httpOnly: false,
-        sameSite:
-          config.get<string>('env') === 'production' ? 'none' : 'strict',
+        sameSite: config.get<string>('stage') === 'local' ? 'strict' : 'none',
       },
     }),
   );
