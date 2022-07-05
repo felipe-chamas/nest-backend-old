@@ -52,4 +52,13 @@ variable "discord_redirect_uri" {
   type      = string
   sensitive = true
 }
-  
+
+variable "docs_username" {
+  type      = string
+  sensitive = true
+}
+
+variable "docs_password" {
+  type      = string
+  sensitive = true
+}

@@ -14,6 +14,8 @@ resource "aws_secretsmanager_secret_version" "secret_variables_version" {
       "discord_client_id": "${var.discord_client_id}",
       "discord_client_secret": "${var.discord_client_secret}",
       "discord_redirect_uri": "${var.discord_redirect_uri}",
+      "docs_username": "${var.docs_username}",
+      "docs_password": "${var.docs_password}",
       "secret_value": "${random_string.random.result}"
     }
   EOF
@@ -79,6 +81,14 @@ resource "aws_ecs_task_definition" "main" {
         {
           name: "DISCORD_REDIRECT_URI",
           valueFrom: "${aws_secretsmanager_secret.secret_variables.arn}:discord_redirect_uri::"
+        },
+        {
+          name: "DOCS_USERNAME",
+          valueFrom: "${aws_secretsmanager_secret.secret_variables.arn}:docs_username::"
+        },
+        {
+          name: "DOCS_PASSWORD",
+          valueFrom: "${aws_secretsmanager_secret.secret_variables.arn}:docs_password::"
         },
         {
           name: "SESSION_SECRET",

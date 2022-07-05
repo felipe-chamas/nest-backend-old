@@ -142,7 +142,7 @@ export default class TheHarvestGameSeeder implements Seeder {
         nftCollection.id.toString() === data.nftCollectionId.toString(),
     );
 
-    const metadata = data.metadata;
+    const metadata = Object.assign({}, data.metadata);
 
     if (nftCollection.slug === 'box') {
       metadata.name = `${metadata.name} - #${String(index).padStart(3, '0')}`;
