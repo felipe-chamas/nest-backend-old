@@ -25,6 +25,8 @@ module "webserver" {
   discord_client_id     = var.discord_client_id
   discord_client_secret = var.discord_client_secret
   discord_redirect_uri  = var.discord_redirect_uri
+  docs_username         = var.docs_username
+  docs_password         = var.docs_password
 
   depends_on = [
     module.events-listener
