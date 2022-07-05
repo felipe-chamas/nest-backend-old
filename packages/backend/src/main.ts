@@ -70,16 +70,16 @@ async function bootstrap() {
 
   Swagger.init(app);
 
-  app.use(
-    ['/docs', '/docs-json'],
-    basicAuth({
-      challenge: true,
-      users: {
-        [config.get<string>('docs.username')]:
-          config.get<string>('docs.password'),
-      },
-    }),
-  );
+  // app.use(
+  //   ['/docs', '/docs-json'],
+  //   basicAuth({
+  //     challenge: true,
+  //     users: {
+  //       [config.get<string>('docs.username')]:
+  //         config.get<string>('docs.password'),
+  //     },
+  //   }),
+  // );
 
   redisClient.on('ready', () => {
     logger.info('Redis client is ready');
