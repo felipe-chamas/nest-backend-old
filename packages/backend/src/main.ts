@@ -43,17 +43,6 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalGuards(new AuthGuard(new Reflector()));
 
-  app.use(
-    ['/docs', '/docs-json'],
-    basicAuth({
-      challenge: true,
-      users: {
-        [config.get<string>('docs.username')]:
-          config.get<string>('docs.password'),
-      },
-    }),
-  );
-
   logger.info(config.get<string>('redis_url'));
 
   const RedisStore = ConnectRedis(session);
@@ -80,6 +69,18 @@ async function bootstrap() {
   );
 
   Swagger.init(app);
+
+  app.use(
+    ['/docs', '/docs-json'],
+    basicAuth({
+      challenge: true,
+      users: {
+        [config.get<string>('docs.username')]:
+          config.get<string>('docs.password'),
+      },
+    }),
+  );
+
   redisClient.on('ready', () => {
     logger.info('Redis client is ready');
   });
