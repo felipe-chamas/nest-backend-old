@@ -4,6 +4,7 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import session from 'express-session';
 import cookieParser from 'cookie-parser';
 import compression from 'compression';
+import basicAuth from 'express-basic-auth';
 
 import { Logger, ValidationPipe } from '@nestjs/common';
 
@@ -41,6 +42,17 @@ async function bootstrap() {
   app.useGlobalInterceptors(new LoggerInterceptor());
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalGuards(new AuthGuard(new Reflector()));
+
+  app.use(
+    ['/docs', '/docs-json'],
+    basicAuth({
+      challenge: true,
+      users: {
+        [config.get<string>('docs.username')]:
+          config.get<string>('docs.password'),
+      },
+    }),
+  );
 
   logger.info(config.get<string>('redis_url'));
 

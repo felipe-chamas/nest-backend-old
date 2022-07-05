@@ -1,34 +1,3 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { AssetTypeDto } from 'common/types';
+import { NftCollection } from 'common/entities/nft-collection.entity';
 
-export class NftCollectionDto {
-  @ApiProperty()
-  id: string;
-
-  @ApiProperty()
-  assetTypes: AssetTypeDto[];
-
-  @ApiProperty()
-  slug: string;
-
-  @ApiProperty()
-  name: string;
-
-  @ApiProperty()
-  icon: string;
-
-  @ApiProperty()
-  tx?: string;
-
-  @ApiProperty()
-  imageBaseUri?: string;
-
-  @ApiProperty()
-  externalUrl?: string;
-
-  @ApiProperty()
-  createdAt?: Date;
-
-  @ApiProperty()
-  updatedAt?: Date;
-}
+export class NftCollectionDto extends NftCollection {}

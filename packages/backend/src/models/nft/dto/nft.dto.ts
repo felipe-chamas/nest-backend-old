@@ -1,20 +1,3 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { AssetIdDto } from 'common/types';
-import { Metadata } from '../interface';
+import { Nft } from 'common/entities';
 
-export class NftDto {
-  @ApiProperty()
-  id: string;
-
-  @ApiProperty()
-  assetIds: AssetIdDto[];
-
-  @ApiProperty()
-  metadata: Metadata;
-
-  @ApiProperty()
-  userId?: string;
-
-  @ApiProperty()
-  nftCollectionId: string;
-}
+export class NftDto extends Nft {}

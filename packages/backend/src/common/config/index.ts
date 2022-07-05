@@ -19,6 +19,10 @@ export default () => ({
   },
   session_secret: process.env.SESSION_SECRET,
   redis_url: process.env.REDIS_URL,
+  docs: {
+    username: process.env.DOCS_USERNAME,
+    password: process.env.DOCS_PASSWORD,
+  },
   discord: {
     clientID: process.env.DISCORD_CLIENT_ID,
     clientSecret: process.env.DISCORD_CLIENT_SECRET,

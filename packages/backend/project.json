@@ -10,6 +10,15 @@
         "outputPath": "dist/packages/backend",
         "main": "packages/backend/src/main.ts",
         "tsConfig": "packages/backend/tsconfig.app.json",
+        "tsPlugins": [
+          {
+            "name": "@nestjs/swagger/plugin",
+            "options": {
+              "classValidatorShim": false,
+              "introspectComments": true
+            }
+          }
+        ],
         "assets": ["packages/backend/src/common/assets"]
       },
       "configurations": {

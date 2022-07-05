@@ -4,31 +4,50 @@ import { IsAssetTypeArray } from 'common/decorators';
 import { AssetTypeDto } from 'common/types';
 
 export class CreateNftCollectionDto {
-  @ApiProperty()
-  @IsString()
+  @ApiProperty({
+    description: 'Nft collection name.',
+    example: 'CryptoKitties',
+  })
   name: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    type: () => [Object],
+    description: [
+      'Asset types.',
+      'Corresponds to where this collection is deployed on the blockchain, with `chainId` and `assetName` references.',
+    ].join('<br/>'),
+    example: [
+      {
+        chainId: {
+          namespace: 'solana',
+          reference: 'EtWTRABZaYq6iMfeYKouRu166VU2xqa1',
+        },
+        assetName: {
+          namespace: 'NonFungible',
+          reference: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+        },
+      },
+    ],
+  })
   @IsAssetTypeArray
   assetTypes: AssetTypeDto[];
 
-  @ApiProperty()
-  @IsOptional()
-  @IsString()
-  tx?: string;
-
-  @ApiProperty()
-  @IsOptional()
-  @IsString()
+  @ApiProperty({
+    description: 'Image base URI for Nfts belonging to this Nft collection.',
+    example: 'https://example.com/cryptokitties/image/',
+  })
   imageBaseUri?: string;
 
-  @ApiProperty()
-  @IsOptional()
-  @IsString()
+  @ApiProperty({
+    description:
+      'External URL. Redirects to more details about the Nft collection.',
+    example: 'https://example.com/cryptokitties/',
+  })
   externalUrl?: string;
 
-  @ApiProperty()
-  @IsOptional()
-  @IsString()
+  @ApiProperty({
+    description: 'Nft collection icon.',
+    example: 'https://example.com/image.png',
+  })
   icon?: string;
 }

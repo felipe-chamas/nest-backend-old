@@ -12,22 +12,23 @@ import { NftService } from '../services/nft.service';
 import { CreateNftDto } from '../dto/create-nft.dto';
 import { UpdateNftDto } from '../dto/update-nft.dto';
 import { GetPagination, Pagination } from 'common/decorators';
-import { ApiBody, ApiOkResponse, ApiOperation } from '@nestjs/swagger';
+import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { NftDto } from '../dto/nft.dto';
 import { AssetId } from 'caip';
 import { Roles } from 'common/decorators/roles.decorators';
 import { Role } from 'common/enums/role.enum';
+
+@ApiTags('Nfts')
 @Controller('nft')
 export class NftController {
   constructor(private readonly nftService: NftService) {}
 
   @Roles(Role.NFT_ADMIN)
-  @Post()
-  @ApiOperation({ description: 'Creates an Nft' })
+  @Delete(':id')
+  @ApiOperation({ description: 'Delete an Nft with provided `id`' })
   @ApiOkResponse({ type: NftDto })
-  @ApiBody({ type: CreateNftDto })
-  create(@Body() createNftDto: CreateNftDto) {
-    return this.nftService.create(createNftDto);
+  remove(@Param('id') id: string) {
+    return this.nftService.remove(id);
   }
 
   @Get()
@@ -37,8 +38,20 @@ export class NftController {
     return this.nftService.findAll({ ...query, ...pagination });
   }
 
+  @Get(':id')
+  @ApiOperation({ description: 'Returns an Nft with provided `id`' })
+  @ApiOkResponse({ type: NftDto })
+  findOne(@Param('id') id: string) {
+    return this.nftService.findById(id);
+  }
+
   @Get(':chainId/:assetName/:tokenId')
-  @ApiOperation({ description: 'Returns an Nft' })
+  @ApiOperation({
+    description: [
+      'Returns an Nft with provided `chainId`, `assetName` and `tokenId` information.',
+      'This is the intended route for setting the baseUri on the smart contracts',
+    ].join('<br/>'),
+  })
   @ApiOkResponse({ type: NftDto })
   async findOneByParams(
     @Param('chainId') chainId: string,
@@ -50,26 +63,20 @@ export class NftController {
     return nft.metadata;
   }
 
-  @Get(':id')
-  @ApiOperation({ description: 'Returns an Nft with provided `id`' })
-  @ApiOkResponse({ type: NftDto })
-  findOne(@Param('id') id: string) {
-    return this.nftService.findById(id);
-  }
-
   @Roles(Role.NFT_ADMIN)
   @Patch(':id')
-  @ApiOperation({ description: 'Update an Nft with provided i`d`' })
+  @ApiOperation({ description: 'Update an Nft with provided `id`' })
   @ApiOkResponse({ type: NftDto })
   update(@Param('id') id: string, @Body() updateNftDto: UpdateNftDto) {
     return this.nftService.update(id, updateNftDto);
   }
 
   @Roles(Role.NFT_ADMIN)
-  @Delete(':id')
-  @ApiOperation({ description: 'Delete an Nft with provided `id`' })
+  @Post()
+  @ApiOperation({ description: 'Creates an Nft' })
   @ApiOkResponse({ type: NftDto })
-  remove(@Param('id') id: string) {
-    return this.nftService.remove(id);
+  @ApiBody({ type: CreateNftDto })
+  create(@Body() createNftDto: CreateNftDto) {
+    return this.nftService.create(createNftDto);
   }
 }
