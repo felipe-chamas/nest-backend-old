@@ -53,20 +53,20 @@ export class UserController {
     return this.userService.findAll(pagination);
   }
 
+  @Get('whoami')
+  @ApiExcludeEndpoint()
+  whoAmI(@Session() session: SessionData) {
+    if (!session.user) throw new UnauthorizedException();
+    const { id } = session.user;
+    return this.userService.findById(id);
+  }
+
   @Roles(Role.USER_ADMIN)
   @Get(':id')
   @ApiOperation({ description: 'Returns a User' })
   @ApiParam({ name: 'id', type: String })
   @ApiOkResponse({ type: UserDto })
   findOne(@Param('id') id: string) {
-    return this.userService.findById(id);
-  }
-
-  @Get('whoami')
-  @ApiExcludeEndpoint()
-  whoAmI(@Session() session: SessionData) {
-    if (!session.user) throw new UnauthorizedException();
-    const { id } = session.user;
     return this.userService.findById(id);
   }
 
