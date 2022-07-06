@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import helmet from 'helmet';
 import { NestFactory, Reflector } from '@nestjs/core';
+import { NextFunction, Request, Response } from 'express';
 import session from 'express-session';
 import cookieParser from 'cookie-parser';
 import compression from 'compression';
@@ -67,6 +68,14 @@ async function bootstrap() {
       },
     }),
   );
+
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    if (req.path === '/docs') {
+      res.redirect('/docs/');
+    } else {
+      next();
+    }
+  });
 
   // app.use(
   //   ['/docs', '/docs-json'],
