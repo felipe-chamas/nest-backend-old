@@ -38,7 +38,6 @@ export class UserController {
   @Roles(Role.USER_ADMIN)
   @ApiOperation({ description: 'Deletes a User' })
   @ApiParam({ name: 'id', type: String })
-  @ApiBody({ type: UpdateUserDto })
   @ApiOkResponse({ type: UserDto })
   @Delete(':id')
   remove(@Param('id') id: string) {
