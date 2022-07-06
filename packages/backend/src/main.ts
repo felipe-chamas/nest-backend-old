@@ -68,16 +68,16 @@ async function bootstrap() {
     }),
   );
 
-  app.use(
-    ['/', '/-json'],
-    basicAuth({
-      challenge: true,
-      users: {
-        [config.get<string>('docs.username')]:
-          config.get<string>('docs.password'),
-      },
-    }),
-  );
+  // app.use(
+  //   ['/docs', '/docs-json'],
+  //   basicAuth({
+  //     challenge: true,
+  //     users: {
+  //       [config.get<string>('docs.username')]:
+  //         config.get<string>('docs.password'),
+  //     },
+  //   }),
+  // );
 
   Swagger.init(app);
 
