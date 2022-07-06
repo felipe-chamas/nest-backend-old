@@ -36,7 +36,7 @@ export class Swagger {
 
     const document = SwaggerModule.createDocument(app, swaggerConfig, options);
 
-    SwaggerModule.setup('docs', app, document, {
+    SwaggerModule.setup('', app, document, {
       swaggerOptions: {
         operationsSorter: 'method',
       },
