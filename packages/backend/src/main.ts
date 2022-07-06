@@ -17,6 +17,7 @@ import ConnectRedis from 'connect-redis';
 import { createClient } from 'redis';
 import { AuthGuard } from 'common/guards';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { NextFunction } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -68,18 +69,23 @@ async function bootstrap() {
     }),
   );
 
-  Swagger.init(app);
+  app.use(
+    ['/docs', '/docs-json'],
+    (req, res) => {
+      if (req.originalUrl === '/docs') {
+        res.redirect('/docs/');
+      }
+    },
+    // basicAuth({
+    //   challenge: true,
+    //   users: {
+    //     [config.get<string>('docs.username')]:
+    //       config.get<string>('docs.password'),
+    //   },
+    // }),
+  );
 
-  // app.use(
-  //   ['/docs', '/docs-json'],
-  //   basicAuth({
-  //     challenge: true,
-  //     users: {
-  //       [config.get<string>('docs.username')]:
-  //         config.get<string>('docs.password'),
-  //     },
-  //   }),
-  // );
+  Swagger.init(app);
 
   redisClient.on('ready', () => {
     logger.info('Redis client is ready');
