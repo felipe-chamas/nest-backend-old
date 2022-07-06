@@ -30,7 +30,7 @@ resource "aws_api_gateway_integration" "main" {
   }
 
   type                    = var.integration_input_type
-  uri                     = "http://${var.nlb_dns_name}:${var.app_port}/{proxy}"
+  uri                     = "http://${var.nlb_dns_name}:${var.app_port}/${var.path_part}"
   integration_http_method = var.integration_http_method
 
   connection_type = "VPC_LINK"
