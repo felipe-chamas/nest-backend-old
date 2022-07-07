@@ -41,7 +41,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   app.useGlobalInterceptors(new LoggerInterceptor());
   app.useGlobalFilters(new HttpExceptionFilter());
-  app.useGlobalGuards(new AuthGuard(new Reflector()));
+  app.useGlobalGuards(new AuthGuard(new Reflector(), config));
 
   logger.info(config.get<string>('redis_url'));
 

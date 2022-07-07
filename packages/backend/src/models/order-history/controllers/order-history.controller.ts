@@ -20,14 +20,14 @@ import {
   FindOneOrderHistoryDto,
   OrderHistoryDto,
 } from '../dto/order-history.dto';
-import { Roles } from 'common/decorators/roles.decorators';
+import { Auth } from 'common/decorators/auth.decorators';
 import { Role } from 'common/enums/role.enum';
 
 @Controller('order-history')
 export class OrderHistoryController {
   constructor(private readonly orderHistoryService: OrderHistoryService) {}
 
-  @Roles(Role.MARKETPLACE_ADMIN)
+  @Auth(Role.MARKETPLACE_ADMIN)
   @Post()
   @ApiOperation({ description: 'Creates an order history' })
   @ApiOkResponse({ type: OrderHistoryDto })
@@ -50,7 +50,7 @@ export class OrderHistoryController {
     return this.orderHistoryService.findById(id);
   }
 
-  @Roles(Role.MARKETPLACE_ADMIN)
+  @Auth(Role.MARKETPLACE_ADMIN)
   @Patch(':id')
   @ApiOperation({ description: 'Updates an order history with given `id`' })
   @ApiOkResponse({ type: UpdateOrderHistoryResponseDto })
@@ -62,7 +62,7 @@ export class OrderHistoryController {
     return this.orderHistoryService.update(id, updateOrderHistoryDto);
   }
 
-  @Roles(Role.MARKETPLACE_ADMIN)
+  @Auth(Role.MARKETPLACE_ADMIN)
   @Delete(':id')
   @ApiOperation({ description: 'Deletes an order history with given `id`' })
   @ApiOkResponse({ type: OrderHistoryDto })

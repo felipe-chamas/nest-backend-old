@@ -15,7 +15,7 @@ import { GetPagination, Pagination } from 'common/decorators';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { NftDto } from '../dto/nft.dto';
 import { AssetId } from 'caip';
-import { Roles } from 'common/decorators/roles.decorators';
+import { Auth } from 'common/decorators/auth.decorators';
 import { Role } from 'common/enums/role.enum';
 
 @ApiTags('Nfts')
@@ -23,7 +23,7 @@ import { Role } from 'common/enums/role.enum';
 export class NftController {
   constructor(private readonly nftService: NftService) {}
 
-  @Roles(Role.NFT_ADMIN)
+  @Auth(Role.NFT_ADMIN)
   @Delete(':id')
   @ApiOperation({ description: 'Delete an Nft with provided `id`' })
   @ApiOkResponse({ type: NftDto })
@@ -63,7 +63,7 @@ export class NftController {
     return nft.metadata;
   }
 
-  @Roles(Role.NFT_ADMIN)
+  @Auth(Role.NFT_ADMIN)
   @Patch(':id')
   @ApiOperation({ description: 'Update an Nft with provided `id`' })
   @ApiOkResponse({ type: NftDto })
@@ -71,7 +71,7 @@ export class NftController {
     return this.nftService.update(id, updateNftDto);
   }
 
-  @Roles(Role.NFT_ADMIN)
+  @Auth(Role.NFT_ADMIN)
   @Post()
   @ApiOperation({ description: 'Creates an Nft' })
   @ApiOkResponse({ type: NftDto })

@@ -10,6 +10,7 @@ export class UpdateUserDto {
     description: 'User email.',
   })
   @IsEmail()
+  @IsOptional()
   email?: string;
 
   @ApiProperty({

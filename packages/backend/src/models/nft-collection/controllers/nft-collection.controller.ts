@@ -14,7 +14,7 @@ import { UpdateNftCollectionDto } from '../dto/update-nft-collection.dto';
 import { GetPagination, Pagination } from 'common/decorators';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { NftCollectionDto } from '../dto/nft-collection.dto';
-import { Roles } from 'common/decorators/roles.decorators';
+import { Auth } from 'common/decorators/auth.decorators';
 import { Role } from 'common/enums/role.enum';
 
 @ApiTags('NftCollections')
@@ -22,7 +22,7 @@ import { Role } from 'common/enums/role.enum';
 export class NftCollectionController {
   constructor(private readonly nftCollectionService: NftCollectionService) {}
 
-  @Roles(Role.NFT_ADMIN)
+  @Auth(Role.NFT_ADMIN)
   @Delete(':id')
   @ApiOperation({ description: 'Deletes an Nft collection with given `id`' })
   @ApiOkResponse({ type: NftCollectionDto })
@@ -44,7 +44,7 @@ export class NftCollectionController {
     return this.nftCollectionService.findAll({ ...query, ...pagination });
   }
 
-  @Roles(Role.NFT_ADMIN)
+  @Auth(Role.NFT_ADMIN)
   @Patch(':id')
   @ApiOperation({ description: 'Updates an Nft collection with given `id`' })
   @ApiOkResponse({ type: NftCollectionDto })
@@ -56,7 +56,7 @@ export class NftCollectionController {
     return this.nftCollectionService.update(id, updateNftCollectionDto);
   }
 
-  @Roles(Role.NFT_ADMIN)
+  @Auth(Role.NFT_ADMIN)
   @Post()
   @ApiOperation({ description: 'Creates an Nft collection' })
   @ApiOkResponse({ type: CreateNftCollectionDto })

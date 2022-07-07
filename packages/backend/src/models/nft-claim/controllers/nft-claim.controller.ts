@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { ApiBody, ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 import { GetPagination, Pagination } from 'common/decorators';
-import { Roles } from 'common/decorators/roles.decorators';
+import { Auth } from 'common/decorators/auth.decorators';
 import { Role } from 'common/enums/role.enum';
 import { CreateNftClaimDto } from '../dto/create-nft-claim.dto';
 import { NftClaimDto } from '../dto/nft-claim.dto';
@@ -21,7 +21,7 @@ import { NftClaimService } from '../services/nft-claim.service';
 export class NftClaimController {
   constructor(private readonly nftClaimService: NftClaimService) {}
 
-  @Roles(Role.NFT_ADMIN)
+  @Auth(Role.NFT_ADMIN)
   @Post()
   @ApiOperation({ description: 'Creates an Nft Calim ' })
   @ApiOkResponse({ type: NftClaimDto })
@@ -44,7 +44,7 @@ export class NftClaimController {
     return this.nftClaimService.findById(id);
   }
 
-  @Roles(Role.NFT_ADMIN)
+  @Auth(Role.NFT_ADMIN)
   @Patch(':id')
   @ApiOperation({ description: 'Updates an Nft Claimed with given `id`' })
   @ApiOkResponse({ type: NftClaimDto })
@@ -56,7 +56,7 @@ export class NftClaimController {
     return this.nftClaimService.update(id, updateNftClaimDto);
   }
 
-  @Roles(Role.NFT_ADMIN)
+  @Auth(Role.NFT_ADMIN)
   @Delete(':id')
   @ApiOperation({ description: 'Deletes an Nft Claimed with given `id`' })
   @ApiOkResponse({ type: NftClaimDto })

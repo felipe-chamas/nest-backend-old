@@ -17,7 +17,7 @@ import { UpdateUserDto } from '../dto/update-user.dto';
 import { Serialize } from 'common/interceptors';
 
 import { GetPagination, Pagination } from 'common/decorators';
-import { Roles } from 'common/decorators/roles.decorators';
+import { Auth } from 'common/decorators/auth.decorators';
 import { Role } from 'common/enums/role.enum';
 import {
   ApiBody,
@@ -35,7 +35,7 @@ import { SessionData } from 'express-session';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Roles(Role.USER_ADMIN)
+  @Auth(Role.USER_ADMIN)
   @ApiOperation({ description: 'Deletes a User' })
   @ApiParam({ name: 'id', type: String })
   @ApiOkResponse({ type: UserDto })
@@ -44,7 +44,7 @@ export class UserController {
     return this.userService.remove(id);
   }
 
-  @Roles(Role.USER_ADMIN)
+  @Auth(Role.USER_ADMIN)
   @ApiOperation({ description: 'Returns a list of Users' })
   @ApiOkResponse({ type: [UserDto] })
   @Get()
@@ -60,7 +60,7 @@ export class UserController {
     return this.userService.findById(id);
   }
 
-  @Roles(Role.USER_ADMIN)
+  @Auth(Role.USER_ADMIN)
   @Get(':id')
   @ApiOperation({ description: 'Returns a User' })
   @ApiParam({ name: 'id', type: String })
@@ -69,7 +69,7 @@ export class UserController {
     return this.userService.findById(id);
   }
 
-  @Roles(Role.USER_ADMIN, Role.ROLES_ADMIN)
+  @Auth(Role.USER_ADMIN, Role.ROLES_ADMIN)
   @Patch(':id')
   @ApiOperation({ description: 'Updates a User' })
   @ApiParam({ name: 'id', type: String })

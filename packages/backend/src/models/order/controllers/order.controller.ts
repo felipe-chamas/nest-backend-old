@@ -18,7 +18,7 @@ import {
 } from '../dto/update-order.dto';
 import { ApiBody, ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 import { FindOneOrderDto, OrderDto } from '../dto/order.dto';
-import { Roles } from 'common/decorators/roles.decorators';
+import { Auth } from 'common/decorators/auth.decorators';
 import { Role } from 'common/enums/role.enum';
 import { GetPagination, Pagination } from 'common/decorators';
 
@@ -26,7 +26,7 @@ import { GetPagination, Pagination } from 'common/decorators';
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
-  @Roles(Role.MARKETPLACE_ADMIN)
+  @Auth(Role.MARKETPLACE_ADMIN)
   @Post()
   @ApiOperation({ description: 'Creates an Order' })
   @ApiOkResponse({ type: OrderDto })
@@ -49,7 +49,7 @@ export class OrderController {
     return this.orderService.findById(id);
   }
 
-  @Roles(Role.MARKETPLACE_ADMIN)
+  @Auth(Role.MARKETPLACE_ADMIN)
   @Patch(':id')
   @ApiOperation({ description: 'Updates an order with given `id`' })
   @ApiOkResponse({ type: UpdateOrderDtoResponse })
@@ -58,7 +58,7 @@ export class OrderController {
     return this.orderService.update(id, updateOrderDto);
   }
 
-  @Roles(Role.MARKETPLACE_ADMIN)
+  @Auth(Role.MARKETPLACE_ADMIN)
   @Delete(':id')
   @ApiOperation({ description: 'Deletes an order with given `id`' })
   @ApiOkResponse({ type: OrderDto })
