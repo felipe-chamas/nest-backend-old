@@ -1,53 +1,33 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { IsOptional } from 'class-validator';
 import { IsAssetTypeArray } from 'common/decorators';
+import {
+  ApiPropertyAssetTypes,
+  ApiPropertyNftCollectionExternalUrl,
+  ApiPropertyNftCollectionIcon,
+  ApiPropertyNftCollectionImageBaseUri,
+  ApiPropertyNftCollectionName,
+} from 'common/decorators/docs.decorators';
 import { AssetTypeDto } from 'common/types';
 
 export class UpdateNftCollectionDto {
-  @ApiProperty({
-    description: 'Nft collection name.',
-    example: 'CryptoKitties',
-  })
-  name: string;
+  @ApiPropertyNftCollectionName()
+  @IsOptional()
+  name?: string;
 
-  @ApiProperty({
-    type: () => [Object],
-    description: [
-      'Asset types.',
-      'Corresponds to where this collection is deployed on the blockchain, with `chainId` and `assetName` references.',
-    ].join('<br/>'),
-    example: [
-      {
-        chainId: {
-          namespace: 'solana',
-          reference: 'EtWTRABZaYq6iMfeYKouRu166VU2xqa1',
-        },
-        assetName: {
-          namespace: 'NonFungible',
-          reference: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
-        },
-      },
-    ],
-  })
+  @ApiPropertyAssetTypes()
   @IsAssetTypeArray
+  @IsOptional()
   assetTypes?: AssetTypeDto[];
 
-  @ApiProperty({
-    description: 'Image base URI for Nfts belonging to this Nft collection.',
-    example: 'https://example.com/cryptokitties/image/',
-  })
+  @ApiPropertyNftCollectionImageBaseUri()
+  @IsOptional()
   imageBaseUri?: string;
 
-  @ApiProperty({
-    description:
-      'External URL. Redirects to more details about the Nft collection.',
-    example: 'https://example.com/cryptokitties/',
-  })
+  @ApiPropertyNftCollectionExternalUrl()
+  @IsOptional()
   externalUrl?: string;
 
-  @ApiProperty({
-    description: 'Nft collection icon.',
-    example: 'https://example.com/image.png',
-  })
+  @ApiPropertyNftCollectionIcon()
+  @IsOptional()
   icon?: string;
 }

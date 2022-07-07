@@ -1,4 +1,3 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { AccountIdParams } from 'caip';
 import {
   IsArray,
@@ -8,25 +7,32 @@ import {
   IsString,
 } from 'class-validator';
 import { IsAccountIdArray } from 'common/decorators';
+import {
+  ApiPropertyUserAccountIds,
+  ApiPropertyUserDiscord,
+  ApiPropertyUserEmail,
+  ApiPropertyUserName,
+  ApiPropertyUserRoles,
+} from 'common/decorators/docs.decorators';
 import { Role } from 'common/enums/role.enum';
 
 export class CreateUserDto {
-  @ApiProperty()
+  @ApiPropertyUserEmail()
   @IsOptional()
   @IsEmail()
   email?: string;
 
-  @ApiProperty()
+  @ApiPropertyUserName()
   @IsOptional()
   @IsString()
   name?: string;
 
-  @ApiProperty()
+  @ApiPropertyUserRoles()
   @IsOptional()
   @IsArray()
   roles?: Role[];
 
-  @ApiProperty()
+  @ApiPropertyUserDiscord()
   @IsOptional()
   @IsObject()
   discord?: {
@@ -34,7 +40,7 @@ export class CreateUserDto {
     username: string;
   };
 
-  @ApiProperty()
+  @ApiPropertyUserAccountIds()
   @IsAccountIdArray
   accountIds: AccountIdParams[];
 }
