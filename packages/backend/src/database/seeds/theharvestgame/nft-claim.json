@@ -1,113 +1,9 @@
 [
   {
     "metadata": {
-      "name": "Gamer Primal (1K)",
-      "description": "Emote given to the players as special thanks for reaching 1K users on discord",
-      "image": "https://nft.theharvestgame.xyz/emote/1k.png",
-      "attributes": [
-        { "trait_type": "Rarity", "value": "Ultimate" },
-        { "trait_type": "Civilization", "value": "Ancients" },
-        { "trait_type": "Category", "value": "Community" }
-      ]
-    },
-    "slug": "emote"
-  },
-  {
-    "metadata": {
-      "name": "Gamer Primal (10K)",
-      "description": "Emote given to the players as special thanks for reaching 10K users on discord",
-      "image": "https://nft.theharvestgame.xyz/emote/10k.png",
-      "attributes": [
-        { "trait_type": "Rarity", "value": "Ultimate" },
-        { "trait_type": "Civilization", "value": "Ancients" },
-        { "trait_type": "Category", "value": "Community" }
-      ]
-    },
-    "slug": "emote"
-  },
-  {
-    "metadata": {
-      "name": "Gamer Primal (50K)",
-      "description": "Emote given to the players as special thanks for reaching 50K users on discord",
-      "image": "https://nft.theharvestgame.xyz/emote/50k.png",
-      "attributes": [
-        { "trait_type": "Rarity", "value": "Ultimate" },
-        { "trait_type": "Civilization", "value": "Ancients" },
-        { "trait_type": "Category", "value": "Community" }
-      ]
-    },
-    "slug": "emote"
-  },
-  {
-    "metadata": {
-      "name": "Gamer Primal (100K)",
-      "description": "Emote given to the players as special thanks for reaching 100K users on discord",
-      "image": "https://nft.theharvestgame.xyz/emote/100k.png",
-      "attributes": [
-        { "trait_type": "Rarity", "value": "Ultimate" },
-        { "trait_type": "Civilization", "value": "Ancients" },
-        { "trait_type": "Category", "value": "Community" }
-      ]
-    },
-    "slug": "emote"
-  },
-  {
-    "metadata": {
-      "name": "Gamer Primal (500K)",
-      "description": "Emote given to the players as special thanks for reaching 500K users on discord",
-      "image": "https://nft.theharvestgame.xyz/emote/500k.png",
-      "attributes": [
-        { "trait_type": "Rarity", "value": "Ultimate" },
-        { "trait_type": "Civilization", "value": "Ancients" },
-        { "trait_type": "Category", "value": "Community" }
-      ]
-    },
-    "slug": "emote"
-  },
-  {
-    "metadata": {
-      "name": "Angel",
-      "description": "Can revive the hero once per match",
-      "image": "https://nft.theharvestgame.xyz/companion-card/angel.png",
-      "attributes": [
-        { "trait_type": "Rarity", "value": "Ultimate" },
-        { "trait_type": "Civilization", "value": "Ancients" },
-        { "trait_type": "Category", "value": "Community" }
-      ]
-    },
-    "slug": "companion-card"
-  },
-  {
-    "metadata": {
-      "name": "Exterminator",
-      "description": "Kills enemies with hp under 15%",
-      "image": "https://nft.theharvestgame.xyz/companion-card/exterminator.png",
-      "attributes": [
-        { "trait_type": "Rarity", "value": "Ultimate" },
-        { "trait_type": "Civilization", "value": "Ancients" },
-        { "trait_type": "Category", "value": "Community" }
-      ]
-    },
-    "slug": "companion-card"
-  },
-  {
-    "metadata": {
-      "name": "Scouter",
-      "description": "Reveals all enemies within 100 meters",
-      "image": "https://nft.theharvestgame.xyz/companion-card/scouter.png",
-      "attributes": [
-        { "trait_type": "Rarity", "value": "Ultimate" },
-        { "trait_type": "Civilization", "value": "Ancients" },
-        { "trait_type": "Category", "value": "Community" }
-      ]
-    },
-    "slug": "companion-card"
-  },
-  {
-    "metadata": {
       "name": "Mystery Box",
       "description": "This box will contain a total of 10 random cards whose drop rates will be according to the following percentages: 85% Rare, 10% Epic, 2.5% Legendary and 2.5% Shiny (2.0% Shiny Rare, 0.4% Shiny Epic and 0.1% Shiny Legendary)",
-      "image": "https://nft.theharvestgame.io/box/mystery.png",
+      "image": "https://nft.theharvestgame.xyz/box/mystery.png",
       "external_url": "https://theharvestgame.com",
       "seller_fee_basis_points": 500,
       "symbol": "THB",
@@ -148,7 +44,7 @@
       "properties": {
         "files": [
           {
-            "uri": "https://nft.theharvestgame.io/box/mystery.png",
+            "uri": "https://nft.theharvestgame.xyz/box/mystery.png",
             "type": "image/jpg"
           }
         ],
@@ -175,7 +71,7 @@
     "metadata": {
       "name": "Legendary Box",
       "description": "This box will contain a total of 40 random cards of guaranteed rarities: 34 Rare, 4 Epic, 1 Legendary and 1 Shiny.",
-      "image": "https://nft.theharvestgame.io/box/legendary.png",
+      "image": "https://nft.theharvestgame.xyz/box/legendary.png",
       "external_url": "https://theharvestgame.com",
       "seller_fee_basis_points": 500,
       "symbol": "THB",
@@ -204,7 +100,7 @@
       "properties": {
         "files": [
           {
-            "uri": "https://nft.theharvestgame.io/box/legendary.png",
+            "uri": "https://nft.theharvestgame.xyz/box/legendary.png",
             "type": "image/jpg"
           }
         ],
@@ -229,176 +125,65 @@
   },
   {
     "metadata": {
-      "name": "O'Ree-Jin",
-      "description": "Battle tag - O'Ree-Jin",
-      "image": "https://nft.theharvestgame.xyz/battle-tag/o-ree-jin.png",
+      "name": "Single NFT Card",
+      "description": "This card will reveal a single card according to the following percentages: 85% Rare, 10% Epic, 2.5% Legendary and 2.5% Shiny (2.0% Shiny Rare, 0.4% Shiny Epic and 0.1% Shiny Legendary)",
+      "image": "https://nft.theharvestgame.xyz/ability-card/back.png",
+      "external_url": "https://theharvestgame.com",
+      "seller_fee_basis_points": 500,
+      "symbol": "THB",
       "attributes": [
-        { "trait_type": "Rarity", "value": "Ultimate" },
-        { "trait_type": "Civilization", "value": "Ancients" },
-        { "trait_type": "Category", "value": "Community" }
-      ]
-    },
-    "slug": "battle-tag"
-  },
-  {
-    "metadata": {
-      "name": "The Ancients",
-      "description": "Battle tag - The Ancients",
-      "image": "https://nft.theharvestgame.xyz/battle-tag/the-ancients.png",
-      "attributes": [
-        { "trait_type": "Rarity", "value": "Ultimate" },
-        { "trait_type": "Civilization", "value": "Ancients" },
-        { "trait_type": "Category", "value": "Community" }
-      ]
-    },
-    "slug": "battle-tag"
-  },
-  {
-    "metadata": {
-      "name": "Essence",
-      "description": "Battle tag - Essence",
-      "image": "https://nft.theharvestgame.xyz/battle-tag/essence.png",
-      "attributes": [
-        { "trait_type": "Rarity", "value": "Ultimate" },
-        { "trait_type": "Civilization", "value": "Ancients" },
-        { "trait_type": "Category", "value": "Community" }
-      ]
-    },
-    "slug": "battle-tag"
-  },
-  {
-    "metadata": {
-      "name": "Alith - God of War",
-      "description": "Give +10 damage to shotguns",
-      "image": "https://nft.theharvestgame.xyz/ability-card/alith/god-of-war.png",
-      "attributes": [
-        { "trait_type": "atk", "value": "500" },
-        { "trait_type": "def", "value": "500" },
-        { "trait_type": "level", "value": "2" },
-        { "trait_type": "edition", "value": "249" },
-        { "trait_type": "Rarity", "value": "Purple" },
-        { "trait_type": "Civilization", "value": "Ancients" },
-        { "trait_type": "Category", "value": "Community" }
-      ]
-    },
-    "slug": "ability-card"
-  },
-  {
-    "metadata": {
-      "name": "Alith - Purple Quantum",
-      "description": "+20 speed to Quantum Blade and creates a protection dome",
-      "image": "https://nft.theharvestgame.xyz/ability-card/alith/purple-quantum.png",
-      "attributes": [
-        { "trait_type": "hp", "value": "550" },
-        { "trait_type": "mov", "value": "370" },
-        { "trait_type": "level", "value": "4" },
-        { "trait_type": "edition", "value": "393" },
-        { "trait_type": "Rarity", "value": "Blue" },
-        { "trait_type": "Civilization", "value": "Ancients" },
-        { "trait_type": "Category", "value": "Community" }
-      ]
-    },
-    "slug": "ability-card"
-  },
-  {
-    "metadata": {
-      "name": "Duke - Earthquake",
-      "description": "+30 Power Dive damage in a bigger area",
-      "image": "https://nft.theharvestgame.xyz/ability-card/duke/earthquake.png",
-      "attributes": [
-        { "trait_type": "atk", "value": "580" },
-        { "trait_type": "def", "value": "230" },
-        { "trait_type": "level", "value": "7" },
-        { "trait_type": "edition", "value": "560" },
-        { "trait_type": "Rarity", "value": "Golden" },
-        { "trait_type": "Civilization", "value": "Ancients" },
-        { "trait_type": "Category", "value": "Community" }
-      ]
-    },
-    "slug": "ability-card"
-  },
-  {
-    "metadata": {
-      "name": "Duke - Super Jump",
-      "description": "Duke can jump 3 times in a row",
-      "image": "https://nft.theharvestgame.xyz/ability-card/duke/super-jump.png",
-      "attributes": [
-        { "trait_type": "atk", "value": "300" },
-        { "trait_type": "def", "value": "800" },
-        { "trait_type": "level", "value": "3" },
-        { "trait_type": "edition", "value": "830" },
-        { "trait_type": "Rarity", "value": "Blue" },
-        { "trait_type": "Civilization", "value": "Ancients" },
-        { "trait_type": "Category", "value": "Community" }
-      ]
-    },
-    "slug": "ability-card"
-  },
-  {
-    "metadata": {
-      "name": "Kira - Ultra Vision",
-      "description": "Can see enemies through nearest rocks",
-      "image": "https://nft.theharvestgame.xyz/ability-card/kira/ultra-vision.png",
-      "attributes": [
-        { "trait_type": "atk", "value": "260" },
-        { "trait_type": "def", "value": "300" },
-        { "trait_type": "level", "value": "10" },
-        { "trait_type": "edition", "value": "590" },
-        { "trait_type": "Rarity", "value": "Purple" },
-        { "trait_type": "Civilization", "value": "Ancients" },
-        { "trait_type": "Category", "value": "Community" }
-      ]
-    },
-    "slug": "ability-card"
-  },
-  {
-    "metadata": {
-      "name": "Sahad - Head Shot",
-      "description": "After killing an enemy randomly destroy 1 of his attached cards",
-      "image": "https://nft.theharvestgame.xyz/ability-card/sahad/head-shot.png",
-      "attributes": [
-        { "trait_type": "atk", "value": "550" },
-        { "trait_type": "def", "value": "380" },
-        { "trait_type": "level", "value": "2" },
-        { "trait_type": "edition", "value": "249" },
-        { "trait_type": "Rarity", "value": "Gray" },
-        { "trait_type": "Civilization", "value": "Ancients" },
-        { "trait_type": "Category", "value": "Community" }
-      ]
-    },
-    "slug": "ability-card"
-  },
-  {
-    "metadata": {
-      "name": "Sahad - Smite",
-      "description": "Death from above",
-      "image": "https://nft.theharvestgame.xyz/ability-card/sahad/smite.png",
-      "attributes": [
-        { "trait_type": "atk", "value": "550" },
-        { "trait_type": "def", "value": "350" },
-        { "trait_type": "level", "value": "3" },
-        { "trait_type": "edition", "value": "249" },
-        { "trait_type": "Rarity", "value": "Gray" },
-        { "trait_type": "Civilization", "value": "Ancients" },
-        { "trait_type": "Category", "value": "Community" }
-      ]
-    },
-    "slug": "ability-card"
-  },
-  {
-    "metadata": {
-      "name": "Sahad - Tracking Bullet",
-      "description": "Track the hit enemies",
-      "image": "https://nft.theharvestgame.xyz/ability-card/sahad/tracking-bullet.png",
-      "attributes": [
-        { "trait_type": "atk", "value": "500" },
-        { "trait_type": "def", "value": "500" },
-        { "trait_type": "level", "value": "2" },
-        { "trait_type": "edition", "value": "249" },
-        { "trait_type": "Rarity", "value": "Gray" },
-        { "trait_type": "Civilization", "value": "Ancients" },
-        { "trait_type": "Category", "value": "Community" }
-      ]
+        {
+          "trait_type": "Rare Card Chance",
+          "value": "85%"
+        },
+        {
+          "trait_type": "Epic Card Chance",
+          "value": "10%"
+        },
+        {
+          "trait_type": "Legendary Card Chance",
+          "value": "2.5%"
+        },
+        {
+          "trait_type": "Shiny Card Chance",
+          "value": "2.5%"
+        },
+        {
+          "trait_type": "Shiny Rare Card Chance",
+          "value": "2.0%"
+        },
+        {
+          "trait_type": "Shiny Epic Card Chance",
+          "value": "0.4%"
+        },
+        {
+          "trait_type": "Shiny Legendary Card Chance",
+          "value": "0.1%"
+        }
+      ],
+      "properties": {
+        "files": [
+          {
+            "uri": "https://nft.theharvestgame.xyz/ability-card/back.png",
+            "type": "image/jpg"
+          }
+        ],
+        "category": "image",
+        "creators": [
+          {
+            "address": "6mm4gskSRRKnQkaFDazAccYFgnjdUvV4PANw1LD6Fepb",
+            "share": 95
+          },
+          {
+            "address": "HMduKVo3A19U5EpQdEhPjo9hq9zfZXn8aGVYZp7Vc7fX",
+            "share": 5
+          }
+        ],
+        "collection": {
+          "family": "The Harvest",
+          "filename": "Cards"
+        }
+      }
     },
     "slug": "ability-card"
   }

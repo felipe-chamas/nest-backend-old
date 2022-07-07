@@ -30,7 +30,7 @@ export const GetPagination = createParamDecorator(
 
     query.push(
       req.query.skip
-        ? { $skip: parseInt(req.query.offset.toString()) }
+        ? { $skip: parseInt(req.query.skip.toString()) }
         : { $skip: 0 },
     );
 
@@ -39,6 +39,10 @@ export const GetPagination = createParamDecorator(
         ? { $limit: parseInt(req.query.limit.toString()) }
         : { $limit: DEFAULT_NUMBER_OF_RESULTS },
     );
+
+    delete req.query.sort;
+    delete req.query.skip;
+    delete req.query.limit;
 
     return { query };
   },

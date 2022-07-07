@@ -5,11 +5,10 @@ import { Keypair } from '@solana/web3.js';
 import { AccountId } from 'caip';
 
 import { Role } from 'common/enums/role.enum';
-import { AccountIdDto, ChainIdReference } from 'common/types';
+import { ChainIdReference } from 'common/types';
 
-interface Context {
+interface Context extends Partial<User> {
   chainId?: ChainIdReference;
-  accountIds?: AccountIdDto[];
 }
 
 const getAddress = (chainId: ChainIdReference): string => {
@@ -37,7 +36,7 @@ const getChainId = () =>
     ChainIdReference.SOLANA_MAINNET,
   ]);
 
-define(User, (_, { chainId = getChainId(), accountIds }: Context) => {
+define(User, (_, { chainId = getChainId(), ...userData }: Context) => {
   const firstName = faker.name.firstName();
   const lastName = faker.name.lastName();
 
@@ -48,13 +47,20 @@ define(User, (_, { chainId = getChainId(), accountIds }: Context) => {
   });
 
   const user = new User();
-  user.name = `${firstName} ${lastName}`;
-  user.email = faker.internet.email();
-  user.accountIds = accountIds ? accountIds : [accountId];
-  user.roles = faker.helpers.arrayElements(
-    [Role.MARKETPLACE_ADMIN, Role.NFT_ADMIN, Role.ROLES_ADMIN, Role.USER_ADMIN],
-    faker.datatype.float({ min: 0, max: 1, precision: 1 }),
-  );
+  user.name = userData.name ?? `${firstName} ${lastName}`;
+  user.email = userData.email ?? faker.internet.email();
+  user.accountIds = userData.accountIds ?? [accountId];
+  user.roles =
+    userData.roles ??
+    faker.helpers.arrayElements(
+      [
+        Role.MARKETPLACE_ADMIN,
+        Role.NFT_ADMIN,
+        Role.ROLES_ADMIN,
+        Role.USER_ADMIN,
+      ],
+      faker.datatype.float({ min: 0, max: 1, precision: 1 }),
+    );
 
   return user;
 });

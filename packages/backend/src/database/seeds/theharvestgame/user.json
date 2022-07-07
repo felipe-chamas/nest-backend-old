@@ -1,5 +1,7 @@
 [
   {
+    "name": "Felipe Chamas",
+    "email": "felipe@falco.gg",
     "accountIds": [
       {
         "chainId": {
@@ -8,9 +10,12 @@
         },
         "address": "GUa8mVe6dwfyoRqjHntQFBKchjWAqUW9WnTtohcPwpJE"
       }
-    ]
+    ],
+    "roles": ["MARKETPLACE_ADMIN", "NFT_ADMIN", "ROLES_ADMIN", "USER_ADMIN"]
   },
   {
+    "name": "Ahmetcan Demirel",
+    "email": "ahmetcan@falco.gg",
     "accountIds": [
       {
         "chainId": {
@@ -19,6 +24,21 @@
         },
         "address": "9crsgHnDc68uRpMtzQR4v4N4PDwMdwfY33h5h3jsXBRd"
       }
-    ]
+    ],
+    "roles": ["MARKETPLACE_ADMIN", "NFT_ADMIN", "ROLES_ADMIN", "USER_ADMIN"]
+  },
+  {
+    "name": "Tamara Sapoznik",
+    "email": "tamara@falco.gg",
+    "accountIds": [
+      {
+        "chainId": {
+          "namespace": "solana",
+          "reference": "EtWTRABZaYq6iMfeYKouRu166VU2xqa1"
+        },
+        "address": "9Bveo8t2wXuymQ6SYeC7QzDuwfY5tD876xAfnfNHJKhg"
+      }
+    ],
+    "roles": ["MARKETPLACE_ADMIN", "NFT_ADMIN", "ROLES_ADMIN", "USER_ADMIN"]
   }
 ]
