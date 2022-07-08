@@ -3,4 +3,5 @@ export enum Role {
   NFT_ADMIN = 'NFT_ADMIN',
   USER_ADMIN = 'USER_ADMIN',
   ROLES_ADMIN = 'ROLES_ADMIN',
+  OWNER = 'OWNER',
 }

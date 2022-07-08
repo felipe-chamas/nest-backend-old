@@ -44,12 +44,8 @@ export default class TheHarvestGameSeeder implements Seeder {
   nfts: Nft[];
 
   public async run(factory: Factory, connection: Connection): Promise<void> {
-    this.users = [];
-
-    UserData.forEach((user) =>
-      factory(User)({ ...user })
-        .create()
-        .then((value) => this.users.push(value)),
+    this.users = await Promise.all(
+      UserData.map((user) => factory(User)({ ...user }).create()),
     );
 
     const nftCollectionRepo = connection.getRepository(NftCollection);

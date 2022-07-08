@@ -4,6 +4,7 @@ import { ROLE_KEY } from '../decorators/auth.decorators';
 import { Role } from '../enums/role.enum';
 import crypto from 'crypto';
 import { ConfigService } from '@nestjs/config';
+import { Request } from 'express';
 
 export function isSafeEqual(challenge: string, expected: string): boolean {
   if (!challenge || !expected) return false;
@@ -45,7 +46,7 @@ export class AuthGuard implements CanActivate {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest<Request>();
 
     const user = request.session?.user;
 
@@ -53,7 +54,11 @@ export class AuthGuard implements CanActivate {
       return false;
     }
 
-    return requiredRoles.some((role) => user.role?.includes(role));
+    if (requiredRoles.includes(Role.OWNER) && user.id === request.params.id) {
+      return true;
+    }
+
+    return requiredRoles.some((role) => user.roles?.includes(role));
   }
 
   canActivate(context: ExecutionContext): boolean {
