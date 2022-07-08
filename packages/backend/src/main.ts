@@ -68,18 +68,15 @@ async function bootstrap() {
     }),
   );
 
-  app.use(
-    ['/docs', '/docs/', '/docs-json', '/docs-json/'],
-    (req: Request, res: Response, next: NextFunction) => {
-      if (
-        isSafeEqual(req.query.token as string, config.get<string>('docs.token'))
-      ) {
-        next();
-      } else {
-        res.status(401).send('Unauthorized');
-      }
-    },
-  );
+  app.use(['/docs-json'], (req: Request, res: Response, next: NextFunction) => {
+    if (
+      isSafeEqual(req.query.token as string, config.get<string>('docs.token'))
+    ) {
+      next();
+    } else {
+      res.status(401).send('Unauthorized');
+    }
+  });
 
   Swagger.init(app);
 

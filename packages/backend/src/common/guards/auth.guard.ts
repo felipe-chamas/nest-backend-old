@@ -5,7 +5,7 @@ import { Role } from '../enums/role.enum';
 import crypto from 'crypto';
 import { ConfigService } from '@nestjs/config';
 
-export function isSafeEqual(challenge: string, expected: string) {
+export function isSafeEqual(challenge: string, expected: string): boolean {
   if (!challenge || !expected) return false;
 
   const hash = crypto.createHash('sha512');
