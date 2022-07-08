@@ -4,7 +4,6 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import session from 'express-session';
 import cookieParser from 'cookie-parser';
 import compression from 'compression';
-import basicAuth from 'express-basic-auth';
 
 import { Logger, ValidationPipe } from '@nestjs/common';
 
@@ -15,8 +14,9 @@ import { logger, Swagger } from 'common/providers';
 
 import ConnectRedis from 'connect-redis';
 import { createClient } from 'redis';
-import { AuthGuard } from 'common/guards';
+import { AuthGuard, isSafeEqual } from 'common/guards';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { Request, Response, NextFunction } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -70,13 +70,15 @@ async function bootstrap() {
 
   app.use(
     ['/docs', '/docs-json'],
-    basicAuth({
-      challenge: true,
-      users: {
-        [config.get<string>('docs.username')]:
-          config.get<string>('docs.password'),
-      },
-    }),
+    (req: Request, res: Response, next: NextFunction) => {
+      if (
+        isSafeEqual(req.query.token as string, config.get<string>('docs.token'))
+      ) {
+        next();
+      } else {
+        res.status(401).send('Unauthorized');
+      }
+    },
   );
 
   Swagger.init(app);

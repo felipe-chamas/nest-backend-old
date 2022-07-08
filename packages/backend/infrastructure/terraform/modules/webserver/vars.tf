@@ -34,8 +34,8 @@ variable "region" {
 }
 
 variable "mongodb_uri" {
-  type        = string
-  sensitive   = true
+  type      = string
+  sensitive = true
 }
 
 variable "discord_client_id" {
@@ -53,12 +53,7 @@ variable "discord_redirect_uri" {
   sensitive = true
 }
 
-variable "docs_username" {
-  type      = string
-  sensitive = true
-}
-
-variable "docs_password" {
+variable "docs_token" {
   type      = string
   sensitive = true
 }

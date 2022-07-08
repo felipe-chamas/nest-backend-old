@@ -1,21 +1,20 @@
 resource "random_string" "random" {
-  length           = 16
+  length = 16
 }
 
 resource "aws_secretsmanager_secret" "secret_variables" {
-   name = "backend-secret-variables"
+  name = "backend-secret-variables"
 }
 
 resource "aws_secretsmanager_secret_version" "secret_variables_version" {
-  secret_id = aws_secretsmanager_secret.secret_variables.id
+  secret_id     = aws_secretsmanager_secret.secret_variables.id
   secret_string = <<EOF
     {
       "mongodb_uri": "${var.mongodb_uri}",
       "discord_client_id": "${var.discord_client_id}",
       "discord_client_secret": "${var.discord_client_secret}",
       "discord_redirect_uri": "${var.discord_redirect_uri}",
-      "docs_username": "${var.docs_username}",
-      "docs_password": "${var.docs_password}",
+      "docs_token": "${var.docs_token}",
       "secret_value": "${random_string.random.result}"
     }
   EOF
@@ -57,42 +56,38 @@ resource "aws_ecs_task_definition" "main" {
           value : var.events_queue_url
         },
         {
-          name: "AWS_REGION",
-          value: var.region
+          name : "AWS_REGION",
+          value : var.region
         },
         {
-          name: "STAGE",
-          value: terraform.workspace
+          name : "STAGE",
+          value : terraform.workspace
         }
       ],
-      secrets: [
+      secrets : [
         {
-          name: "MONGODB_URI",
-          valueFrom: "${aws_secretsmanager_secret.secret_variables.arn}:mongodb_uri::"
+          name : "MONGODB_URI",
+          valueFrom : "${aws_secretsmanager_secret.secret_variables.arn}:mongodb_uri::"
         },
         {
-          name: "DISCORD_CLIENT_ID",
-          valueFrom: "${aws_secretsmanager_secret.secret_variables.arn}:discord_client_id::"
+          name : "DISCORD_CLIENT_ID",
+          valueFrom : "${aws_secretsmanager_secret.secret_variables.arn}:discord_client_id::"
         },
         {
-          name: "DISCORD_CLIENT_SECRET",
-          valueFrom: "${aws_secretsmanager_secret.secret_variables.arn}:discord_client_secret::"
+          name : "DISCORD_CLIENT_SECRET",
+          valueFrom : "${aws_secretsmanager_secret.secret_variables.arn}:discord_client_secret::"
         },
         {
-          name: "DISCORD_REDIRECT_URI",
-          valueFrom: "${aws_secretsmanager_secret.secret_variables.arn}:discord_redirect_uri::"
+          name : "DISCORD_REDIRECT_URI",
+          valueFrom : "${aws_secretsmanager_secret.secret_variables.arn}:discord_redirect_uri::"
         },
         {
-          name: "DOCS_USERNAME",
-          valueFrom: "${aws_secretsmanager_secret.secret_variables.arn}:docs_username::"
+          name : "DOCS_TOKEN",
+          valueFrom : "${aws_secretsmanager_secret.secret_variables.arn}:docs_token::"
         },
         {
-          name: "DOCS_PASSWORD",
-          valueFrom: "${aws_secretsmanager_secret.secret_variables.arn}:docs_password::"
-        },
-        {
-          name: "SESSION_SECRET",
-          valueFrom: "${aws_secretsmanager_secret.secret_variables.arn}:secret_value::"
+          name : "SESSION_SECRET",
+          valueFrom : "${aws_secretsmanager_secret.secret_variables.arn}:secret_value::"
         },
       ]
     },
@@ -117,10 +112,10 @@ resource "aws_ecs_task_definition" "main" {
           hostPort : var.redis_port
         }
       ],
-      environment: [
+      environment : [
         {
-          name: "ALLOW_EMPTY_PASSWORD",
-          value: "yes"
+          name : "ALLOW_EMPTY_PASSWORD",
+          value : "yes"
         }
       ],
     }

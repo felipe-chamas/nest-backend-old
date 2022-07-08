@@ -30,13 +30,7 @@ variable "discord_redirect_uri" {
   sensitive = true
 }
 
-variable "docs_username" {
+variable "docs_token" {
   type      = string
   sensitive = true
 }
-
-variable "docs_password" {
-  type      = string
-  sensitive = true
-}
-  

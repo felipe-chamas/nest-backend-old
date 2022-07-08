@@ -50,7 +50,7 @@ variable "redis_memory" {
 }
 
 variable "redis_port" {
-  type = number
+  type    = number
   default = 6379
 }
 
@@ -83,8 +83,8 @@ variable "aws_security_group_ecs_tasks_id" {
 }
 
 variable "mongodb_uri" {
-  type        = string
-  sensitive   = true
+  type      = string
+  sensitive = true
 }
 
 variable "discord_client_id" {
@@ -102,13 +102,7 @@ variable "discord_redirect_uri" {
   sensitive = true
 }
 
-variable "docs_username" {
+variable "docs_token" {
   type      = string
   sensitive = true
 }
-
-variable "docs_password" {
-  type      = string
-  sensitive = true
-}
-  

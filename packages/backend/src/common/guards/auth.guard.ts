@@ -5,6 +5,23 @@ import { Role } from '../enums/role.enum';
 import crypto from 'crypto';
 import { ConfigService } from '@nestjs/config';
 
+export function isSafeEqual(challenge: string, expected: string) {
+  if (!challenge || !expected) return false;
+
+  const hash = crypto.createHash('sha512');
+  if (
+    crypto.timingSafeEqual(
+      hash.copy().update(challenge).digest(),
+      hash.copy().update(expected).digest(),
+    )
+  ) {
+    return crypto.timingSafeEqual(
+      Buffer.from(challenge),
+      Buffer.from(expected),
+    );
+  } else return false;
+}
+
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(private reflector: Reflector, private config: ConfigService) {}
@@ -15,20 +32,7 @@ export class AuthGuard implements CanActivate {
     const apiKey = request.header('X-API-KEY') || '';
     const expectedApiKey = this.config.get<string>('apiKey');
 
-    if (!expectedApiKey) return false;
-
-    const hash = crypto.createHash('sha512');
-    if (
-      crypto.timingSafeEqual(
-        hash.copy().update(apiKey).digest(),
-        hash.copy().update(expectedApiKey).digest(),
-      )
-    ) {
-      return crypto.timingSafeEqual(
-        Buffer.from(apiKey),
-        Buffer.from(expectedApiKey),
-      );
-    } else return false;
+    return isSafeEqual(apiKey, expectedApiKey);
   }
 
   validateRoles(context: ExecutionContext): boolean {
