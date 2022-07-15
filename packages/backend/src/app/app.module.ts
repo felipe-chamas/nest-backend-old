@@ -7,8 +7,9 @@ import {
   OrderHistoryModule,
   OrderModule,
   UserModule,
+  ChainModule,
+  NftClaimModule,
 } from 'models';
-import { NftClaimModule } from 'models/nft-claim/nft-claim.module';
 import { AppController } from './controllers/app.controller';
 import { AppService } from './services/app.service';
 import { AuthModule } from 'auth';
@@ -21,6 +22,7 @@ import { AuthModule } from 'auth';
     UserModule,
     NftModule,
     NftCollectionModule,
+    ChainModule,
     OrderModule,
     OrderHistoryModule,
     NftClaimModule,

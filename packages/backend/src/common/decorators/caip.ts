@@ -5,8 +5,33 @@ import {
   AssetIdParams,
   AssetType,
   AssetTypeParams,
+  ChainId,
+  ChainIdParams,
 } from 'caip';
 import { isArray, registerDecorator } from 'class-validator';
+
+export function IsChainId(object: object, propertyName: string) {
+  registerDecorator({
+    name: 'isChainId',
+    target: object.constructor,
+    propertyName: propertyName,
+    options: {
+      message:
+        'String should be formatted according to caip standard. See more ' +
+        'https://github.com/ChainAgnostic/CAIPs/blob/master/CAIPs/caip-2.md',
+    },
+    validator: {
+      validate(value: string | ChainIdParams) {
+        try {
+          new ChainId(value);
+          return true;
+        } catch (_) {
+          return false;
+        }
+      },
+    },
+  });
+}
 
 export function IsAccountId(object: object, propertyName: string) {
   registerDecorator({
@@ -63,7 +88,7 @@ export function IsAssetTypeArray(object: object, propertyName: string) {
     options: {
       message:
         'String should be formatted according to caip standard. See more ' +
-        'https://github.com/ChainAgnostic/CAIPs/blob/master/CAIPs/caip-10.md',
+        'https://github.com/ChainAgnostic/CAIPs/blob/master/CAIPs/caip-19.md',
     },
     validator: {
       validate(values: string[] | AssetTypeParams[]) {
@@ -87,7 +112,7 @@ export function IsAssetIdArray(object: object, propertyName: string) {
     options: {
       message:
         'String should be formatted according to caip standard. See more ' +
-        'https://github.com/ChainAgnostic/CAIPs/blob/master/CAIPs/caip-10.md',
+        'https://github.com/ChainAgnostic/CAIPs/blob/master/CAIPs/caip-19.md',
     },
     validator: {
       validate(values: string[] | AssetIdParams[]) {

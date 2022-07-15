@@ -69,7 +69,7 @@ export class UserController {
     return this.userService.findById(id);
   }
 
-  @Auth(Role.USER_ADMIN, Role.ROLES_ADMIN, Role.OWNER)
+  @Auth(Role.USER_ADMIN, Role.ROLE_ADMIN, Role.OWNER)
   @Patch(':id')
   @ApiOperation({ description: 'Updates a User' })
   @ApiParam({ name: 'id', type: String })
@@ -80,7 +80,7 @@ export class UserController {
     @Body() updateUserDto: UpdateUserDto,
     @Session() session: SessionData,
   ) {
-    if (!session.user?.roles?.includes(Role.ROLES_ADMIN))
+    if (!session.user?.roles?.includes(Role.ROLE_ADMIN))
       updateUserDto.roles = [];
     return this.userService.update(id, updateUserDto);
   }

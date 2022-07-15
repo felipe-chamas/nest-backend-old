@@ -56,7 +56,7 @@ define(User, (_, { chainId = getChainId(), ...userData }: Context) => {
       [
         Role.MARKETPLACE_ADMIN,
         Role.NFT_ADMIN,
-        Role.ROLES_ADMIN,
+        Role.ROLE_ADMIN,
         Role.USER_ADMIN,
       ],
       faker.datatype.float({ min: 0, max: 1, precision: 1 }),

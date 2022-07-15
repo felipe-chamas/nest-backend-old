@@ -17,7 +17,7 @@ export const mockAdmin = {
   account: '0x01',
   roles: [
     Role.USER_ADMIN,
-    Role.ROLES_ADMIN,
+    Role.ROLE_ADMIN,
     Role.NFT_ADMIN,
     Role.MARKETPLACE_ADMIN,
   ],
