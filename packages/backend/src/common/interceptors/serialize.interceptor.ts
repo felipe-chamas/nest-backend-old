@@ -29,7 +29,7 @@ export class SerializeInterceptor implements NestInterceptor {
       map((data) => {
         const res = plainToInstance(this.dto, data);
         return { ...res, id: data.id };
-      })
+      }),
     );
   }
 }

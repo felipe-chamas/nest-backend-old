@@ -66,7 +66,7 @@ export const getSolanaCluster = (network: string) => {
 
 export const getEthereumJSONRPC = (reference: string) => {
   const jsonRpcProvider = config.get<string>(
-    `blockchain.jsonRpcProvider.${reference}`
+    `blockchain.jsonRpcProvider.${reference}`,
   );
   return jsonRpcProvider;
 };

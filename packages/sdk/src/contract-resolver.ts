@@ -6,7 +6,7 @@ import { wrapContractResolveWithContractTypes } from './typechain/helpers';
 
 export type ResolveContractFunctionBase = (
   contractName: ContractName,
-  address: Address
+  address: Address,
 ) => unknown;
 
 export class ContractResolver {

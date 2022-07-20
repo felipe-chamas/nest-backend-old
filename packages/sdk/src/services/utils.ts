@@ -15,7 +15,7 @@ export type FetchEventsFunctionBase = (
   transactionHash: string,
   contractAddress: AccountId,
   contractName: ContractName,
-  eventName: EventName
+  eventName: EventName,
 ) => Promise<Array<unknown>>;
 
 /**
@@ -122,8 +122,7 @@ export class Utils {
     if (!eventsDetails.supportedEventNames.has(eventName))
       throw new GeneralError(
         ErrorCodes.not_supported_event,
-        `contract ${contractName} ` +
-        `does not support event ${eventName}`,
+        `contract ${contractName} ` + `does not support event ${eventName}`,
       );
     events = events.filter((x) => x && x.name === eventName);
 

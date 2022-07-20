@@ -11,9 +11,13 @@ import { Pagination } from 'common/decorators';
 import { recoveryAgent } from 'common/utils';
 import { AssetId } from 'caip';
 import { ObjectId } from 'mongodb';
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class NftService {
+  private readonly httpService = new HttpService();
+
   constructor(
     @InjectRepository(Nft)
     private readonly nftRepo: MongoRepository<Nft>,
@@ -52,6 +56,39 @@ export class NftService {
       .toArray();
 
     return nfts;
+  }
+
+  async findAllByWallet(query, wallet: string) {
+    // TODO add pagination
+    // TODO add filtering
+    const endpoint = process.env.QUICKNODE_URI;
+
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+
+    const data = {
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'qn_fetchNFTs',
+      params: {
+        wallet: wallet,
+        omitFields: ['provenance', 'creators'],
+        page: query.page || 1,
+        perPage: query.limit || 20,
+      },
+    };
+
+    const response = await firstValueFrom(
+      this.httpService.post(endpoint, data, config),
+    );
+
+    if (!response.data.result)
+      throw new NotFoundException(`Wallet with Public Key ${wallet} not found`);
+
+    return response.data.result.assets;
   }
 
   async findById(id: string) {

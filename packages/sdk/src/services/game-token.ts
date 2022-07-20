@@ -342,13 +342,12 @@ export class GameToken {
     if (payee.amount <= 0)
       throw new GeneralError(
         ErrorCodes.bad_input,
-        "Payee's amount should be positive. " +
-        'But got ' + payee.amount,
+        "Payee's amount should be positive. " + 'But got ' + payee.amount,
       );
-    return ({
+    return {
       amount: payee.amount,
       account: await this.signerUtils.parseAddress(payee.accountId),
-    });
+    };
   };
 
   private mergePayees = (
@@ -366,7 +365,6 @@ export class GameToken {
     return Array.from(map.values());
   };
 
-
   /**
    *
    * Batch equivalent of {@link transfer}.
@@ -376,11 +374,8 @@ export class GameToken {
    * are merged into a single entry.
    *
    */
-  transferBatch = async (
-    payees: Payee[],
-    mergeDuplicates = false,
-  ) => {
-    let _payees = await Promise.all(payees.map(x => this.parsePayee(x)));
+  transferBatch = async (payees: Payee[], mergeDuplicates = false) => {
+    let _payees = await Promise.all(payees.map((x) => this.parsePayee(x)));
     if (mergeDuplicates) _payees = this.mergePayees(_payees);
     return await this.gameTokenContract.transferBatch(_payees);
   };
@@ -395,7 +390,7 @@ export class GameToken {
     payees: Payee[],
     mergeDuplicates = false,
   ) => {
-    let _payees = await Promise.all(payees.map(x => this.parsePayee(x)));
+    let _payees = await Promise.all(payees.map((x) => this.parsePayee(x)));
     if (mergeDuplicates) _payees = this.mergePayees(_payees);
     return await this.gameTokenContract.transferFromBatch(
       await this.signerUtils.parseAddress(from),

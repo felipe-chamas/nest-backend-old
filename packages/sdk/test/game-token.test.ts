@@ -8,7 +8,9 @@ import {
 } from './utils';
 import { BigNumber, ContractReceipt } from 'ethers';
 import {
-  ERC20SignedApproval, ErrorCodes, GeneralError,
+  ERC20SignedApproval,
+  ErrorCodes,
+  GeneralError,
   Payee,
 } from '../dist/sdk';
 import { ethers } from 'hardhat';
@@ -212,8 +214,10 @@ describe('game-token functionality', () => {
         });
         async function checkNotMergedTransferEvents() {
           const events = await ctx.anon.utils.fetchEvents(
-            transferTx.transactionHash, ctx.gameToken,
-            'GameToken', 'Transfer',
+            transferTx.transactionHash,
+            ctx.gameToken,
+            'GameToken',
+            'Transfer',
           );
           expect(events).to.have.lengthOf(payees.length);
           for (let i = 0; i < events.length; i++) {
@@ -224,22 +228,28 @@ describe('game-token functionality', () => {
         }
         async function checkMergedTransferEvents() {
           const events = await ctx.anon.utils.fetchEvents(
-            transferTx.transactionHash, ctx.gameToken,
-            'GameToken', 'Transfer',
+            transferTx.transactionHash,
+            ctx.gameToken,
+            'GameToken',
+            'Transfer',
           );
           expect(events).to.have.lengthOf(uniquePayeesCount);
           for (let i = 0; i < events.length; i++) {
             expect(events[i].from).eql(ctx.admin.accountId);
-            expect(events[i].value)
-              .equals(amountMap.get(events[i].to.address));
+            expect(events[i].value).equals(amountMap.get(events[i].to.address));
           }
         }
         describe('transferBatchFrom', () => {
           describe('when invalid amount is passed', () => {
             it('fails', async () => {
-              await expect(wait(ctx.anon.gameToken.transferBatchFrom(
-                ctx.admin.accountId, wrongPayees,
-              )))
+              await expect(
+                wait(
+                  ctx.anon.gameToken.transferBatchFrom(
+                    ctx.admin.accountId,
+                    wrongPayees,
+                  ),
+                ),
+              )
                 .to.eventually.rejectedWith(GeneralError)
                 .to.have.property('errorCode', ErrorCodes.bad_input);
             });
@@ -247,20 +257,24 @@ describe('game-token functionality', () => {
           describe('anon `transferBatchFrom` admin to anon2, anon3', () => {
             describe('when `mergeDuplicates` is not set', () => {
               beforeEach('transfer tokens', async () => {
-                transferTx = await wait(ctx.anon.gameToken.transferBatchFrom(
-                  ctx.admin.accountId,
-                  payees,
-                ));
+                transferTx = await wait(
+                  ctx.anon.gameToken.transferBatchFrom(
+                    ctx.admin.accountId,
+                    payees,
+                  ),
+                );
               });
               it('emits transfer events', checkNotMergedTransferEvents);
             });
             describe('when `mergeDuplicates` is set', () => {
               beforeEach('transfer tokens', async () => {
-                transferTx = await wait(ctx.anon.gameToken.transferBatchFrom(
-                  ctx.admin.accountId,
-                  payees,
-                  true,
-                ));
+                transferTx = await wait(
+                  ctx.anon.gameToken.transferBatchFrom(
+                    ctx.admin.accountId,
+                    payees,
+                    true,
+                  ),
+                );
               });
               it('emits transfer events', checkMergedTransferEvents);
             });
@@ -269,9 +283,7 @@ describe('game-token functionality', () => {
         describe('transferBatch', () => {
           describe('when invalid amount is passed', () => {
             it('fails', async () => {
-              await expect(wait(ctx.admin.gameToken.transferBatch(
-                wrongPayees,
-              )))
+              await expect(wait(ctx.admin.gameToken.transferBatch(wrongPayees)))
                 .to.eventually.rejectedWith(GeneralError)
                 .to.have.property('errorCode', ErrorCodes.bad_input);
             });
@@ -279,18 +291,17 @@ describe('game-token functionality', () => {
           describe('admin `transferBatch` to anon2, anon3', () => {
             describe('when `mergeDuplicates` is not set', () => {
               beforeEach('transfer tokens', async () => {
-                transferTx = await wait(ctx.admin.gameToken.transferBatch(
-                  payees,
-                ));
+                transferTx = await wait(
+                  ctx.admin.gameToken.transferBatch(payees),
+                );
               });
               it('emits transfer events', checkNotMergedTransferEvents);
             });
             describe('when `mergeDuplicates` is set', () => {
               beforeEach('transfer tokens', async () => {
-                transferTx = await wait(ctx.admin.gameToken.transferBatch(
-                  payees,
-                  true,
-                ));
+                transferTx = await wait(
+                  ctx.admin.gameToken.transferBatch(payees, true),
+                );
               });
               it('emits transfer events', checkMergedTransferEvents);
             });

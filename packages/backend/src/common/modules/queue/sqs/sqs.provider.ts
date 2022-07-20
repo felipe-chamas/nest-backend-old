@@ -24,7 +24,7 @@ export class SqsProvider {
 
   constructor(
     private readonly queueService: QueueService,
-    private readonly config: ConfigService
+    private readonly config: ConfigService,
   ) {
     this.sqsConsumer = Consumer.create(this.sqsOptions);
   }

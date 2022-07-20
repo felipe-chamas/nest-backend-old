@@ -70,7 +70,7 @@ export class LoggerInterceptor implements NestInterceptor {
         }
 
         return data;
-      })
+      }),
     );
   }
 }

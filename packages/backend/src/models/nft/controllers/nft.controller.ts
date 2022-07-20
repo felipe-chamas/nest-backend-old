@@ -11,6 +11,7 @@ import {
 import { NftService } from '../services/nft.service';
 import { CreateNftDto } from '../dto/create-nft.dto';
 import { UpdateNftDto } from '../dto/update-nft.dto';
+import { Metadata } from '../interface/index';
 import { GetPagination, Pagination } from 'common/decorators';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { NftDto } from '../dto/nft.dto';
@@ -36,6 +37,13 @@ export class NftController {
   @ApiOkResponse({ type: [NftDto], schema: { type: 'array' } })
   findAll(@Query() query, @GetPagination() pagination: Pagination) {
     return this.nftService.findAll({ ...query, ...pagination });
+  }
+
+  @Get('findAllByWallet/:wallet')
+  @ApiOperation({ description: "Returns a list of Nfts in a user's wallet" })
+  findAllByWallet(@Query() query, @Param('wallet') wallet: string) {
+    // TODO add ApiOkResponse
+    return this.nftService.findAllByWallet({ ...query }, wallet);
   }
 
   @Get(':id')

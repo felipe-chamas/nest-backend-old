@@ -21,7 +21,7 @@ export class SignatureAuthService {
     network: string,
     message: string,
     signature: string,
-    address: string
+    address: string,
   ): boolean {
     switch (network) {
       case ChainIdReference.ETHEREUM_MAINNET:
@@ -41,7 +41,7 @@ export class SignatureAuthService {
   verifySolanaSignature(
     message: string,
     signature: string,
-    address: string
+    address: string,
   ): boolean {
     // Ref: https://www.npmjs.com/package/tweetnacl#naclsignsignaturelength--64
     try {
@@ -49,7 +49,7 @@ export class SignatureAuthService {
       const isValid = sign.detached.verify(
         Uint8Array.from(Buffer.from(message)),
         Uint8Array.from(Buffer.from(signature, 'hex')),
-        decode(address)
+        decode(address),
       );
       return isValid;
     } catch (_) {
@@ -60,7 +60,7 @@ export class SignatureAuthService {
   verifyEthereumSignature(
     message: string,
     signature: string,
-    address: string
+    address: string,
   ): boolean {
     // Ref: https://docs.ethers.io/v4/api-utils.html#signatures
     try {
@@ -69,7 +69,7 @@ export class SignatureAuthService {
         '\x19Ethereum Signed Message:\n' + message.length + message;
       const signerAddress = utils.recoverAddress(
         utils.arrayify(utils.id(signatureFromMessage)),
-        signature
+        signature,
       );
       return address === signerAddress;
     } catch (_) {
