@@ -27,5 +27,8 @@ export default () => ({
     clientSecret: process.env.DISCORD_CLIENT_SECRET,
     redirectURL: process.env.DISCORD_REDIRECT_URI,
   },
+  quicknode: {
+    quicknode_uri: process.env.QUICKNODE_URI,
+  },
   apiKey: process.env.API_KEY,
 });

@@ -15,6 +15,7 @@ resource "aws_secretsmanager_secret_version" "secret_variables_version" {
       "discord_client_secret": "${var.discord_client_secret}",
       "discord_redirect_uri": "${var.discord_redirect_uri}",
       "docs_token": "${var.docs_token}",
+      "quicknode_uri": "${var.quicknode_uri}",
       "secret_value": "${random_string.random.result}"
     }
   EOF
@@ -84,6 +85,10 @@ resource "aws_ecs_task_definition" "main" {
         {
           name : "DOCS_TOKEN",
           valueFrom : "${aws_secretsmanager_secret.secret_variables.arn}:docs_token::"
+        },
+        {
+          name : "QUICKNODE_URI",
+          valueFrom : "${aws_secretsmanager_secret.secret_variables.arn}:quicknode_uri::"
         },
         {
           name : "SESSION_SECRET",

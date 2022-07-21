@@ -23,6 +23,7 @@ module "ecs" {
   discord_client_secret = var.discord_client_secret
   discord_redirect_uri  = var.discord_redirect_uri
   docs_token            = var.docs_token
+  quicknode_uri         = var.quicknode_uri
 
   vpc_id = module.vpc_for_ecs_fargate.vpc_id
   # Service

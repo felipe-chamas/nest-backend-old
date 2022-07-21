@@ -57,3 +57,8 @@ variable "docs_token" {
   type      = string
   sensitive = true
 }
+
+variable "quicknode_uri" {
+  type      = string
+  sensitive = true
+}

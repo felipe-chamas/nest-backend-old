@@ -13,6 +13,7 @@ services:
       - DISCORD_CLIENT_SECRET=${DISCORD_CLIENT_SECRET}
       - DISCORD_REDIRECT_URI=${DISCORD_REDIRECT_URI}
       - DOCS_TOKEN=${DOCS_TOKEN}
+      - QUICKNODE_URI=${QUICKNODE_URI}
       - MONGODB_URI=mongodb://mongo:27017/database
       - STAGE=local
     ports:
