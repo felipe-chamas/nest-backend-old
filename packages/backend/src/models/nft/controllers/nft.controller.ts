@@ -49,11 +49,13 @@ export class NftController {
     // TODO add ApiOkResponse
     const result = await this.nftService.findAllByWallet({ ...query }, wallet);
     const collections = await this.nftCollectionService.findAll({ query: [] });
-    const collectionAddresses = collections.data.map((collection) => {
-      collection.assetTypes[0].assetName.reference;
-    });
+    const collectionAddresses = collections.data.map(
+      (collection) => collection.assetTypes[0].assetName.reference,
+    );
 
-    return result.filter((nft) => nft.collectionAddress in collectionAddresses);
+    return result.filter((nft) =>
+      collectionAddresses.includes(nft.collectionAddress),
+    );
   }
 
   @Get(':id')
