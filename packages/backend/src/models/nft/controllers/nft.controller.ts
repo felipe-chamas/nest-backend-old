@@ -11,18 +11,22 @@ import {
 import { NftService } from '../services/nft.service';
 import { CreateNftDto } from '../dto/create-nft.dto';
 import { UpdateNftDto } from '../dto/update-nft.dto';
-import { Metadata } from '../interface/index';
+import { QuickNodeFetchNftsAsset, QuickNodeFetchNftsResponse } from '../types';
 import { GetPagination, Pagination } from 'common/decorators';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { NftDto } from '../dto/nft.dto';
 import { AssetId } from 'caip';
 import { Auth } from 'common/decorators/auth.decorators';
 import { Role } from 'common/enums/role.enum';
+import { NftCollectionService } from 'models/nft-collection';
 
 @ApiTags('Nfts')
 @Controller('nft')
 export class NftController {
-  constructor(private readonly nftService: NftService) {}
+  constructor(
+    private readonly nftService: NftService,
+    private readonly nftCollectionService: NftCollectionService,
+  ) {}
 
   @Auth(Role.NFT_ADMIN)
   @Delete(':id')
@@ -41,9 +45,15 @@ export class NftController {
 
   @Get('findAllByWallet/:wallet')
   @ApiOperation({ description: "Returns a list of Nfts in a user's wallet" })
-  findAllByWallet(@Query() query, @Param('wallet') wallet: string) {
+  async findAllByWallet(@Query() query, @Param('wallet') wallet: string) {
     // TODO add ApiOkResponse
-    return this.nftService.findAllByWallet({ ...query }, wallet);
+    const result = await this.nftService.findAllByWallet({ ...query }, wallet);
+    const collections = await this.nftCollectionService.findAll({ query: [] });
+    const collectionAddresses = collections.data.map((collection) => {
+      collection.assetTypes[0].assetName.reference;
+    });
+
+    return result.filter((nft) => nft.collectionAddress in collectionAddresses);
   }
 
   @Get(':id')

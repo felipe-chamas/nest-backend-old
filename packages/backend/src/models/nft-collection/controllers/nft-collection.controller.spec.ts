@@ -22,7 +22,11 @@ describe('NftCollectionController', () => {
           ...mockNftCollection,
           ...createNftCollectionDto,
         } as unknown as NftCollection),
-      findAll: () => Promise.resolve([mockNftCollection as NftCollection]),
+      findAll: () =>
+        Promise.resolve({
+          data: [mockNftCollection as NftCollection],
+          total: 1,
+        }),
       findById: jest.fn().mockImplementation(async () => {
         return {
           ...mockNftCollection,
@@ -63,7 +67,7 @@ describe('NftCollectionController', () => {
     const result = await controller.findAll({} as Request, {
       query: [{ $skip: 0 }, { $limit: 10 }],
     });
-    expect(result).toEqual([mockNftCollection]);
+    expect(result).toEqual({ data: [mockNftCollection], total: 1 });
   });
 
   it('should fetch a nftCollection', async () => {

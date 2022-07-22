@@ -9,6 +9,7 @@ import { Pagination } from 'common/decorators';
 import { recoveryAgent } from 'common/utils';
 import { AssetType } from 'caip';
 import { ObjectId } from 'mongodb';
+import { NftCollectionFacet } from '../types';
 
 @Injectable()
 export class NftCollectionService {
@@ -27,7 +28,7 @@ export class NftCollectionService {
 
   async findAll({ query, ...match }: Pagination & Partial<NftCollection>) {
     const [nftCollections] = await this.nftCollectionRepo
-      .aggregate<NftCollection[]>([
+      .aggregate<NftCollectionFacet>([
         {
           $match: match,
         },

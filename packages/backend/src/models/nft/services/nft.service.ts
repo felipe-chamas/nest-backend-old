@@ -13,6 +13,7 @@ import { AssetId } from 'caip';
 import { ObjectId } from 'mongodb';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
+import { QuickNodeFetchNftsAsset, QuickNodeFetchNftsResponse } from '../types';
 
 @Injectable()
 export class NftService {
@@ -58,7 +59,10 @@ export class NftService {
     return nfts;
   }
 
-  async findAllByWallet(query, wallet: string) {
+  async findAllByWallet(
+    query,
+    wallet: string,
+  ): Promise<QuickNodeFetchNftsAsset[]> {
     // TODO add pagination
     // TODO add filtering
     const endpoint = process.env.QUICKNODE_URI;
@@ -82,7 +86,7 @@ export class NftService {
     };
 
     const response = await firstValueFrom(
-      this.httpService.post(endpoint, data, config),
+      this.httpService.post<QuickNodeFetchNftsResponse>(endpoint, data, config),
     );
 
     if (!response.data.result)
