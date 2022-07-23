@@ -12,7 +12,7 @@ variable "region" {
 
 variable "app_count" {
   type    = number
-  default = 2
+  default = 1
 }
 
 variable "total_cpu" {
