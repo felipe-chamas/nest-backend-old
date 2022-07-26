@@ -71,7 +71,8 @@ export class SignatureAuthService {
         utils.arrayify(utils.id(signatureFromMessage)),
         signature,
       );
-      return address === signerAddress;
+
+      return address.toLowerCase() === signerAddress.toLowerCase();
     } catch (_) {
       return false;
     }
