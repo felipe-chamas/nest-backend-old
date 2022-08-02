@@ -13,7 +13,11 @@ import { AssetId } from 'caip';
 import { ObjectId } from 'mongodb';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
-import { QuickNodeFetchNftsAsset, QuickNodeFetchNftsResponse } from '../types';
+import {
+  ExternalApiNft,
+  QuickNodeFetchNftsResponse,
+  SolscanTokenAccountResponse,
+} from '../types';
 
 @Injectable()
 export class NftService {
@@ -59,10 +63,37 @@ export class NftService {
     return nfts;
   }
 
-  async findAllByWallet(
-    query,
-    wallet: string,
-  ): Promise<QuickNodeFetchNftsAsset[]> {
+  async findByAddress(address: string): Promise<ExternalApiNft> {
+    const SOLSCAN_PUBLIC_ENDPOINT = 'https://public-api.solscan.io';
+    const endpoint = `${SOLSCAN_PUBLIC_ENDPOINT}/account/${address}`;
+
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+
+    const response = await firstValueFrom(
+      this.httpService.get<SolscanTokenAccountResponse>(endpoint, config),
+    );
+
+    if (!response.data) return;
+
+    const { data, collection } = response.data.metadata;
+    return {
+      name: data.name,
+      collectionName: '',
+      tokenAddress: data.mint,
+      collectionAddress: collection.key,
+      imageUrl: data.image,
+      traits: data.attributes,
+      chain: 'solana',
+      network: 'mainnet',
+      description: data.description,
+    };
+  }
+
+  async findAllByWallet(query, wallet: string): Promise<ExternalApiNft[]> {
     // TODO add pagination
     // TODO add filtering
     const endpoint = process.env.QUICKNODE_URI;

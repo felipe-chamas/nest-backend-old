@@ -11,7 +11,7 @@ import {
 import { NftService } from '../services/nft.service';
 import { CreateNftDto } from '../dto/create-nft.dto';
 import { UpdateNftDto } from '../dto/update-nft.dto';
-import { QuickNodeFetchNftsAsset, QuickNodeFetchNftsResponse } from '../types';
+import { ExternalApiNft, QuickNodeFetchNftsResponse } from '../types';
 import { GetPagination, Pagination } from 'common/decorators';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { NftDto } from '../dto/nft.dto';
@@ -41,6 +41,28 @@ export class NftController {
   @ApiOkResponse({ type: [NftDto], schema: { type: 'array' } })
   findAll(@Query() query, @GetPagination() pagination: Pagination) {
     return this.nftService.findAll({ ...query, ...pagination });
+  }
+
+  @Get('findByAddress/:chain/:asset/:address')
+  @ApiOperation({ description: 'Returns an Nft from a specific Token Address' })
+  async findByAddress(
+    @Param('chain') chain: string,
+    @Param('asset') asset: string,
+    @Param('address') address: string,
+  ) {
+    // TODO add ApiOkResponse
+    if (chain !== 'solana') return null; // TODO support other chains
+    const collections = await this.nftCollectionService.findAll({ query: [] });
+
+    const result = await this.nftService.findByAddress(address);
+
+    const collectionAddresses = collections.data.map(
+      (collection) => collection.assetTypes[0].assetName.reference,
+    );
+
+    return collectionAddresses.includes(result.collectionAddress)
+      ? result
+      : result;
   }
 
   @Get('findAllByWallet/:wallet')
