@@ -5,6 +5,10 @@ on:
     branches-ignore:
       - main
 
+concurrency:
+  group: ${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
 jobs:
   workspace-lint:
     name: Workspace Lint
@@ -14,7 +18,15 @@ jobs:
         with:
           fetch-depth: 0
       - uses: nrwl/nx-set-shas@v2
-      - run: yarn install --frozen-lockfile
+      - name: Cache Modules
+        id: yarn-cache
+        uses: actions/cache@v2
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+      - name: Install Dependencies
+        if: steps.yarn-cache.outputs.cache-hit != 'true'
+        run: yarn install --frozen-lockfile
       - run: npx nx workspace-lint --base=remotes/origin/main
   format-check:
     name: Format Check
@@ -24,7 +36,15 @@ jobs:
         with:
           fetch-depth: 0
       - uses: nrwl/nx-set-shas@v2
-      - run: yarn install --frozen-lockfile
+      - name: Cache Modules
+        id: yarn-cache
+        uses: actions/cache@v2
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+      - name: Install Dependencies
+        if: steps.yarn-cache.outputs.cache-hit != 'true'
+        run: yarn install --frozen-lockfile
       - run: npx nx format:check --base=remotes/origin/main
   lint:
     name: Lint
@@ -34,7 +54,15 @@ jobs:
         with:
           fetch-depth: 0
       - uses: nrwl/nx-set-shas@v2
-      - run: yarn install --frozen-lockfile
+      - name: Cache Modules
+        id: yarn-cache
+        uses: actions/cache@v2
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+      - name: Install Dependencies
+        if: steps.yarn-cache.outputs.cache-hit != 'true'
+        run: yarn install --frozen-lockfile
       - run: npx nx affected --target=setup --base=remotes/origin/main
       - run: npx nx affected --target=lint --parallel=3 --base=remotes/origin/main
   test:
@@ -45,7 +73,15 @@ jobs:
         with:
           fetch-depth: 0
       - uses: nrwl/nx-set-shas@v2
-      - run: yarn install --frozen-lockfile
+      - name: Cache Modules
+        id: yarn-cache
+        uses: actions/cache@v2
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+      - name: Install Dependencies
+        if: steps.yarn-cache.outputs.cache-hit != 'true'
+        run: yarn install --frozen-lockfile
       - run: npx nx affected --target=setup --base=remotes/origin/main
       - run: npx nx affected --target=test --parallel=3 --base=remotes/origin/main
   build:
@@ -56,5 +92,13 @@ jobs:
         with:
           fetch-depth: 0
       - uses: nrwl/nx-set-shas@v2
-      - run: yarn install --frozen-lockfile
+      - name: Cache Modules
+        id: yarn-cache
+        uses: actions/cache@v2
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+      - name: Install Dependencies
+        if: steps.yarn-cache.outputs.cache-hit != 'true'
+        run: yarn install --frozen-lockfile
       - run: npx nx affected --target=build --parallel=3 --base=remotes/origin/main
