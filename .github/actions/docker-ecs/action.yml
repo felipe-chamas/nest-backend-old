@@ -1,0 +1,82 @@
+name: 'Docker - ECS Builder'
+description: 'Builds a Docker container and pushes to ECS'
+inputs:
+  aws-secret-key:
+    description: 'AWS Secret Key'
+    required: true
+  aws-access-key:
+    description: 'AWS Access Key'
+    required: true
+  aws-region:
+    description: 'AWS Region'
+    required: true
+  registry-name:
+    description: 'Registry Name'
+    required: true
+  service-name:
+    description: 'Service Name'
+    required: true
+  cluster-name:
+    description: 'Cluster Name'
+    required: true
+  container-name:
+    description: 'Container Name'
+    required: true
+  task-definition-family:
+    description: 'Task Definition Family'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/checkout@v3
+    - name: Set GitHub env variables
+      shell: bash
+      run: echo "IMAGE_TAG=$(echo ${GITHUB_REF#refs/heads/} | tr / -)-$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ inputs.aws-access-key }}
+        aws-secret-access-key: ${{ inputs.aws-secret-key }}
+        aws-region: ${{ inputs.aws-region }}
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+    - name: Build and Tag image
+      uses: docker/build-push-action@v3
+      with:
+        context: .
+        tags: ${{ steps.login-ecr.outputs.registry }}/${{ inputs.registry-name }}:${{ env.IMAGE_TAG }}
+        push: false
+        load: true
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+    - name: Push image to ECR
+      shell: bash
+      run: docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.REGISTRY_NAME }}:${{ env.IMAGE_TAG }}
+    - name: Download task definition
+      shell: bash
+      run: aws ecs describe-task-definition --task-definition "${{ inputs.task-definition-family }}" --query taskDefinition > task-definition.json
+    - name: Update task definition
+      id: task-def
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+        task-definition: task-definition.json
+        container-name: ${{ inputs.container-name }}
+        image: ${{ steps.login-ecr.outputs.registry }}/${{ inputs.registry-name }}:${{ env.IMAGE_TAG }}
+    - name: Shutdown cluster
+      shell: bash
+      run: aws ecs update-service --desired-count 0 --cluster "${{ inputs.cluster-name }}" --service "${{ inputs.service-name }}"
+    - name: Deploy Amazon ECS task definition
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: ${{ steps.task-def.outputs.task-definition }}
+        service: ${{ inputs.service-name }}
+        cluster: ${{ inputs.cluster-name }}
+        force-new-deployment: true
+        wait-for-service-stability: true
+    - name: Wait for service to stabilize
+      run: aws ecs update-service --desired-count 1 --cluster "${{ env.CLUSTER_NAME }}" --service "${{ env.SERVICE_NAME }}"
+      shell: bash
