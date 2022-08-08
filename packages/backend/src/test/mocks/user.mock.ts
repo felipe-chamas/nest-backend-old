@@ -31,10 +31,8 @@ export const mockCreateUser = {
     { chainId: { namespace: 'eip155', reference: '1' }, address: '0x12345' },
   ],
   socialAccounts: {
-    discordUser: '',
-    instagramUser: '',
-    twitterUser: '',
-    youtubeUser: '',
+    discord: { id: 'asdasd', username: 'Juan' },
+    steam: { id: 'asdsa32332', username: 'Odzen' },
   },
 };
 

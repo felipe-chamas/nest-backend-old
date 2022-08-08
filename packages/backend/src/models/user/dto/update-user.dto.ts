@@ -2,13 +2,13 @@ import { IsEmail, IsOptional } from 'class-validator';
 import { IsAccountIdArray } from 'common/decorators';
 import {
   ApiPropertyUserAccountIds,
-  ApiPropertyUserDiscord,
+  ApiPropertyUserSocialAccounts,
   ApiPropertyUserEmail,
   ApiPropertyUserName,
   ApiPropertyUserRoles,
 } from 'common/decorators/docs.decorators';
 import { Role } from 'common/enums/role.enum';
-import { AccountIdDto } from 'common/types';
+import { AccountIdDto, SocialAccounts } from 'common/types';
 
 export class UpdateUserDto {
   @ApiPropertyUserEmail()
@@ -29,10 +29,7 @@ export class UpdateUserDto {
   @IsOptional()
   roles?: Role[];
 
-  @ApiPropertyUserDiscord()
+  @ApiPropertyUserSocialAccounts()
   @IsOptional()
-  discord?: {
-    id: string;
-    username: string;
-  };
+  socialAccounts?: SocialAccounts;
 }

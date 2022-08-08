@@ -10,7 +10,7 @@ import {
   OneToMany,
   UpdateDateColumn,
 } from 'typeorm';
-import { AccountIdDto } from 'common/types';
+import { AccountIdDto, SocialAccounts } from 'common/types';
 import { Role } from '../enums/role.enum';
 import {
   ApiPropertyAvatarUrl,
@@ -18,7 +18,7 @@ import {
   ApiPropertyDeletedAt,
   ApiPropertyUpdatedAt,
   ApiPropertyUserAccountIds,
-  ApiPropertyUserDiscord,
+  ApiPropertyUserSocialAccounts,
   ApiPropertyUserEmail,
   ApiPropertyUserId,
   ApiPropertyUserName,
@@ -50,11 +50,8 @@ export class User {
   accountIds: AccountIdDto[];
 
   @Column()
-  @ApiPropertyUserDiscord()
-  discord?: {
-    id: string;
-    username: string;
-  };
+  @ApiPropertyUserSocialAccounts()
+  socialAccounts?: SocialAccounts;
 
   @Column()
   @ApiPropertyAvatarUrl()

@@ -14,6 +14,10 @@ resource "aws_secretsmanager_secret_version" "secret_variables_version" {
       "discord_client_id": "${var.discord_client_id}",
       "discord_client_secret": "${var.discord_client_secret}",
       "discord_redirect_uri": "${var.discord_redirect_uri}",
+      "steam_api_key": "${var.steam_api_key}",
+      "steam_return_url": "${var.steam_return_url}",
+      "steam_realm": "${var.steam_realm}",
+      "frontend_url": "${var.frontend_url}",
       "docs_token": "${var.docs_token}",
       "quicknode_uri": "${var.quicknode_uri}",
       "secret_value": "${random_string.random.result}"
@@ -81,6 +85,22 @@ resource "aws_ecs_task_definition" "main" {
         {
           name : "DISCORD_REDIRECT_URI",
           valueFrom : "${aws_secretsmanager_secret.secret_variables.arn}:discord_redirect_uri::"
+        },
+        {
+          name : "STEAM_API_KEY",
+          valueFrom : "${aws_secretsmanager_secret.secret_variables.arn}:steam_api_key::"
+        },
+        {
+          name : "STEAM_RETURN_URL",
+          valueFrom : "${aws_secretsmanager_secret.secret_variables.arn}:steam_return_url::"
+        },
+        {
+          name : "STEAM_REALM",
+          valueFrom : "${aws_secretsmanager_secret.secret_variables.arn}:steam_realm::"
+        },
+        {
+          name : "FRONTEND_URL",
+          valueFrom : "${aws_secretsmanager_secret.secret_variables.arn}:frontend_url::"
         },
         {
           name : "DOCS_TOKEN",

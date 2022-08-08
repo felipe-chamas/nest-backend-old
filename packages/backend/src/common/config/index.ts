@@ -27,6 +27,12 @@ export default () => ({
     clientSecret: process.env.DISCORD_CLIENT_SECRET,
     redirectURL: process.env.DISCORD_REDIRECT_URI,
   },
+  steam: {
+    returnURL: process.env.STEAM_RETURN_URL,
+    realm: process.env.STEAM_REALM,
+    apiKey: process.env.STEAM_API_KEY,
+  },
+  frontend_url: process.env.FRONTEND_URL,
   quicknode: {
     quicknode_uri: process.env.QUICKNODE_URI,
   },

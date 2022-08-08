@@ -11,4 +11,4 @@ import { ConfigService } from '@nestjs/config';
   imports: [ConfigService, UserModule],
   providers: [DiscordStrategy, DiscordService, UserService],
 })
-export class DiscordModule {}
+export class DiscordAuthModule {}

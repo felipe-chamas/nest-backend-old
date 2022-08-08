@@ -30,6 +30,26 @@ variable "discord_redirect_uri" {
   sensitive = true
 }
 
+variable "steam_api_key" {
+  type      = string
+  sensitive = true
+}
+
+variable "steam_return_url" {
+  type      = string
+  sensitive = true
+}
+
+variable "steam_realm" {
+  type      = string
+  sensitive = true
+}
+
+variable "frontend_url" {
+  type      = string
+  sensitive = true
+}
+
 variable "docs_token" {
   type      = string
   sensitive = true

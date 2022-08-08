@@ -181,14 +181,25 @@ export const ApiPropertyUserAccountIds = () =>
     ],
   });
 
-export const ApiPropertyUserDiscord = () =>
+export const ApiPropertyUserSocialAccounts = () =>
   ApiProperty({
-    type: () => Object,
+    type: () => [Object],
     description: [
-      'Discord information.',
-      'This property is only present on users that have connected their discord account.',
+      'Social Accounts information.',
+      'This property is only present on users that have connected their social accounts.',
     ].join('<br/>'),
-    example: { id: '364990825698837451', username: 'vitalik#1234' },
+    example: [
+      {
+        discord: {
+          id: '364990825698837451',
+          reference: 'vitalik#1234',
+        },
+        steam: {
+          id: '263930811698332411',
+          username: 'vitalik_buterin',
+        },
+      },
+    ],
   });
 
 export const ApiPropertyAvatarUrl = () =>

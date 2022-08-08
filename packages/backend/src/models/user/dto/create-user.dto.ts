@@ -1,15 +1,10 @@
 import { AccountIdParams } from 'caip';
-import {
-  IsArray,
-  IsEmail,
-  IsObject,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { SocialAccounts } from 'common/types/social';
+import { IsArray, IsEmail, IsOptional, IsString } from 'class-validator';
 import { IsAccountIdArray } from 'common/decorators';
 import {
   ApiPropertyUserAccountIds,
-  ApiPropertyUserDiscord,
+  ApiPropertyUserSocialAccounts,
   ApiPropertyUserEmail,
   ApiPropertyUserName,
   ApiPropertyUserRoles,
@@ -32,13 +27,9 @@ export class CreateUserDto {
   @IsArray()
   roles?: Role[];
 
-  @ApiPropertyUserDiscord()
+  @ApiPropertyUserSocialAccounts()
   @IsOptional()
-  @IsObject()
-  discord?: {
-    id: string;
-    username: string;
-  };
+  socialAccounts?: SocialAccounts;
 
   @ApiPropertyUserAccountIds()
   @IsAccountIdArray

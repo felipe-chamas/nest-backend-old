@@ -1,4 +1,4 @@
-export type DiscordDetails = {
+export type SteamDetails = {
   id: string;
   username: string;
 };
