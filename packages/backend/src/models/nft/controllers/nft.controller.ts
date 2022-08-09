@@ -62,7 +62,7 @@ export class NftController {
 
     return collectionAddresses.includes(result.collectionAddress)
       ? result
-      : result;
+      : null;
   }
 
   @Get('findAllByWallet/:wallet')
