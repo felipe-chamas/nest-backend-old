@@ -131,3 +131,19 @@ variable "quicknode_uri" {
   type      = string
   sensitive = true
 }
+
+variable "venly_client_id" {
+  type      = string
+  sensitive = true
+}
+
+variable "venly_client_secret" {
+  type      = string
+  sensitive = true
+}
+
+variable "venly_application_id" {
+  type      = string
+  sensitive = true
+}
+

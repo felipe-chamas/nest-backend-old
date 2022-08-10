@@ -28,6 +28,9 @@ module "ecs" {
   frontend_url          = var.frontend_url
   docs_token            = var.docs_token
   quicknode_uri         = var.quicknode_uri
+  venly_client_id       = var.venly_client_id
+  venly_client_secret   = var.venly_client_secret
+  venly_application_id  = var.venly_application_id
 
   vpc_id = module.vpc_for_ecs_fargate.vpc_id
   # Service

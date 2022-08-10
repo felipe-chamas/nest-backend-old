@@ -20,6 +20,9 @@ resource "aws_secretsmanager_secret_version" "secret_variables_version" {
       "frontend_url": "${var.frontend_url}",
       "docs_token": "${var.docs_token}",
       "quicknode_uri": "${var.quicknode_uri}",
+      "venly_client_id": "${var.venly_client_id}",
+      "venly_client_secret": "${var.venly_client_secret}",
+      "venly_application_id": "${var.venly_application_id}",
       "secret_value": "${random_string.random.result}"
     }
   EOF
@@ -109,6 +112,18 @@ resource "aws_ecs_task_definition" "main" {
         {
           name : "QUICKNODE_URI",
           valueFrom : "${aws_secretsmanager_secret.secret_variables.arn}:quicknode_uri::"
+        },
+        {
+          name : "VENLY_CLIENT_ID",
+          valueFrom : "${aws_secretsmanager_secret.secret_variables.arn}:venly_client_id::"
+        },
+        {
+          name : "VENLY_CLIENT_SECRET",
+          valueFrom : "${aws_secretsmanager_secret.secret_variables.arn}:venly_client_secret::"
+        },
+        {
+          name : "VENLY_APPLICATION_ID",
+          valueFrom : "${aws_secretsmanager_secret.secret_variables.arn}:venly_application_id::"
         },
         {
           name : "SESSION_SECRET",

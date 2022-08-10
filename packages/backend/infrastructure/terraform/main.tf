@@ -31,6 +31,9 @@ module "webserver" {
   frontend_url          = var.frontend_url
   docs_token            = var.docs_token
   quicknode_uri         = var.quicknode_uri
+  venly_client_id       = var.venly_client_id
+  venly_client_secret   = var.venly_client_secret
+  venly_application_id  = var.venly_application_id
 
   depends_on = [
     module.events-listener
