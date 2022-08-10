@@ -32,4 +32,7 @@ export class UpdateUserDto {
   @ApiPropertyUserSocialAccounts()
   @IsOptional()
   socialAccounts?: SocialAccounts;
+
+  @IsOptional()
+  venlyWalletId?: string;
 }

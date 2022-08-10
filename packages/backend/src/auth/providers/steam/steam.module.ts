@@ -4,10 +4,10 @@ import { SteamService } from './steam.service';
 import { UserModule } from '../../../models';
 import { UserService } from '../../../models/user';
 import { SteamStrategy } from './SteamStrategy';
-import { ConfigService } from '@nestjs/config';
+
 @Module({
   controllers: [SteamController],
-  imports: [ConfigService, UserModule],
+  imports: [UserModule],
   providers: [SteamStrategy, SteamService, UserService],
 })
 export class SteamAuthModule {}

@@ -71,7 +71,10 @@ const config: HardhatUserConfig = {
     disambiguatePaths: false,
   },
   etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY,
+    apiKey: {
+      goerli: process.env.ETHERSCAN_API_KEY ?? '',
+      bscTestnet: process.env.BSCSCAN_API_KEY ?? '',
+    },
   },
   typechain: {
     outDir: './typechain',

@@ -18,8 +18,7 @@
               "introspectComments": true
             }
           }
-        ],
-        "assets": ["packages/backend/src/common/assets"]
+        ]
       },
       "configurations": {
         "production": {

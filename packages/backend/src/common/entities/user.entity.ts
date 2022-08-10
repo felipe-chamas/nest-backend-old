@@ -50,6 +50,9 @@ export class User {
   accountIds: AccountIdDto[];
 
   @Column()
+  venlyWalletId?: string;
+
+  @Column()
   @ApiPropertyUserSocialAccounts()
   socialAccounts?: SocialAccounts;
 

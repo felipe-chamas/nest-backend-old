@@ -8,8 +8,8 @@
     "lint": "nx run-many --target=lint --all",
     "build:backend": "nx build backend",
     "serve:backend": "nx serve backend",
-    "seed:config": "ts-node --project packages/backend/tsconfig.app.json -r tsconfig-paths/register ./node_modules/typeorm-seeding/dist/cli.js config",
-    "seed:run": "ts-node --project packages/backend/tsconfig.app.json -r tsconfig-paths/register ./node_modules/typeorm-seeding/dist/cli.js seed",
+    "seed:config": "ts-node --project packages/backend/tsconfig.app.json -r tsconfig-paths/register ./node_modules/typeorm-seeding/dist/cli.js config --configName=seedconfig.js",
+    "seed:run": "ts-node --project packages/backend/tsconfig.app.json -r tsconfig-paths/register ./node_modules/typeorm-seeding/dist/cli.js seed --configName=seedconfig.js",
     "seed:random": "yarn seed:run --seed RandomSeeder",
     "seed:harvest": "yarn seed:run --seed TheHarvestGameSeeder"
   },

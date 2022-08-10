@@ -36,5 +36,10 @@ export default () => ({
   quicknode: {
     quicknode_uri: process.env.QUICKNODE_URI,
   },
+  venly: {
+    client_id: process.env.VENLY_CLIENT_ID,
+    client_secret: process.env.VENLY_CLIENT_SECRET,
+    application_id: process.env.VENLY_APPLICATION_ID,
+  },
   apiKey: process.env.API_KEY,
 });
