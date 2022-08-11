@@ -11,7 +11,16 @@
         "address": "GUa8mVe6dwfyoRqjHntQFBKchjWAqUW9WnTtohcPwpJE"
       }
     ],
-    "roles": ["MARKETPLACE_ADMIN", "NFT_ADMIN", "ROLES_ADMIN", "USER_ADMIN"]
+    "roles": ["MARKETPLACE_ADMIN", "NFT_ADMIN", "ROLES_ADMIN", "USER_ADMIN"],
+    "wallet": {
+      "id": "ea6ab907-e626-4202-bdbf-2f086626380b",
+      "address": "0xC86a3DEF12196FAA1e1d41F22d76047923bd85D0",
+      "walletType": "WHITE_LABEL",
+      "secretType": "BSC",
+      "identifier": "62f4f734606dbfd5de6f15be",
+      "description": "Gutsy Ratel",
+      "createdAt": "2022-08-11T12:37:34.770792019"
+    }
   },
   {
     "name": "Ahmetcan Demirel",

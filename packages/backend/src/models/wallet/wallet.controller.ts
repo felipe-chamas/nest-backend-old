@@ -3,7 +3,7 @@ import { Controller, Post, Body } from '@nestjs/common';
 import { WalletService } from './wallet.service';
 
 import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CreateWalletDto } from './dto/create-wallet.dto';
+import { WalletBodyDto } from './dto/create-wallet.dto';
 import { UserDto } from 'models/user/dto';
 
 @ApiTags('Wallets')
@@ -15,9 +15,9 @@ export class WalletController {
   @ApiOperation({
     description: 'Creates wallet and assigns to user with passed `userId`',
   })
-  @ApiBody({ type: CreateWalletDto })
+  @ApiBody({ type: WalletBodyDto })
   @ApiOkResponse({ type: UserDto })
-  async create(@Body() createWalletDto: CreateWalletDto) {
+  async create(@Body() createWalletDto: WalletBodyDto) {
     return this.walletService.createWallet(createWalletDto);
   }
 }

@@ -25,6 +25,7 @@ import {
   ApiPropertyUserNfts,
   ApiPropertyUserRoles,
 } from 'common/decorators/docs.decorators';
+import { WalletDto } from 'common/types/wallet';
 
 @Entity()
 @Index(['email'])
@@ -50,7 +51,7 @@ export class User {
   accountIds: AccountIdDto[];
 
   @Column()
-  venlyWalletId?: string;
+  wallet?: WalletDto;
 
   @Column()
   @ApiPropertyUserSocialAccounts()

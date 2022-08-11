@@ -18,6 +18,8 @@ import {
   QuickNodeFetchNftsResponse,
   SolscanTokenAccountResponse,
 } from '../types';
+import { WalletService } from 'models/wallet/wallet.service';
+import { WalletBodyDto } from 'models/wallet/dto/create-wallet.dto';
 
 @Injectable()
 export class NftService {
@@ -26,6 +28,7 @@ export class NftService {
   constructor(
     @InjectRepository(Nft)
     private readonly nftRepo: MongoRepository<Nft>,
+    private readonly walletService: WalletService,
   ) {}
 
   async create(createNftDto: CreateNftDto) {
@@ -180,5 +183,9 @@ export class NftService {
 
   async recover(id?: string) {
     return await recoveryAgent(this.nftRepo, id);
+  }
+
+  async mint(body: WalletBodyDto) {
+    return this.walletService.executeMint(body);
   }
 }

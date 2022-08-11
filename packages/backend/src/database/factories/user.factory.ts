@@ -62,5 +62,7 @@ define(User, (_, { chainId = getChainId(), ...userData }: Context) => {
       faker.datatype.float({ min: 0, max: 1, precision: 1 }),
     );
 
+  if (userData.wallet) user.wallet = userData.wallet;
+
   return user;
 });

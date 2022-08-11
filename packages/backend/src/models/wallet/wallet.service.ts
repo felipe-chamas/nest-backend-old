@@ -1,17 +1,27 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { plainToInstance } from 'class-transformer';
+import { WalletDto } from 'common/types/wallet';
 import { UserService } from 'models/user';
 
 import url from 'url';
-import { CreateWalletDto } from './dto/create-wallet.dto';
-import { AccessTokenResult, CreateWalletResult } from './types';
+import { WalletBodyDto } from './dto/create-wallet.dto';
+import {
+  AccessTokenResult,
+  CreateWalletResult,
+  GetWalletResult,
+  MintResult,
+} from './types';
 
 @Injectable()
 export class WalletService {
   client_id: string;
   client_secret: string;
   application_id: string;
+
+  nftCollectionAddress: string;
+  boxCollectionAddress: string;
 
   private readonly authBaseURL: string;
   private readonly apiBaseURL: string;
@@ -34,6 +44,13 @@ export class WalletService {
       this.config.get('stage') === 'production'
         ? 'https://api-wallet.venly.io/api'
         : 'https://api-wallet-staging.venly.io/api';
+
+    // TODO: input production address once deployed
+    // TODO: change testnet address once deployed in IMX
+    this.nftCollectionAddress =
+      this.config.get('stage') === 'production'
+        ? ''
+        : '0x83269feb3c2e078cd364b69b3a76c51074e45cfa';
   }
 
   async getAccessToken() {
@@ -58,7 +75,21 @@ export class WalletService {
     this.httpService.axiosRef.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
   }
 
-  async createWallet({ pincode, userId }: CreateWalletDto) {
+  async getWallet(walletId: string) {
+    await this.getAccessToken();
+
+    this.httpService.axiosRef.defaults.baseURL = this.apiBaseURL;
+
+    const {
+      data: { result },
+    } = await this.httpService.axiosRef.get<GetWalletResult>(
+      `wallets/${walletId}`,
+    );
+
+    return result;
+  }
+
+  async createWallet({ pincode, userId }: WalletBodyDto) {
     // TODO: Change to find by EpicId / SteamId
     const user = await this.userService.findById(userId);
 
@@ -68,9 +99,7 @@ export class WalletService {
 
     // TODO: Replace BSC with IMX when available
     const {
-      data: {
-        result: { id: venlyWalletId },
-      },
+      data: { result },
     } = await this.httpService.axiosRef.post<CreateWalletResult>('wallets', {
       pincode,
       identifier: userId,
@@ -78,6 +107,46 @@ export class WalletService {
       walletType: 'WHITE_LABEL',
     });
 
-    return this.userService.update(userId, { ...user, venlyWalletId });
+    const wallet = plainToInstance(WalletDto, result);
+
+    return this.userService.update(userId, { ...user, wallet });
+  }
+
+  async executeMint({ pincode, userId }: WalletBodyDto) {
+    // TODO: Change to find by EpicId / SteamId
+    const user = await this.userService.findById(userId);
+
+    if (!user.wallet) throw new BadRequestException('User has no wallet');
+
+    await this.getAccessToken();
+
+    this.httpService.axiosRef.defaults.baseURL = this.apiBaseURL;
+
+    const {
+      data: {
+        result: { transactionHash },
+      },
+    } = await this.httpService.axiosRef.post<MintResult>(
+      'transactions/execute',
+      {
+        pincode,
+        transactionRequest: {
+          walletId: user.wallet.id,
+          type: 'CONTRACT_EXECUTION',
+          to: this.nftCollectionAddress,
+          secretType: 'BSC',
+          functionName: 'mint',
+          value: 0,
+          inputs: [
+            {
+              type: 'address',
+              value: user.wallet.address,
+            },
+          ],
+        },
+      },
+    );
+
+    return transactionHash;
   }
 }

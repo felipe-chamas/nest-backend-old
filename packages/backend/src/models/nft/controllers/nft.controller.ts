@@ -18,6 +18,7 @@ import { AssetId } from 'caip';
 import { Auth } from 'common/decorators/auth.decorators';
 import { Role } from 'common/enums/role.enum';
 import { NftCollectionService } from 'models/nft-collection';
+import { WalletBodyDto } from 'models/wallet/dto/create-wallet.dto';
 
 @ApiTags('Nfts')
 @Controller('nft')
@@ -119,5 +120,15 @@ export class NftController {
   @ApiBody({ type: CreateNftDto })
   create(@Body() createNftDto: CreateNftDto) {
     return this.nftService.create(createNftDto);
+  }
+
+  @Post('mint')
+  @ApiOperation({
+    description: 'Mints an Nft and returns the transaction hash',
+  })
+  @ApiOkResponse({ type: String })
+  @ApiBody({ type: WalletBodyDto })
+  mint(@Body() walletBodyDto: WalletBodyDto) {
+    return this.nftService.mint(walletBodyDto);
   }
 }

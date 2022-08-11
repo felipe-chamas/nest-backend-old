@@ -9,6 +9,7 @@ import {
 } from 'common/decorators/docs.decorators';
 import { Role } from 'common/enums/role.enum';
 import { AccountIdDto, SocialAccounts } from 'common/types';
+import { WalletDto } from 'common/types/wallet';
 
 export class UpdateUserDto {
   @ApiPropertyUserEmail()
@@ -34,5 +35,5 @@ export class UpdateUserDto {
   socialAccounts?: SocialAccounts;
 
   @IsOptional()
-  venlyWalletId?: string;
+  wallet?: WalletDto;
 }

@@ -1,7 +1,7 @@
 import { IsString } from 'class-validator';
 import { IsPincode } from 'common/decorators/venly';
 
-export class CreateWalletDto {
+export class WalletBodyDto {
   @IsString()
   userId: string;
 

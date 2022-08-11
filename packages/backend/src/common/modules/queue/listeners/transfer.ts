@@ -14,6 +14,8 @@ import { UserService } from 'models/user';
 import { NftService } from 'models/nft';
 import { AccountId, AssetId, AssetType } from 'caip';
 import { ChainIdReference } from 'common/types';
+import { WalletService } from 'models/wallet/wallet.service';
+import { ConfigService } from '@nestjs/config';
 
 const parseEthereumData = async (parsiqEvent: ParsiqEvent) => {
   const assetId = new AssetId(parsiqEvent.assetType);
@@ -96,7 +98,10 @@ export default async function transfer(
     const nftRepo = getMongoRepository(Nft);
 
     const userService = new UserService(userRepo);
-    const nftService = new NftService(nftRepo);
+    const nftService = new NftService(
+      nftRepo,
+      new WalletService(new ConfigService(), userService),
+    );
 
     const toAccountId = new AccountId({
       chainId,

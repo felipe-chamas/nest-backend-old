@@ -11,6 +11,8 @@ import { Nft, NftService } from 'models/nft';
 import { User } from 'common/entities';
 import { NftClaimService } from 'models/nft-claim/services/nft-claim.service';
 import { AccountId, AssetId, AssetType } from 'caip';
+import { WalletService } from 'models/wallet/wallet.service';
+import { ConfigService } from '@nestjs/config';
 
 // TODO: Implement for Solana once minting is done internally
 export default async function tokenClaimed(
@@ -38,7 +40,10 @@ export default async function tokenClaimed(
     const nftClaimRepo = getMongoRepository(NftClaim);
     const nftCollectionRepo = getMongoRepository(NftCollection);
     const userService = new UserService(userRepo);
-    const nftService = new NftService(nftRepo);
+    const nftService = new NftService(
+      nftRepo,
+      new WalletService(new ConfigService(), userService),
+    );
     const nftClaimService = new NftClaimService(nftClaimRepo);
     const nftCollectionService = new NftCollectionService(nftCollectionRepo);
 
