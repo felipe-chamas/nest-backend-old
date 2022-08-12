@@ -56,6 +56,29 @@ export function IsAccountId(object: object, propertyName: string) {
   });
 }
 
+export function IsAssetId(object: object, propertyName: string) {
+  registerDecorator({
+    name: 'isAssetId',
+    target: object.constructor,
+    propertyName: propertyName,
+    options: {
+      message:
+        'String should be formatted according to caip standard. See more ' +
+        'https://github.com/ChainAgnostic/CAIPs/blob/master/CAIPs/caip-19.md',
+    },
+    validator: {
+      validate(value: string | AssetIdParams) {
+        try {
+          new AssetId(value);
+          return true;
+        } catch (_) {
+          return false;
+        }
+      },
+    },
+  });
+}
+
 export function IsAccountIdArray(object: object, propertyName: string) {
   registerDecorator({
     name: 'isAccountIdArray',

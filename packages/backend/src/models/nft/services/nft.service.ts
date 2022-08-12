@@ -19,7 +19,11 @@ import {
   SolscanTokenAccountResponse,
 } from '../types';
 import { WalletService } from 'models/wallet/wallet.service';
-import { WalletBodyDto } from 'models/wallet/dto/create-wallet.dto';
+import {
+  NFTWalletBodyDto,
+  PayableNFTWalletBodyDto,
+  WalletBodyDto,
+} from 'models/wallet/dto/create-wallet.dto';
 
 @Injectable()
 export class NftService {
@@ -187,5 +191,13 @@ export class NftService {
 
   async mint(body: WalletBodyDto) {
     return this.walletService.executeMint(body);
+  }
+
+  async unbox(body: NFTWalletBodyDto) {
+    return this.walletService.executeUnbox(body);
+  }
+
+  async upgrade(body: PayableNFTWalletBodyDto) {
+    return this.walletService.executeUpgrade(body);
   }
 }

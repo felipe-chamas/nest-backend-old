@@ -1,12 +1,17 @@
 import { HttpService } from '@nestjs/axios';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { AssetId } from 'caip';
 import { plainToInstance } from 'class-transformer';
 import { WalletDto } from 'common/types/wallet';
 import { UserService } from 'models/user';
 
 import url from 'url';
-import { WalletBodyDto } from './dto/create-wallet.dto';
+import {
+  NFTWalletBodyDto,
+  PayableNFTWalletBodyDto,
+  WalletBodyDto,
+} from './dto/create-wallet.dto';
 import {
   AccessTokenResult,
   CreateWalletResult,
@@ -21,7 +26,6 @@ export class WalletService {
   application_id: string;
 
   nftCollectionAddress: string;
-  boxCollectionAddress: string;
 
   private readonly authBaseURL: string;
   private readonly apiBaseURL: string;
@@ -141,6 +145,93 @@ export class WalletService {
             {
               type: 'address',
               value: user.wallet.address,
+            },
+          ],
+        },
+      },
+    );
+
+    return transactionHash;
+  }
+
+  async executeUnbox({ pincode, userId, assetId }: NFTWalletBodyDto) {
+    // TODO: Change to find by EpicId / SteamId
+    const user = await this.userService.findById(userId);
+
+    if (!user.wallet) throw new BadRequestException('User has no wallet');
+
+    await this.getAccessToken();
+
+    this.httpService.axiosRef.defaults.baseURL = this.apiBaseURL;
+
+    const caipAssetId = new AssetId(assetId);
+
+    // TODO: Check on input parameters after Smart Contract refactor
+    const {
+      data: {
+        result: { transactionHash },
+      },
+    } = await this.httpService.axiosRef.post<MintResult>(
+      'transactions/execute',
+      {
+        pincode,
+        transactionRequest: {
+          walletId: user.wallet.id,
+          type: 'CONTRACT_EXECUTION',
+          to: caipAssetId.assetName.reference,
+          secretType: 'BSC',
+          functionName: 'unbox',
+          value: 0,
+          inputs: [
+            {
+              type: 'uint256',
+              value: caipAssetId.tokenId,
+            },
+          ],
+        },
+      },
+    );
+
+    return transactionHash;
+  }
+
+  async executeUpgrade({
+    pincode,
+    userId,
+    assetId,
+    value,
+  }: PayableNFTWalletBodyDto) {
+    // TODO: Change to find by EpicId / SteamId
+    const user = await this.userService.findById(userId);
+
+    if (!user.wallet) throw new BadRequestException('User has no wallet');
+
+    await this.getAccessToken();
+
+    this.httpService.axiosRef.defaults.baseURL = this.apiBaseURL;
+
+    const caipAssetId = new AssetId(assetId);
+
+    // TODO: Check on input parameters after Smart Contract refactor
+    const {
+      data: {
+        result: { transactionHash },
+      },
+    } = await this.httpService.axiosRef.post<MintResult>(
+      'transactions/execute',
+      {
+        pincode,
+        transactionRequest: {
+          walletId: user.wallet.id,
+          type: 'CONTRACT_EXECUTION',
+          to: caipAssetId.assetName.reference,
+          secretType: 'BSC',
+          functionName: 'upgrade',
+          value,
+          inputs: [
+            {
+              type: 'uint256',
+              value: caipAssetId.tokenId,
             },
           ],
         },

@@ -18,7 +18,11 @@ import { AssetId } from 'caip';
 import { Auth } from 'common/decorators/auth.decorators';
 import { Role } from 'common/enums/role.enum';
 import { NftCollectionService } from 'models/nft-collection';
-import { WalletBodyDto } from 'models/wallet/dto/create-wallet.dto';
+import {
+  NFTWalletBodyDto,
+  PayableNFTWalletBodyDto,
+  WalletBodyDto,
+} from 'models/wallet/dto/create-wallet.dto';
 
 @ApiTags('Nfts')
 @Controller('nft')
@@ -128,7 +132,27 @@ export class NftController {
   })
   @ApiOkResponse({ type: String })
   @ApiBody({ type: WalletBodyDto })
-  mint(@Body() walletBodyDto: WalletBodyDto) {
-    return this.nftService.mint(walletBodyDto);
+  mint(@Body() bodyDto: WalletBodyDto) {
+    return this.nftService.mint(bodyDto);
+  }
+
+  @Post('unbox')
+  @ApiOperation({
+    description: 'Unboxes an Nft and returns the transaction hash',
+  })
+  @ApiOkResponse({ type: String })
+  @ApiBody({ type: NFTWalletBodyDto })
+  unbox(@Body() bodyDto: NFTWalletBodyDto) {
+    return this.nftService.unbox(bodyDto);
+  }
+
+  @Post('upgrade')
+  @ApiOperation({
+    description: 'Upgrades an Nft and returns the transaction hash',
+  })
+  @ApiOkResponse({ type: String })
+  @ApiBody({ type: PayableNFTWalletBodyDto })
+  upgrade(@Body() bodyDto: PayableNFTWalletBodyDto) {
+    return this.nftService.upgrade(bodyDto);
   }
 }
