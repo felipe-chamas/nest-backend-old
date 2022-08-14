@@ -25,6 +25,9 @@ export type NFTConstructor = BaseConstructor & {
   maxTokenSupply: string;
   burnEnabled: boolean;
 };
+export type NFTLaunchpadConstructor = NFTConstructor & {
+  launchpad: string;
+};
 export type TokenSaleConstructor = BaseConstructor & {
   /// Vesting period (in seconds)
   vestingPeriod: number;
@@ -52,5 +55,4 @@ export type MarketplaceConstructor = BaseConstructor & {
   custody: string;
   gameToken: string;
 };
-
 export type AtLeast<T, K extends keyof T> = Partial<T> & Pick<T, K>;

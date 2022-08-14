@@ -6,7 +6,7 @@ export function baseContext(description: string, testSuite: () => void): void {
   describe(description, function () {
     before(async function () {
       const signers = await ethers.getSigners();
-      const [admin, operator, other, stranger, custody, user] = signers;
+      const [admin, operator, launchpad, other, stranger, custody, user] = signers;
       this.signers = {
         admin,
         operator,
@@ -14,6 +14,7 @@ export function baseContext(description: string, testSuite: () => void): void {
         stranger,
         custody,
         user,
+        launchpad,
       };
       this.chainId = await admin.getChainId();
       this.contracts = {} as Contracts;

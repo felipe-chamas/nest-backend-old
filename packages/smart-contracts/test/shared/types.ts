@@ -19,6 +19,7 @@ import {
   TokenSale,
   VRFCoordinatorV2Mock,
   Staking,
+  NFTLaunchpad,
 } from '../../typechain';
 import { solidityId } from './utils';
 
@@ -39,6 +40,7 @@ export interface Contracts {
   splitter: Splitter;
   staking: Staking;
   nft: NFT;
+  nftLaunchpad: NFTLaunchpad;
   gameToken: GameToken;
   recoverable: ERC20TokenRecoverable;
   accessControllable: AccessControllable;
@@ -68,6 +70,7 @@ export interface Signers {
   stranger: SignerWithAddress;
   custody: SignerWithAddress;
   user: SignerWithAddress;
+  launchpad: SignerWithAddress;
 }
 
 export const Roles: Record<string, string> = {

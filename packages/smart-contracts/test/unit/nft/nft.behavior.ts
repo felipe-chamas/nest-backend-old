@@ -6,7 +6,7 @@ import { AddressZero } from '../../shared/constants';
 import { Roles } from '../../shared/types';
 import { getTransferEvent } from '../../shared/utils';
 
-export function shouldBehaveLikeNFT(burnEnabled: boolean) {
+export function shouldBehaveLikeNFT(burnEnabled: boolean, nftIdentifier: 'nft' | 'nftLaunchpad' = 'nft') {
   context('NFT', function () {
     let nft: NFT;
     let stranger: SignerWithAddress;
@@ -15,7 +15,7 @@ export function shouldBehaveLikeNFT(burnEnabled: boolean) {
     let user: SignerWithAddress;
 
     beforeEach(function () {
-      ({ nft } = this.contracts);
+      nft = this.contracts[nftIdentifier] as NFT;
       ({ stranger, other, operator, user } = this.signers);
     });
 
@@ -111,7 +111,10 @@ export function shouldBehaveLikeNFT(burnEnabled: boolean) {
   });
 }
 
-export function shouldBehaveLikeNFTWithLimitedSupply(maxTokenSupply: bigint) {
+export function shouldBehaveLikeNFTWithLimitedSupply(
+  maxTokenSupply: bigint,
+  nftIdentifier: 'nft' | 'nftLaunchpad' = 'nft',
+) {
   context(`Max Token Supply: ${maxTokenSupply}`, function () {
     let nft: NFT;
     let other: SignerWithAddress;
@@ -119,7 +122,7 @@ export function shouldBehaveLikeNFTWithLimitedSupply(maxTokenSupply: bigint) {
 
     beforeEach(function () {
       ({ other, operator } = this.signers);
-      const { nft: adminNFT } = this.contracts;
+      const adminNFT = this.contracts[nftIdentifier] as NFT;
 
       nft = adminNFT.connect(operator);
     });

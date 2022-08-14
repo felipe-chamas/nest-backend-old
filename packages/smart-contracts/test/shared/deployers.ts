@@ -5,6 +5,7 @@ import {
   TASK_DEPLOY_GAME_TOKEN,
   TASK_DEPLOY_MOCK_ERC20,
   TASK_DEPLOY_NFT,
+  TASK_DEPLOY_NFT_LAUNCHPAD,
   TASK_DEPLOY_NFT_BOX_UNBOXING,
   TASK_DEPLOY_NFT_CLAIM,
   TASK_DEPLOY_SPLITTER,
@@ -20,6 +21,7 @@ import {
   NFTBoxUnboxingConstructor,
   NFTClaimConstructor,
   NFTConstructor,
+  NFTLaunchpadConstructor,
   StakingConstructor,
   TokenSaleConstructor,
 } from '../../tasks/types';
@@ -30,6 +32,7 @@ import {
   MarketplaceMock,
   MarketplaceMock__factory,
   NFTClaim__factory,
+  NFTLaunchpad__factory,
   NFTMock,
   NFTMock__factory,
   NFTUnboxing__factory,
@@ -119,6 +122,33 @@ export async function deployNFT(
   });
 
   return NFT__factory.connect(nft, deployer);
+}
+
+export async function deployNFTLaunchpad(
+  deployer: Signer,
+  {
+    acl,
+    name = 'Testing NFT Launchpad',
+    symbol = 'TNFTL',
+    baseUri = 'ipfs://',
+    maxTokenSupply = MAX_UINT256.toString(10),
+    burnEnabled,
+    silent,
+    launchpad,
+  }: AtLeast<NFTLaunchpadConstructor, 'acl' | 'launchpad'>,
+) {
+  const nftLaunchpad = await hre.run(TASK_DEPLOY_NFT_LAUNCHPAD, {
+    acl,
+    name,
+    symbol,
+    maxTokenSupply,
+    burnEnabled,
+    baseUri,
+    launchpad,
+    silent,
+  });
+
+  return NFTLaunchpad__factory.connect(nftLaunchpad, deployer);
 }
 
 export async function deployTokenSale(deployer: Signer, args: TokenSaleConstructor) {

@@ -42,7 +42,7 @@ contract NFTMock is NFT, INFTPermitMock {
         public
         view
         virtual
-        override(IERC165Upgradeable, NFT)
+        override(IERC165Upgradeable, NFTBase)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
