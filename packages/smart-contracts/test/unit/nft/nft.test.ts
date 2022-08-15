@@ -10,7 +10,11 @@ import { Roles } from '../../shared/types';
 import { shouldBehaveLikeAccessControllable } from '../access-controllable/access-controllable.behavior';
 import { shouldBehaveLikeNFTPermit } from '../nft-permit/permit.behavior';
 import { shouldBehaveLikeERC20TokenRecoverable } from '../recoverable/recoverable.behavior';
-import { shouldBehaveLikeNFT, shouldBehaveLikeNFTWithLimitedSupply } from './nft.behavior';
+import {
+  shouldBehaveLikeNFT,
+  shouldBehaveLikeNFTWithBatchTransfer,
+  shouldBehaveLikeNFTWithLimitedSupply,
+} from './nft.behavior';
 
 async function nftFixture(signers: Signer[], maxLimitedSupply = MAX_UINT256, burnEnabled = false) {
   const [deployer, operator] = signers;
@@ -50,6 +54,7 @@ export function unitTestNFT(): void {
     });
 
     shouldBehaveLikeNFT(false);
+    shouldBehaveLikeNFTWithBatchTransfer();
     context('ERC4494 (permit)', function () {
       shouldBehaveLikeNFTPermit();
     });

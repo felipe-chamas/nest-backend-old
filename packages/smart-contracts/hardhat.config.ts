@@ -57,6 +57,10 @@ const config: HardhatUserConfig = {
       url: `https://eth-goerli.alchemyapi.io/v2/${process.env.ALCHEMY_API_KEY}`,
       accounts: privateKey('goerli'),
     },
+    binance: {
+      url: 'https://bsc-dataseed.binance.org/',
+      accounts: privateKey('binance'),
+    },
     binanceTestnet: {
       url: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
       accounts: privateKey('binanceTestnet'),
@@ -73,6 +77,7 @@ const config: HardhatUserConfig = {
   etherscan: {
     apiKey: {
       goerli: process.env.ETHERSCAN_API_KEY ?? '',
+      bsc: process.env.BSCSCAN_API_KEY ?? '',
       bscTestnet: process.env.BSCSCAN_API_KEY ?? '',
     },
   },

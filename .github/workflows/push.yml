@@ -84,6 +84,11 @@ jobs:
         run: yarn install --frozen-lockfile
       - run: npx nx affected --target=setup --base=remotes/origin/main
       - run: npx nx affected --target=test --parallel=3 --base=remotes/origin/main
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: './packages/smart-contracts/coverage/lcov.info'
   build:
     name: Build
     runs-on: ubuntu-latest

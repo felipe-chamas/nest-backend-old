@@ -1,7 +1,11 @@
 import { Signer } from 'ethers';
 import { deployACL, deployNFTLaunchpad } from '../../shared/deployers';
 import { Roles } from '../../shared/types';
-import { shouldBehaveLikeNFT, shouldBehaveLikeNFTWithLimitedSupply } from '../nft/nft.behavior';
+import {
+  shouldBehaveLikeNFT,
+  shouldBehaveLikeNFTWithBatchTransfer,
+  shouldBehaveLikeNFTWithLimitedSupply,
+} from '../nft/nft.behavior';
 import { shouldBehaveLikeConstructor } from './constructor';
 import { shouldBehaveLikeINFTLaunchpad, shouldBehaveLikeOnlyLaunchpadIsAllowedToMint } from './nft-launchpad.behavior';
 
@@ -45,6 +49,7 @@ export function unitTestNFTLaunchpad(): void {
     shouldBehaveLikeConstructor();
     shouldBehaveLikeNFT(true, 'nftLaunchpad');
     shouldBehaveLikeNFTWithLimitedSupply(maxTokenSupply, 'nftLaunchpad');
+    shouldBehaveLikeNFTWithBatchTransfer('nftLaunchpad');
     shouldBehaveLikeINFTLaunchpad(maxTokenSupply);
     shouldBehaveLikeOnlyLaunchpadIsAllowedToMint();
   });

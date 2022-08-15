@@ -9,7 +9,7 @@ task(TASK_DEPLOY_NFT_LAUNCHPAD, 'Deploy NFT Launchpad contract')
   .addParam('symbol', 'Token symbol', undefined, types.string)
   .addParam('launchpad', 'Launchpad contract address', undefined, types.string)
   .addParam('maxTokenSupply', 'Maximum token supply', undefined, types.string)
-  .addParam('burnEnabled', 'Enable Token burning (Needs to be "true" for NFT Boxes)', undefined, types.boolean)
+  .addOptionalParam('burnEnabled', 'Enable Token burning (Needs to be "true" for NFT Boxes)', true, types.boolean)
   .addOptionalParam('baseUri', 'Base Token URI', '', types.string)
   .addOptionalParam('silent', 'Silent', false, types.boolean)
   .setAction(

@@ -149,3 +149,43 @@ export function shouldBehaveLikeNFTWithLimitedSupply(
     });
   });
 }
+
+export function shouldBehaveLikeNFTWithBatchTransfer(nftIdentifier: 'nft' | 'nftLaunchpad' = 'nft') {
+  context('NFT batchTransfer', function () {
+    let nft: NFT;
+    let other: SignerWithAddress;
+    let operator: SignerWithAddress;
+    let user: SignerWithAddress;
+
+    beforeEach(function () {
+      nft = this.contracts[nftIdentifier] as NFT;
+      ({ other, operator, user } = this.signers);
+    });
+
+    context('batchTransfer', () => {
+      it('should be possible to batch transfer NFTs', async () => {
+        const tokenIds = [1, 2, 3, 4];
+        for (const tokenId of tokenIds) {
+          await expect(nft.connect(operator).mint(user.address))
+            .to.emit(nft, 'Transfer')
+            .withArgs(AddressZero, user.address, tokenId);
+        }
+
+        const nftsToTransfer = [2, 4];
+        await expect(nft.connect(user).batchTransfer(user.address, other.address, nftsToTransfer))
+          .to.emit(nft, 'Transfer')
+          .withArgs(user.address, other.address, nftsToTransfer[0])
+          .to.emit(nft, 'Transfer')
+          .withArgs(user.address, other.address, nftsToTransfer[1]);
+      });
+
+      it('should not be possible to transfer a large amount of NFTs', async () => {
+        const BATCH_SIZE_LIMIT = 100;
+        const batch = Array.from(Array(BATCH_SIZE_LIMIT + 1).keys());
+        await expect(nft.connect(user).batchTransfer(user.address, other.address, batch)).to.be.eventually.rejectedWith(
+          `BatchSizeTooLarge(${BATCH_SIZE_LIMIT}, ${batch.length})`,
+        );
+      });
+    });
+  });
+}

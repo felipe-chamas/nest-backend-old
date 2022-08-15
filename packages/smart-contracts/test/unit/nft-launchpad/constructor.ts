@@ -23,15 +23,6 @@ export function shouldBehaveLikeConstructor() {
     ).eventually.exist;
   });
 
-  it('should fail to deploy with invalid launchpad address', async () => {
-    await expect(
-      deployNFTLaunchpad(admin, {
-        acl: acl.address,
-        launchpad: AddressZero,
-      }),
-    ).to.be.rejectedWith('LaunchpadIsZeroAddress()');
-  });
-
   it('should fail to deploy with zero ACL address', async () => {
     await expect(
       deployNFTLaunchpad(admin, {

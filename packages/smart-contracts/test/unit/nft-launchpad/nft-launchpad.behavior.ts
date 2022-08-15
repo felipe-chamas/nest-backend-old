@@ -2,6 +2,7 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
 import { NFTLaunchpad } from '../../../typechain';
 import { AddressZero } from '../../shared/constants';
+import { Roles } from '../../shared/types';
 
 export function shouldBehaveLikeOnlyLaunchpadIsAllowedToMint() {
   context('NFT Launchpad', function () {
@@ -9,10 +10,11 @@ export function shouldBehaveLikeOnlyLaunchpadIsAllowedToMint() {
     let stranger: SignerWithAddress;
     let launchpad: SignerWithAddress;
     let user: SignerWithAddress;
+    let operator: SignerWithAddress;
 
     beforeEach(function () {
       ({ nftLaunchpad } = this.contracts);
-      ({ stranger, launchpad, user } = this.signers);
+      ({ stranger, operator, launchpad, user } = this.signers);
     });
 
     context('minting', () => {
@@ -26,6 +28,18 @@ export function shouldBehaveLikeOnlyLaunchpadIsAllowedToMint() {
         await expect(nftLaunchpad.balanceOf(user.address)).eventually.to.eq(2);
         await expect(nftLaunchpad.tokenURI(1)).eventually.to.eq('ipfs://1');
         await expect(nftLaunchpad.tokenURI(2)).eventually.to.eq('ipfs://2');
+      });
+
+      it('operator should be able to set launchpad address', async () => {
+        await expect(nftLaunchpad.connect(operator).setLaunchpad(AddressZero))
+          .to.emit(nftLaunchpad, 'LaunchpadChanged')
+          .withArgs(launchpad.address, AddressZero);
+      });
+
+      it('stranger cannot set launchpad address', async () => {
+        await expect(nftLaunchpad.connect(stranger).setLaunchpad(AddressZero)).to.be.eventually.rejectedWith(
+          `AccessControl: account ${stranger.address.toLowerCase()} is missing role ${Roles.OPERATOR_ROLE}`,
+        );
       });
 
       it('stranger cannot mint NFT', async () => {

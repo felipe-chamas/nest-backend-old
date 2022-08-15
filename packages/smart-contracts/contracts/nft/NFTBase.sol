@@ -9,6 +9,7 @@ import "./NFTStorage.sol";
 import "./INFT.sol";
 
 error MaximumTotalSupplyReached(uint256 maximum);
+error BatchSizeTooLarge(uint256 maximum, uint256 actual);
 error BurningIsNotEnabled();
 
 // solhint-disable no-empty-blocks
@@ -24,6 +25,8 @@ abstract contract NFTBase is
 
     event BaseURIChanged(string baseURI);
     event TokenURIChanged(uint256 tokenId, string tokenURI);
+
+    uint256 private constant _BATCH_SIZE_LIMIT = 100;
 
     modifier whenBurnEnabled() {
         if (!_burnEnabled) revert BurningIsNotEnabled();
@@ -94,6 +97,21 @@ abstract contract NFTBase is
         returns (string memory)
     {
         return super.tokenURI(tokenId);
+    }
+
+    function batchTransfer(
+        address from,
+        address to,
+        uint256[] calldata tokenIds
+    ) external {
+        if (tokenIds.length > _BATCH_SIZE_LIMIT) revert BatchSizeTooLarge(_BATCH_SIZE_LIMIT, tokenIds.length);
+
+        for (uint256 i; i < tokenIds.length; ) {
+            _transfer(from, to, tokenIds[i]);
+            unchecked {
+                i++;
+            }
+        }
     }
 
     function supportsInterface(bytes4 interfaceId)

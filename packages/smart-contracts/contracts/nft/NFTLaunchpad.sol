@@ -5,7 +5,6 @@ import "./INFTLaunchpad.sol";
 import "./NFT.sol";
 
 error MaximumLaunchpadSupplyReached(uint256 maximum);
-error LaunchpadIsZeroAddress();
 error ToIsZeroAddress();
 error SizeIsZero();
 error MsgSenderIsNotLaunchpad();
@@ -13,6 +12,8 @@ error MintNotAvailableOutsideLaunchpad();
 
 contract NFTLaunchpad is NFTBase, INFTLaunchpad {
     address public launchpad;
+
+    event LaunchpadChanged(address indexed previousLaunchpad, address indexed newLaunchpad);
 
     modifier onlyLaunchpad() {
         if (msg.sender != launchpad) revert MsgSenderIsNotLaunchpad();
@@ -29,8 +30,15 @@ contract NFTLaunchpad is NFTBase, INFTLaunchpad {
         address _launchpad
     ) external initializer {
         __NFT_init(name_, symbol_, baseTokenURI, maxTokenSupply, burnEnabled, aclContract);
+        _setLaunchpad(_launchpad);
+    }
 
-        if (_launchpad == address(0)) revert LaunchpadIsZeroAddress();
+    function setLaunchpad(address _launchpad) external onlyOperator {
+        _setLaunchpad(_launchpad);
+    }
+
+    function _setLaunchpad(address _launchpad) internal {
+        emit LaunchpadChanged(launchpad, _launchpad);
         launchpad = _launchpad;
     }
 
