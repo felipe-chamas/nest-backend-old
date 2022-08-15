@@ -41,7 +41,6 @@ import {
   Splitter__factory,
   Staking__factory,
   TokenSale__factory,
-  VRFCoordinatorV2Mock__factory,
 } from '../../typechain';
 
 import { MAX_UINT256 } from './constants';
@@ -132,7 +131,7 @@ export async function deployNFTLaunchpad(
     symbol = 'TNFTL',
     baseUri = 'ipfs://',
     maxTokenSupply = MAX_UINT256.toString(10),
-    burnEnabled,
+    burnEnabled = true,
     silent,
     launchpad,
   }: AtLeast<NFTLaunchpadConstructor, 'acl' | 'launchpad'>,
@@ -167,21 +166,10 @@ export async function deployNFTClaim(deployer: Signer, { acl, nft, silent }: NFT
   return NFTClaim__factory.connect(nftClaim, deployer);
 }
 
-export async function deployVRFCoordinatorV2(deployer: Signer) {
-  return await new VRFCoordinatorV2Mock__factory(deployer).deploy(0, 0);
-}
-
-export async function deployNFTUnboxing(
-  deployer: Signer,
-  { acl, vrfCoordinator, keyHash, nftBox, requestConfirmations, subscriptionId }: NFTBoxUnboxingConstructor,
-) {
+export async function deployNFTUnboxing(deployer: Signer, { acl, nftBox }: NFTBoxUnboxingConstructor) {
   const nftUnboxing = await hre.run(TASK_DEPLOY_NFT_BOX_UNBOXING, {
     acl,
-    vrfCoordinator,
-    keyHash,
     nftBox,
-    requestConfirmations,
-    subscriptionId,
     silent: true,
   });
 

@@ -40,11 +40,7 @@ export type NFTBoxConstructor = BaseConstructor & { acl: string; name: string; s
 export type NFTClaimConstructor = BaseConstructor & { acl: string; nft: string };
 export type NFTBoxUnboxingConstructor = BaseConstructor & {
   acl: string;
-  vrfCoordinator: string;
   nftBox: string;
-  requestConfirmations: number;
-  subscriptionId: string;
-  keyHash: string;
   addToACL?: boolean;
 };
 export type MarketplaceConstructor = BaseConstructor & {

@@ -1,7 +1,7 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
 import { BigNumber } from 'ethers';
-import { ERC721Upgradeable, NFT, NFTUnboxing, VRFCoordinatorV2Mock } from '../../../typechain';
+import { ERC721Upgradeable, NFT, NFTUnboxing } from '../../../typechain';
 import { Roles } from '../../shared/types';
 import { getTransferEvent, getUnboxedEvent } from '../../shared/utils';
 
@@ -11,7 +11,6 @@ export function shouldBehaveLikeNFTUnboxing() {
   context('NFT Unboxing', () => {
     let nft: NFT;
     let nftUnboxing: NFTUnboxing;
-    let vrfCoordinator: VRFCoordinatorV2Mock;
     let stranger: SignerWithAddress;
     let user: SignerWithAddress;
     let other: SignerWithAddress;
@@ -20,7 +19,7 @@ export function shouldBehaveLikeNFTUnboxing() {
     let collection: NFT[];
 
     beforeEach(async function () {
-      ({ nft, nftUnboxing, vrfCoordinator, collection } = this.contracts);
+      ({ nft, nftUnboxing, collection } = this.contracts);
       ({ stranger, operator, user, other } = this.signers);
 
       const tx = await nft.connect(operator).mint(user.address);
@@ -28,119 +27,19 @@ export function shouldBehaveLikeNFTUnboxing() {
       ({ tokenId: nftBoxId } = await getTransferEvent(tx, nft as unknown as ERC721Upgradeable));
     });
 
-    context('when user requests unboxing', () => {
+    context('when operator requests unboxing', () => {
       context('on non-existent NFT box', () => {
         it('reverts', async () => {
-          await expect(nftUnboxing.connect(user).requestUnboxing(999)).to.revertedWith(
-            'ERC721: operator query for nonexistent token',
+          await expect(nftUnboxing.connect(operator).unbox(999, [nft.address], [3])).to.revertedWith(
+            'ERC721: owner query for nonexistent token',
           );
         });
       });
 
       context('on existing NFT box', () => {
         it('works', async () => {
-          await expect(nftUnboxing.connect(user).requestUnboxing(nftBoxId))
-            .to.emit(nftUnboxing, 'UnboxingRequested')
-            .withArgs(1, nftBoxId);
-
-          await expect(nftUnboxing.getRequestId(nftBoxId)).eventually.to.eq(1);
-          await expect(nftUnboxing.getTokenId(1)).eventually.to.eq(nftBoxId);
-          await expect(nftUnboxing.getRandomResultByTokenId(nftBoxId)).eventually.to.eq('0');
-        });
-      });
-
-      context('when user requests unboxing again', () => {
-        beforeEach(async () => {
-          await nftUnboxing.connect(user).requestUnboxing(nftBoxId);
-        });
-
-        it('reverts', async () => {
-          await expect(nftUnboxing.connect(user).requestUnboxing(nftBoxId)).revertedWith(
-            `UnboxingAlreadyRequested(${nftBoxId})`,
-          );
-        });
-      });
-    });
-
-    context('when stranger requests unboxing', () => {
-      it('reverts', async () => {
-        await expect(nftUnboxing.connect(stranger).requestUnboxing(nftBoxId)).revertedWith(
-          `RequesterIsNotTokenOwnerOrApproved(${nftBoxId})`,
-        );
-      });
-    });
-
-    context('when user approves token', () => {
-      context('for all', () => {
-        beforeEach(async () => {
-          await nft.connect(user).setApprovalForAll(other.address, true);
-        });
-
-        it('succeeds', async () => {
-          await expect(nftUnboxing.connect(other).requestUnboxing(nftBoxId))
-            .to.emit(nftUnboxing, 'UnboxingRequested')
-            .withArgs(1, nftBoxId);
-        });
-      });
-
-      context('for tokenId', () => {
-        beforeEach(async () => {
-          await nft.connect(user).approve(other.address, nftBoxId);
-        });
-
-        it('succeeds', async () => {
-          await expect(nftUnboxing.connect(other).requestUnboxing(nftBoxId))
-            .to.emit(nftUnboxing, 'UnboxingRequested')
-            .withArgs(1, nftBoxId);
-        });
-      });
-
-      context('for tokenId, but other user uses wrong tokenId', () => {
-        beforeEach(async () => {
-          const tx = await nft.connect(operator).mint(user.address);
-          const event = await getTransferEvent(tx, nft as unknown as ERC721Upgradeable);
-
-          await nft.connect(user).approve(other.address, event.tokenId);
-        });
-
-        it('reverts', async () => {
-          await expect(nftUnboxing.connect(other).requestUnboxing(nftBoxId)).revertedWith(
-            `RequesterIsNotTokenOwnerOrApproved(${nftBoxId})`,
-          );
-        });
-      });
-    });
-
-    context('when user requested unboxing', () => {
-      beforeEach(async () => {
-        await nftUnboxing.connect(user).requestUnboxing(nftBoxId);
-      });
-
-      context('when Chainlink responds with random number', () => {
-        beforeEach(async () => {
-          const requestId = await nftUnboxing.getRequestId(nftBoxId);
-
-          await vrfCoordinator.fulfillRandomWords(requestId, nftUnboxing.address);
-        });
-
-        it('stores the result', async () => {
-          await expect(nftUnboxing.getRandomResultByTokenId(nftBoxId)).eventually.not.eq('0');
-        });
-      });
-    });
-
-    context('completeUnboxing', () => {
-      let requestId: BigNumber;
-      beforeEach(async () => {
-        await nftUnboxing.connect(user).requestUnboxing(nftBoxId);
-        requestId = await nftUnboxing.getRequestId(nftBoxId);
-        await vrfCoordinator.fulfillRandomWords(requestId, nftUnboxing.address);
-      });
-
-      context('when operator completes unboxing', () => {
-        it('works', async () => {
-          const tx = await nftUnboxing.connect(operator).completeUnboxing(
-            requestId,
+          const tx = await nftUnboxing.connect(operator).unbox(
+            nftBoxId,
             collection.map(x => x.address),
             collection.map(() => 2),
           );
@@ -148,11 +47,11 @@ export function shouldBehaveLikeNFTUnboxing() {
           await expect(tx)
             .to.emit(nftUnboxing, 'Unboxed')
             .withArgs(
-              requestId,
               nftBoxId,
               collection.map(x => x.address),
               [], // chai matcher fails to validate 2D array
             );
+
           const event = await getUnboxedEvent(tx, nftUnboxing);
           expect(event.mintedTokenIds[0][0]).to.eq(1);
           expect(event.mintedTokenIds[0][1]).to.eq(2);
@@ -163,48 +62,50 @@ export function shouldBehaveLikeNFTUnboxing() {
         });
       });
 
-      context('when operator completes unboxing again', () => {
+      context('when requested unboxing again', () => {
         beforeEach(async () => {
-          await nftUnboxing.connect(operator).completeUnboxing(
-            requestId,
+          await nftUnboxing.connect(operator).unbox(
+            nftBoxId,
             collection.map(x => x.address),
-            collection.map(() => 1),
+            collection.map(() => 2),
           );
         });
 
         it('reverts', async () => {
           await expect(
-            nftUnboxing.connect(operator).completeUnboxing(
-              requestId,
+            nftUnboxing.connect(operator).unbox(
+              nftBoxId,
               collection.map(x => x.address),
-              collection.map(() => 1),
+              collection.map(() => 2),
             ),
-          ).to.be.reverted;
+          ).revertedWith('ERC721: owner query for nonexistent token');
         });
       });
+    });
 
-      context('when stranger completes unboxing', () => {
-        it('reverts', async () => {
-          await expect(
-            nftUnboxing.connect(stranger).completeUnboxing(
-              requestId,
-              collection.map(x => x.address),
-              collection.map(() => 1),
-            ),
-          ).to.be.revertedWith(
-            `AccessControl: account ${stranger.address.toLowerCase()} is missing role ${Roles.OPERATOR_ROLE}`,
-          );
-        });
+    context('when stranger requests unboxing', () => {
+      it('reverts', async () => {
+        await expect(
+          nftUnboxing.connect(stranger).unbox(
+            nftBoxId,
+            collection.map(x => x.address),
+            collection.map(() => 2),
+          ),
+        ).revertedWith(
+          `AccessControl: account ${stranger.address.toLowerCase()} is missing role ${Roles.OPERATOR_ROLE}`,
+        );
       });
+    });
 
+    context('completeUnboxing', () => {
       context('when user transfers NFT box to other user after requesting unboxing', () => {
         beforeEach(async () => {
           await nft.connect(user)['safeTransferFrom(address,address,uint256)'](user.address, other.address, nftBoxId);
         });
 
         it('mints unboxed tokens to other user', async () => {
-          await nftUnboxing.connect(operator).completeUnboxing(
-            requestId,
+          await nftUnboxing.connect(operator).unbox(
+            nftBoxId,
             collection.map(x => x.address),
             collection.map(() => 1),
           );
@@ -217,24 +118,12 @@ export function shouldBehaveLikeNFTUnboxing() {
       context('when array lengths does not match', () => {
         it('reverts', async () => {
           await expect(
-            nftUnboxing.connect(operator).completeUnboxing(
-              requestId,
+            nftUnboxing.connect(operator).unbox(
+              nftBoxId,
               collection.map(x => x.address),
               [1],
             ),
           ).to.revertedWith(`ArrayLengthsDoesNotMatch(${collection.length}, 1)`);
-        });
-      });
-
-      context('when operator specifies unknown requestId', () => {
-        it('reverts', async () => {
-          await expect(
-            nftUnboxing.connect(operator).completeUnboxing(
-              999999,
-              collection.map(x => x.address),
-              collection.map(() => 1),
-            ),
-          ).to.revertedWith(`UnregisteredRequestId(999999)`);
         });
       });
     });

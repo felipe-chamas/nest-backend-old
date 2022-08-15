@@ -130,31 +130,9 @@ export async function prepareTestContext() {
     await signerUtils.createAccountIdFromAddress(minter.address),
     Roles.Minter,
   );
-  const coordinator = await new typechain.VRFCoordinatorV2Mock__factory(
-    admin,
-  ).deploy(0, 0);
-  const vrfCoordinatorAccountId = await signerUtils.createAccountIdFromAddress(
-    coordinator.address,
-  );
-  const receipt = await wait(coordinator.createSubscription());
-  const utils = await sdk.utils();
-  const events = await utils.fetchEvents(
-    receipt.transactionHash,
-    vrfCoordinatorAccountId,
-    'VRFCoordinatorV2Mock',
-    'SubscriptionCreated',
-  );
-  const createSubEvent = events[0];
-  expect(createSubEvent).to.exist;
-  await coordinator.fundSubscription(createSubEvent.subId, ONE_TOKEN.mul(100));
   const nftUnboxAddress = await runDeployTask('nft-box-unboxing', {
     acl: aclAddress,
     nftBox: boxAddress,
-    vrfCoordinator: coordinator.address,
-    keyHash:
-      '0xd4bb89654db74673a187bd804519e65e3f71a52bc55f11da7601a13dcf505314',
-    requestConfirmations: 3,
-    subscriptionId: createSubEvent.subId.toString(),
     addToACL: true,
   });
   nftUnbox = await signerUtils.createAccountIdFromAddress(nftUnboxAddress);
@@ -178,9 +156,6 @@ export async function prepareTestContext() {
     gameTokenConfig,
     boxConfig,
     nftConfig,
-    // vrf, random generator provider
-    vrfCoordinator: coordinator,
-    vrfCoordinatorAccountId,
     // actors
     ...actors,
     // addresses

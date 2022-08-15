@@ -8138,6 +8138,19 @@ solc@^0.8.13:
     semver "^5.5.0"
     tmp "0.0.33"
 
+solc@^0.8.14-fixed:
+  version "0.8.16"
+  resolved "https://registry.yarnpkg.com/solc/-/solc-0.8.16.tgz#120f992357e236d99e6cf3445bf2c2dca3384f96"
+  integrity sha512-6oZg7FAhIouj2zYLvoR3Q4fMP/+BGPR7sY7GcrEXKIp+DRd8RmpDEFO1LUBKpClUiaYguNgmthTFmnPl4MeiMQ==
+  dependencies:
+    command-exists "^1.2.8"
+    commander "^8.1.0"
+    follow-redirects "^1.12.1"
+    js-sha3 "0.8.0"
+    memorystream "^0.3.1"
+    semver "^5.5.0"
+    tmp "0.0.33"
+
 solidity-ast@^0.4.15:
   version "0.4.31"
   resolved "https://registry.yarnpkg.com/solidity-ast/-/solidity-ast-0.4.31.tgz#c63e42f894cd047826a05dbb8d1e1dfc17282d39"

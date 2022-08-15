@@ -46,8 +46,8 @@ export class NFTUnbox {
    * during unboxing process.
    *
    */
-  async completeUnboxing(
-    requestId: BigNumberish,
+  async unbox(
+    tokenId: BigNumberish,
     nftAccountIdsToMint: AccountId[],
     tokenCountsToMint: BigNumberish[],
   ) {
@@ -57,8 +57,8 @@ export class NFTUnbox {
         `nfts length: ${nftAccountIdsToMint.length} !== ` +
           `token counts: ${tokenCountsToMint}.`,
       );
-    return this.unboxContract.completeUnboxing(
-      requestId,
+    return this.unboxContract.unbox(
+      tokenId,
       await Promise.all(
         nftAccountIdsToMint.map((x) => this.signerUtils.parseAddress(x)),
       ),
