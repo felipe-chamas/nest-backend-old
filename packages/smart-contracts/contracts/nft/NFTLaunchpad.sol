@@ -37,19 +37,6 @@ contract NFTLaunchpad is NFTBase, INFTLaunchpad {
         _setLaunchpad(_launchpad);
     }
 
-    function _setLaunchpad(address _launchpad) internal {
-        emit LaunchpadChanged(launchpad, _launchpad);
-        launchpad = _launchpad;
-    }
-
-    function getMaxLaunchpadSupply() external view returns (uint256) {
-        return _maxTokenSupply;
-    }
-
-    function getLaunchpadSupply() external view returns (uint256) {
-        return super.totalSupply();
-    }
-
     function mintTo(address to, uint256 size) external onlyLaunchpad {
         if (to == address(0)) revert ToIsZeroAddress();
         if (size == 0) revert SizeIsZero();
@@ -61,5 +48,18 @@ contract NFTLaunchpad is NFTBase, INFTLaunchpad {
         for (uint256 i = 0; i < size; i++) {
             _mintTo(to);
         }
+    }
+
+    function getMaxLaunchpadSupply() external view returns (uint256) {
+        return _maxTokenSupply;
+    }
+
+    function getLaunchpadSupply() external view returns (uint256) {
+        return super.totalSupply();
+    }
+
+    function _setLaunchpad(address _launchpad) internal {
+        emit LaunchpadChanged(launchpad, _launchpad);
+        launchpad = _launchpad;
     }
 }

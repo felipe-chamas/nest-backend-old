@@ -23,40 +23,14 @@ abstract contract NFTBase is
 {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
+    uint256 private constant _BATCH_SIZE_LIMIT = 100;
+
     event BaseURIChanged(string baseURI);
     event TokenURIChanged(uint256 tokenId, string tokenURI);
-
-    uint256 private constant _BATCH_SIZE_LIMIT = 100;
 
     modifier whenBurnEnabled() {
         if (!_burnEnabled) revert BurningIsNotEnabled();
         _;
-    }
-
-    function __NFT_init(
-        string calldata name_,
-        string calldata symbol_,
-        string calldata baseTokenURI,
-        uint256 maxTokenSupply,
-        bool burnEnabled,
-        address aclContract
-    ) internal onlyInitializing {
-        __ERC721_init_unchained(name_, symbol_);
-        __ERC721Enumerable_init_unchained();
-        __ERC721WithPermit_init_unchained();
-        __BaseContract_init(aclContract);
-        _baseTokenURI = baseTokenURI;
-        _maxTokenSupply = maxTokenSupply;
-        _burnEnabled = burnEnabled;
-        // nextTokenId is initialized to 1
-        _tokenIdCounter.increment();
-    }
-
-    function _mintTo(address to) internal returns (uint256 tokenId) {
-        if (totalSupply() >= _maxTokenSupply) revert MaximumTotalSupplyReached(_maxTokenSupply);
-        tokenId = _tokenIdCounter.current();
-        _tokenIdCounter.increment();
-        _safeMint(to, tokenId);
     }
 
     function mint(address to) external onlyMinter returns (uint256 tokenId) {
@@ -75,6 +49,21 @@ abstract contract NFTBase is
     function setTokenURI(uint256 tokenId, string calldata _tokenURI) external onlyOperator {
         _setTokenURI(tokenId, _tokenURI);
         emit TokenURIChanged(tokenId, tokenURI(tokenId));
+    }
+
+    function batchTransfer(
+        address from,
+        address to,
+        uint256[] calldata tokenIds
+    ) external {
+        if (tokenIds.length > _BATCH_SIZE_LIMIT) revert BatchSizeTooLarge(_BATCH_SIZE_LIMIT, tokenIds.length);
+
+        for (uint256 i; i < tokenIds.length; ) {
+            transferFrom(from, to, tokenIds[i]);
+            unchecked {
+                i++;
+            }
+        }
     }
 
     function isApprovedOrOwner(address spender, uint256 tokenId) external view returns (bool) {
@@ -99,21 +88,6 @@ abstract contract NFTBase is
         return super.tokenURI(tokenId);
     }
 
-    function batchTransfer(
-        address from,
-        address to,
-        uint256[] calldata tokenIds
-    ) external {
-        if (tokenIds.length > _BATCH_SIZE_LIMIT) revert BatchSizeTooLarge(_BATCH_SIZE_LIMIT, tokenIds.length);
-
-        for (uint256 i; i < tokenIds.length; ) {
-            _transfer(from, to, tokenIds[i]);
-            unchecked {
-                i++;
-            }
-        }
-    }
-
     function supportsInterface(bytes4 interfaceId)
         public
         view
@@ -122,6 +96,33 @@ abstract contract NFTBase is
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
+    }
+
+    // solhint-disable-next-line func-name-mixedcase
+    function __NFT_init(
+        string calldata name_,
+        string calldata symbol_,
+        string calldata baseTokenURI,
+        uint256 maxTokenSupply,
+        bool burnEnabled,
+        address aclContract
+    ) internal onlyInitializing {
+        __ERC721_init_unchained(name_, symbol_);
+        __ERC721Enumerable_init_unchained();
+        __ERC721WithPermit_init_unchained();
+        __BaseContract_init(aclContract);
+        _baseTokenURI = baseTokenURI;
+        _maxTokenSupply = maxTokenSupply;
+        _burnEnabled = burnEnabled;
+        // nextTokenId is initialized to 1
+        _tokenIdCounter.increment();
+    }
+
+    function _mintTo(address to) internal returns (uint256 tokenId) {
+        if (totalSupply() >= _maxTokenSupply) revert MaximumTotalSupplyReached(_maxTokenSupply);
+        tokenId = _tokenIdCounter.current();
+        _tokenIdCounter.increment();
+        _safeMint(to, tokenId);
     }
 
     function _burn(uint256 tokenId) internal override(ERC721Upgradeable, ERC721URIStorageUpgradeable) {
