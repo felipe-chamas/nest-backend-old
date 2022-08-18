@@ -20,6 +20,7 @@ import {
   VRFCoordinatorV2Mock,
   Staking,
   NFTLaunchpad,
+  NFTLevelUp,
 } from '../../typechain';
 import { solidityId } from './utils';
 
@@ -47,6 +48,7 @@ export interface Contracts {
   tokenSale: TokenSale;
   nftClaim: NFTClaim;
   nftUnboxing: NFTUnboxing;
+  nftLevelUp: NFTLevelUp;
   vrfCoordinator: VRFCoordinatorV2Mock;
   collection: NFT[];
   nftPermit: INFTPermitMock;

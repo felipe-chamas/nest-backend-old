@@ -179,7 +179,7 @@ export function shouldBehaveLikeNFTWithBatchTransfer(nftIdentifier: 'nft' | 'nft
           .withArgs(user.address, other.address, nftsToTransfer[1]);
       });
 
-      it.only('should not be possible to batch transfer NFTs from non owner', async () => {
+      it('should not be possible to batch transfer NFTs from non owner', async () => {
         const tokenIds = [1, 2, 3, 4];
         for (const tokenId of tokenIds) {
           await expect(nft.connect(operator).mint(user.address))

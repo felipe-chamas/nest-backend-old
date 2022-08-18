@@ -52,3 +52,9 @@ export type MarketplaceConstructor = BaseConstructor & {
   gameToken: string;
 };
 export type AtLeast<T, K extends keyof T> = Partial<T> & Pick<T, K>;
+export type NFTLevelUpConstructor = BaseConstructor & {
+  acl: string;
+  levelUpValue: string;
+  receiver: string;
+  addToACL?: boolean;
+};

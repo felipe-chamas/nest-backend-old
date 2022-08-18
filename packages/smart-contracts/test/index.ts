@@ -9,6 +9,7 @@ import { unitTestNFTClaim } from './unit/nft-claim/nft-claim.test';
 import { unitTestTokenSale } from './unit/token-sale/token-sale.test';
 import { unitTestSplitter } from './unit/splitter/splitter.test';
 import { unitTestStaking } from './unit/staking/staking.test';
+import { unitTestNFTLevelUp } from './unit/nft-level-up/nft-level-up.test';
 
 baseContext('Unit Tests', function () {
   unitTestACL();
@@ -21,4 +22,5 @@ baseContext('Unit Tests', function () {
   unitTestSplitter();
   unitTestStaking();
   unitTestMarketplace();
+  unitTestNFTLevelUp();
 });

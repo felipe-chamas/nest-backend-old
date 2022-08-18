@@ -11,6 +11,7 @@ import {
   TASK_DEPLOY_SPLITTER,
   TASK_DEPLOY_STAKING,
   TASK_DEPLOY_TOKEN_SALE,
+  TASK_DEPLOY_NFT_LEVEL_UP,
 } from '../../tasks';
 import {
   ACLConstructor,
@@ -22,6 +23,7 @@ import {
   NFTClaimConstructor,
   NFTConstructor,
   NFTLaunchpadConstructor,
+  NFTLevelUpConstructor,
   StakingConstructor,
   TokenSaleConstructor,
 } from '../../tasks/types';
@@ -33,6 +35,7 @@ import {
   MarketplaceMock__factory,
   NFTClaim__factory,
   NFTLaunchpad__factory,
+  NFTLevelUp__factory,
   NFTMock,
   NFTMock__factory,
   NFTUnboxing__factory,
@@ -174,6 +177,17 @@ export async function deployNFTUnboxing(deployer: Signer, { acl, nftBox }: NFTBo
   });
 
   return NFTUnboxing__factory.connect(nftUnboxing, deployer);
+}
+
+export async function deployNFTLevelUp(deployer: Signer, { acl, levelUpValue, receiver }: NFTLevelUpConstructor) {
+  const nftLevelUp = await hre.run(TASK_DEPLOY_NFT_LEVEL_UP, {
+    acl,
+    levelUpValue,
+    receiver,
+    silent: true,
+  });
+
+  return NFTLevelUp__factory.connect(nftLevelUp, deployer);
 }
 
 export async function deployNFTMock(

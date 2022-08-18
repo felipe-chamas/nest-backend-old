@@ -9,3 +9,4 @@ export * from './07_splitter';
 export * from './08_staking';
 export * from './08_marketplace';
 export * from './09_nft_launchpad';
+export * from './10_nft_level_up';
