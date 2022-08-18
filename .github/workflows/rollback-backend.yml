@@ -2,3 +2,61 @@ name: Rollback Backend Versions
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Type version of the task definition'
+        default: ''
+        required: false
+      stage:
+        description: 'Stage'
+        required: true
+        default: 'develop'
+        type: choice
+        options:
+          - develop
+          - production
+
+jobs:
+  rollback-develop:
+    name: Rollback Develop
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set env vars for Development
+        if: inputs.stage == 'develop'
+        run: |
+          echo "REGISTRY_NAME=$(echo webserver-develop-ecr)" >> $GITHUB_ENV
+          echo "SERVICE_NAME=$(echo webserver-develop-service)" >> $GITHUB_ENV
+          echo "CLUSTER_NAME=$(echo webserver-develop-cluster)" >> $GITHUB_ENV
+          echo "CONTAINER_NAME=$(echo webserver-develop-ecs-container)" >> $GITHUB_ENV
+          echo "TASK_DEFINITION_FAMILY=$(echo webserver-develop-ecs-task-definition)" >> $GITHUB_ENV
+          echo "AWS_ACCESS_KEY_ID=$(echo ${{ secrets.AWS_ACCESS_KEY_ID_DEVELOP }})" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=$(echo ${{ secrets.AWS_SECRET_ACCESS_KEY_DEVELOP }})" >> $GITHUB_ENV
+          echo "AWS_REGION=$(echo ${{ secrets.AWS_REGION_DEVELOP }})" >> $GITHUB_ENV
+      - name: Set env vars for Production
+        if: inputs.stage == 'production'
+        run: |
+          echo "REGISTRY_NAME=$(echo webserver-production-ecr)" >> $GITHUB_ENV
+          echo "SERVICE_NAME=$(echo webserver-production-service)" >> $GITHUB_ENV
+          echo "CLUSTER_NAME=$(echo webserver-production-cluster)" >> $GITHUB_ENV
+          echo "CONTAINER_NAME=$(echo webserver-production-ecs-container)" >> $GITHUB_ENV
+          echo "TASK_DEFINITION_FAMILY=$(echo webserver-production-ecs-task-definition)" >> $GITHUB_ENV
+          echo "AWS_ACCESS_KEY_ID=$(echo ${{ secrets.AWS_ACCESS_KEY_ID_PRODUCTION }})" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=$(echo ${{ secrets.AWS_SECRET_ACCESS_KEY_PRODUCTION }})" >> $GITHUB_ENV
+          echo "AWS_REGION=$(echo ${{ secrets.AWS_REGION_PRODUCTION }})" >> $GITHUB_ENV
+      - name: Getting the version from the input and saving to env
+        if: inputs.version != ''
+        run: echo "VERSION_TAG=$(echo ${{inputs.version}})" >> $GITHUB_ENV
+      - name: Getting the version from the tag and saving to env
+        if: inputs.version == ''
+        run: echo "VERSION_TAG=$(echo ${{github.ref_name}} | cut -d "-" -f2)" >> $GITHUB_ENV
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION}}
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+      - name: Rollback task definition and update cluster
+        run: aws ecs update-service --cluster "${{env.CLUSTER_NAME}}" --service "${{env.SERVICE_NAME}}" --task-definition ${{env.TASK_DEFINITION_FAMILY}}:${{env.VERSION_TAG}}
