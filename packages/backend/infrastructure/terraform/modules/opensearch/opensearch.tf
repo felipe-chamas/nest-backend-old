@@ -7,7 +7,7 @@ locals {
 }
 
 resource "aws_opensearch_domain" "opensearch" {
-  domain_name    = "${var.namespace}-${terraform.workspace}"
+  domain_name    = var.namespace
   engine_version = "OpenSearch_1.3"
 
   node_to_node_encryption {
