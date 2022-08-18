@@ -21,3 +21,7 @@ output "nlb_arn" {
 output "nlb_dns_name" {
   value = aws_lb.nlb.dns_name
 }
+
+output "cloudwatch_log_group" {
+  value = aws_cloudwatch_log_group.log-group.name
+}

@@ -68,6 +68,12 @@ By default, the `us-east-1` region is used. If you need to change it, be sure to
 
 Since the webserver is inside a VPC, it needs to connect to Mongo Cloud through a Peer peer.
 
+### OpenSearch
+
+Automatically collects Cloudwatch Logs from the specified Log Group using a Lambda Function that sends the logs to an Opensearch Domain using Cognito for authentication.
+
+When using the AWS Console to create an Opensearch Service subscription filter for a log group, it automatically creates a Lambda Function to send the logs. Unfortunately, Terraform can't automatically create the Lambda Function in the same way, so this module provisions a Lambda Function using the same code, found in the `lambda folder`. There is a [issue](https://github.com/hashicorp/terraform-provider-aws/issues/17090) in the Terraform repository about this feature, if someday it is implemented, this module can be updated to simplify the infrastructure.
+
 ## Create the infrastructure
 
 Setup a `.env` file with the following parameters:
@@ -82,6 +88,16 @@ make build
 make push
 make apply
 ```
+
+## Update infrastructure
+
+- Set `STAGE` in the environment variables (develop/production)
+- Paste values from `backend-${STAGE}.conf` to `backend.tf` (Make sure not to commit this change)
+- `make tfvars` to get `${STAGE}.tfvars`
+- `make zip` to zip lambda functions
+- `make init` to initialize terraform
+- `make plan` to preview changes in the infrastructure
+- `make apply` to deploy changes in the infrastructure
 
 ##### Manual setup: Create a Peering Connection on Mongo Cloud
 

@@ -21,7 +21,7 @@ module "acm" {
 
 module "cdn" {
   source  = "cloudposse/cloudfront-s3-cdn/aws"
-  version = "0.82.4"
+  version = "0.82.5"
 
   namespace = var.account_alias
   stage     = terraform.workspace

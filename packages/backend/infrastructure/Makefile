@@ -53,16 +53,32 @@ lint:
 	( cd terraform; tflint .)
 
 
-init: ## initialize terraform backend state
+first-init: ## first initialization of terraform backend state
 	( cd terraform; sed -i.bak 's/$${var.account_alias}/$(ACCOUNT_ALIAS)/' backend-$(STAGE).conf && rm backend-$(STAGE).conf.bak )
 	( cd terraform; terraform init -backend-config=backend-$(STAGE).conf )
 	( cd terraform; sed -i.bak 's/$(ACCOUNT_ALIAS)/$${var.account_alias}/' backend-$(STAGE).conf && rm backend-$(STAGE).conf.bak )
 
 
-apply: ## updates terraform infrastructure
-	( make init )
+tfvars: ## get tfvars from AWS Secretsmanager
+	( cd terraform; aws secretsmanager get-secret-value --region us-east-1 --secret-id backend/infrastructure/$(STAGE).tfvars | jq --raw-output ".SecretString" > $(STAGE).tfvars )
+
+
+zip: ## zips the source code for our lambda functions
+	( cd terraform/modules/opensearch/lambda && rm ../lambda.zip 2>/dev/null ; zip -rq ../lambda.zip . )
+
+
+init: ## initialize terraform backend state (paste values from backend-$(STAGE).conf to backend.tf)
+	( cd terraform; terraform init -upgrade )
+
+
+plan: ## preview changes to infrastructure
 	( cd terraform; terraform workspace select $(STAGE) )
-	( cd terraform; terraform apply -var="account_alias=$(ACCOUNT_ALIAS)" -var="api_domain_name=$(API_DOMAIN_NAME)" -var="nft_storage_domain_name=$(NFT_STORAGE_DOMAIN_NAME)" )
+	( cd terraform; terraform plan -var-file=$(STAGE).tfvars )
+
+
+apply: ## updates terraform infrastructure
+	( cd terraform; terraform workspace select $(STAGE) )
+	( cd terraform; terraform apply -var-file=$(STAGE).tfvars )
 
 
 output: ## get terraform output

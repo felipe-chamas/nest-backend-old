@@ -40,3 +40,14 @@ module "webserver" {
     # , module.nft-storage
   ]
 }
+
+module "opensearch" {
+  source = "./modules/opensearch"
+
+  namespace                 = var.account_alias
+  cloudwatch_log_group_name = module.webserver.cloudwatch_log_group
+
+  depends_on = [
+    module.webserver
+  ]
+}

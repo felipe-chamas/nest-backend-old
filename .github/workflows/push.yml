@@ -84,7 +84,14 @@ jobs:
         run: yarn install --frozen-lockfile
       - run: npx nx affected --target=setup --base=remotes/origin/main
       - run: npx nx affected --target=test --parallel=3 --base=remotes/origin/main
+      - name: Check if code coverage exists
+        id: coverage
+        run: |
+          if [ -f "./packages/smart-contracts/coverage/lcov.info" ]; then
+            echo "::set-output name=exists::true"
+          fi
       - name: Coveralls
+        if: steps.coverage.outputs.exists == 'true'
         uses: coverallsapp/github-action@master
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}

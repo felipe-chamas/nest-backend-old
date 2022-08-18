@@ -2,3 +2,4 @@
 
 /dist
 /coverage
+/packages/backend/infrastructure/terraform/modules/opensearch/lambda
