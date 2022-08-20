@@ -60,7 +60,7 @@ jobs:
         run: echo "LAST_TASK_VERSION=$(aws ecs describe-task-definition --task-definition "${{ env.TASK_DEFINITION_FAMILY }}" --query taskDefinition.revision --output text)" >> $GITHUB_ENV
       - name: Set GitHub env variables
         shell: bash
-        run: echo "GITHUB_TAG=$(echo dev)/$(echo $GITHUB_SHA | cut -c 1-6)-$(echo ${{env.LAST_TASK_VERSION}})" >> $GITHUB_ENV
+        run: echo "GITHUB_TAG=$(echo develop)/$(echo $GITHUB_SHA | cut -c 1-6)-$(echo ${{env.LAST_TASK_VERSION}})" >> $GITHUB_ENV
       - uses: actions/checkout@v3
         with:
           fetch-depth: '0'
