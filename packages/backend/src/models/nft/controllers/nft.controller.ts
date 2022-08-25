@@ -12,7 +12,14 @@ import { NftService } from '../services/nft.service';
 import { CreateNftDto } from '../dto/create-nft.dto';
 import { UpdateNftDto } from '../dto/update-nft.dto';
 import { GetPagination, Pagination } from 'common/decorators';
-import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiCreatedResponse,
+  ApiExcludeEndpoint,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { NftDto } from '../dto/nft.dto';
 import { AssetId } from 'caip';
 import { Auth } from 'common/decorators/auth.decorators';
@@ -36,6 +43,7 @@ export class NftController {
   @Delete(':id')
   @ApiOperation({ description: 'Delete an Nft with provided `id`' })
   @ApiOkResponse({ type: NftDto })
+  @ApiExcludeEndpoint()
   remove(@Param('id') id: string) {
     return this.nftService.remove(id);
   }
@@ -48,6 +56,7 @@ export class NftController {
   }
 
   @Get('findByAddress/:chain/:asset/:address')
+  @ApiExcludeEndpoint()
   @ApiOperation({ description: 'Returns an Nft from a specific Token Address' })
   async findByAddress(
     @Param('chain') chain: string,
@@ -69,8 +78,9 @@ export class NftController {
       : null;
   }
 
-  @Get('findAllByWallet/:wallet')
+  @Get('wallet/:wallet')
   @ApiOperation({ description: "Returns a list of Nfts in a user's wallet" })
+  @ApiOkResponse({ type: [NftDto] })
   async findAllByWallet(@Query() query, @Param('wallet') wallet: string) {
     // TODO add ApiOkResponse
     const result = await this.nftService.findAllByWallet({ ...query }, wallet);
@@ -87,11 +97,13 @@ export class NftController {
   @Get(':id')
   @ApiOperation({ description: 'Returns an Nft with provided `id`' })
   @ApiOkResponse({ type: NftDto })
+  @ApiExcludeEndpoint()
   findOne(@Param('id') id: string) {
     return this.nftService.findById(id);
   }
 
   @Get(':chainId/:assetName/:tokenId')
+  @ApiExcludeEndpoint()
   @ApiOperation({
     description: [
       'Returns an Nft with provided `chainId`, `assetName` and `tokenId` information.',
@@ -113,6 +125,7 @@ export class NftController {
   @Patch(':id')
   @ApiOperation({ description: 'Update an Nft with provided `id`' })
   @ApiOkResponse({ type: NftDto })
+  @ApiExcludeEndpoint()
   update(@Param('id') id: string, @Body() updateNftDto: UpdateNftDto) {
     return this.nftService.update(id, updateNftDto);
   }
@@ -122,20 +135,27 @@ export class NftController {
   @ApiOperation({ description: 'Creates an Nft' })
   @ApiOkResponse({ type: NftDto })
   @ApiBody({ type: CreateNftDto })
+  @ApiExcludeEndpoint()
   create(@Body() createNftDto: CreateNftDto) {
     return this.nftService.create(createNftDto);
   }
 
+  @Auth(Role.NFT_ADMIN)
   @Post('mint')
   @ApiOperation({
     description: 'Mints an Nft and returns the transaction hash',
   })
-  @ApiOkResponse({ type: String })
+  @ApiOkResponse({
+    type: String,
+  })
+  @ApiExcludeEndpoint()
+  @ApiCreatedResponse()
   @ApiBody({ type: WalletBodyDto })
   mint(@Body() bodyDto: WalletBodyDto) {
     return this.nftService.mint(bodyDto);
   }
 
+  @Auth(Role.NFT_ADMIN)
   @Post('unbox')
   @ApiOperation({
     description: 'Unboxes an Nft and returns the transaction hash',
@@ -146,6 +166,7 @@ export class NftController {
     return this.nftService.unbox(bodyDto);
   }
 
+  @Auth(Role.NFT_ADMIN)
   @Post('upgrade')
   @ApiOperation({
     description: 'Upgrades an Nft and returns the transaction hash',

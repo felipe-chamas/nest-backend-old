@@ -40,6 +40,7 @@ export class UserController {
   @ApiParam({ name: 'id', type: String })
   @ApiOkResponse({ type: UserDto })
   @Delete(':id')
+  @ApiExcludeEndpoint()
   remove(@Param('id') id: string) {
     return this.userService.remove(id);
   }
@@ -48,6 +49,7 @@ export class UserController {
   @ApiOperation({ description: 'Returns a list of Users' })
   @ApiOkResponse({ type: [UserDto] })
   @Get()
+  @ApiExcludeEndpoint()
   findAll(@GetPagination() pagination: Pagination) {
     return this.userService.findAll(pagination);
   }
@@ -65,6 +67,7 @@ export class UserController {
   @ApiOperation({ description: 'Returns a User' })
   @ApiParam({ name: 'id', type: String })
   @ApiOkResponse({ type: UserDto })
+  @ApiExcludeEndpoint()
   findOne(@Param('id') id: string) {
     return this.userService.findById(id);
   }
@@ -75,6 +78,7 @@ export class UserController {
   @ApiParam({ name: 'id', type: String })
   @ApiBody({ type: UpdateUserDto })
   @ApiOkResponse({ type: UserDto })
+  @ApiExcludeEndpoint()
   update(
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,

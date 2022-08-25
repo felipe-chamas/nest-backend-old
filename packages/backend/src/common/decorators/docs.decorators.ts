@@ -212,3 +212,66 @@ export const ApiPropertyUserNfts = () =>
   ApiProperty({
     description: 'List of user Nfts',
   });
+
+export const ApiPropertyWallet = () =>
+  ApiProperty({
+    description: 'Wallet',
+    example: {
+      id: '507f1f77bcf86cd799439011',
+      address: '0xab5801a7d398351b8be11c439e05c5b3259aec9b',
+      walletType: 'WHITE_LABEL',
+      secretType: 'BSC',
+      identifier: '523d7be5-8001-4954-aa96-f717413dfad7',
+    },
+  });
+
+export const ApiPropertyWalletId = () =>
+  ApiProperty({
+    type: () => String,
+    description: 'Wallet id.',
+    example: '507f1f77bcf86cd799439011',
+  });
+
+export const ApiPropertyWalletAddress = () =>
+  ApiProperty({
+    description: 'Wallet address.',
+    example: '0xab5801a7d398351b8be11c439e05c5b3259aec9b',
+  });
+
+export const ApiPropertyWalletType = () =>
+  ApiProperty({
+    description: 'Wallet type.',
+    example: 'WHITE_LABEL',
+  });
+
+export const ApiPropertyWalletSecretType = () =>
+  ApiProperty({
+    description: 'Wallet secret type.',
+    example: 'ETHEREUM',
+  });
+
+export const ApiPropertyWalletIdentifier = () =>
+  ApiProperty({
+    description: 'Wallet identifier used to create the wallet (user id)',
+    example: '507f1f77bcf86cd799439011',
+  });
+
+export const ApiPropertyWalletDescription = () =>
+  ApiProperty({
+    description: 'Wallet description',
+    example: 'Wallet',
+  });
+
+export const ApiPropertyWalletCreatedAt = () =>
+  ApiProperty({
+    description: 'Created date (automatically set).',
+    type: () => String,
+    example: '2022-07-05T14:12:34.567Z',
+  });
+
+export const ApiPropertyWalletGameTokenBalance = () =>
+  ApiProperty({
+    description: 'Wallet balance in Game Tokens.',
+    type: () => String,
+    example: '42.123',
+  });

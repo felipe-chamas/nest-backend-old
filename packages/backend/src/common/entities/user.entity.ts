@@ -24,6 +24,7 @@ import {
   ApiPropertyUserName,
   ApiPropertyUserNfts,
   ApiPropertyUserRoles,
+  ApiPropertyWallet,
 } from 'common/decorators/docs.decorators';
 import { WalletDto } from 'common/types/wallet';
 
@@ -51,6 +52,7 @@ export class User {
   accountIds: AccountIdDto[];
 
   @Column()
+  @ApiPropertyWallet()
   wallet?: WalletDto;
 
   @Column()

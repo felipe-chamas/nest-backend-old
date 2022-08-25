@@ -7,6 +7,7 @@ import {
 import { NftCollectionModule } from 'models/nft-collection/nft-collection.module';
 import { NftModule } from 'models/nft/nft.module';
 import { UserModule } from 'models/user/user.module';
+import { WalletModule } from 'models/wallet/wallet.module';
 
 export class Swagger {
   static init(app: INestApplication) {
@@ -14,24 +15,26 @@ export class Swagger {
       .setTitle('Blockchain API')
       .setDescription(
         [
-          'Use the Blockchain API to manage Nfts, NftCollections and Users.',
-          '',
-          'The data model of the Blockchain API is summarized in three main entities:',
-          '<ul>',
-          '<li>Nfts, digital assets from the game minted on the blockchain. Each Nft belongs to a NftCollection.</li>',
-          '<li>NftCollections, grouping of Nfts from the same category (e.g., Battle Tags, Heroes, Pets, Boxes, these can be all seen as different collections depending on the specifics of the game). Each NftCollection has zero or more Nfts.</li>',
-          '<li>Users, the players and investors owning digital assets of the game. Users have wallet information, as well as other profile information. Each User has zero or more Nfts.</li>',
-          '</ul>',
+          'Welcome to the Blockchain API documentation.',
+          'Additional flowcharts are provided for a better understanding of user stories',
+          '<ol>',
+          '<li><a href="https://theharvest.gg/docs-create-wallet" target="_blank">Create wallet</a></li>',
+          '<li><a href="https://theharvest.gg/docs-get-wallet-by-player" target="_blank">Get wallet by player</a></li>',
+          '<li><a href="https://theharvest.gg/docs-get-nfts-by-player" target="_blank">Get NFTs by player</a></li>',
+          '<li><a href="https://theharvest.gg/docs-unbox-nfts" target="_blank">Unbox NFTs</a></li>',
+          '<li><a href="https://theharvest.gg/docs-get-nft-by-tokenid" target="_blank">Get NFT by <code>tokenId</code></a></li>',
+          '<li><a href="https://theharvest.gg/docs-import-wallet" target="_blank">Import wallet</a></li>',
+          '<li><a href="https://theharvest.gg/docs-transfer-har-nfts-to-wallet" target="_blank">Transfer $HAR/NFTs to wallet</a></li>',
+          '</ol>',
         ].join('<br/>'),
       )
-      .setVersion('1.1')
+      .setVersion('0.3')
+      .addTag('Wallets')
       .addTag('Nfts')
-      .addTag('NftCollections')
-      .addTag('Users')
       .build();
 
     const options: SwaggerDocumentOptions = {
-      include: [UserModule, NftModule, NftCollectionModule],
+      include: [UserModule, NftModule, NftCollectionModule, WalletModule],
     };
 
     const document = SwaggerModule.createDocument(app, swaggerConfig, options);

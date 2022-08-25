@@ -105,6 +105,10 @@ export class UserService {
     return user;
   }
 
+  async findByWalletId(walletId: string): Promise<User> {
+    throw new Error('Missing implementation');
+  }
+
   async findByAccountId(accountId: AccountId) {
     const [user] = await this.userRepo
       .aggregate<User>([

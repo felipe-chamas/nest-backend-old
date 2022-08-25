@@ -93,6 +93,12 @@ export class WalletService {
     return result;
   }
 
+  async findById(id: string) {
+    // TODO: Change to find by EpicId / SteamId
+    const user = await this.userService.findByWalletId(id);
+    return user.wallet;
+  }
+
   async createWallet({ pincode, userId }: WalletBodyDto) {
     // TODO: Change to find by EpicId / SteamId
     const user = await this.userService.findById(userId);
@@ -112,8 +118,8 @@ export class WalletService {
     });
 
     const wallet = plainToInstance(WalletDto, result);
-
-    return this.userService.update(userId, { ...user, wallet });
+    await this.userService.update(userId, { ...user, wallet });
+    return wallet;
   }
 
   async executeMint({ pincode, userId }: WalletBodyDto) {
