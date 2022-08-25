@@ -25,6 +25,13 @@ import {
   WalletBodyDto,
 } from 'models/wallet/dto/create-wallet.dto';
 
+import { MoralisNetworks } from 'common/types/caip';
+import {
+  MoralisResponseNftsByAddress,
+  MorealisResultNftsByAddress,
+  MoralisResposeSearchNft,
+} from '../types/moralis';
+
 @Injectable()
 export class NftService {
   private readonly httpService = new HttpService();
@@ -100,7 +107,51 @@ export class NftService {
     };
   }
 
-  async findAllByWallet(query, wallet: string): Promise<ExternalApiNft[]> {
+  async findByContractAddressAndTokenIdEvm(
+    chain: string,
+    contractAddress: string,
+    tokenId: string,
+  ) {
+    const url = `https://deep-index.moralis.io/api/v2/nft/${contractAddress}/${tokenId}`;
+
+    const options = {
+      method: 'GET',
+      params: {
+        chain: MoralisNetworks[chain].id,
+        format: 'decimal',
+      },
+      headers: {
+        Accept: 'application/json',
+        'X-API-Key': process.env.MORALIS_API_KEY,
+      },
+    };
+
+    const { data } =
+      await this.httpService.axiosRef.get<MoralisResposeSearchNft>(
+        url,
+        options,
+      );
+
+    console.log(data);
+
+    const metadata = JSON.parse(data.metadata);
+
+    return {
+      name: metadata.name,
+      collectionName: '',
+      collectionAddress: contractAddress,
+      imageUrl: metadata.image,
+      traits: metadata.attributes,
+      chain: MoralisNetworks[chain].chain,
+      network: MoralisNetworks[chain].name,
+      description: metadata.description,
+    };
+  }
+
+  async findAllBySolanaWallet(
+    query,
+    wallet: string,
+  ): Promise<ExternalApiNft[]> {
     // TODO add pagination
     // TODO add filtering
     const endpoint = process.env.QUICKNODE_URI;
@@ -131,6 +182,86 @@ export class NftService {
       throw new NotFoundException(`Wallet with Public Key ${wallet} not found`);
 
     return response.data.result.assets;
+  }
+
+  async findAllByEvmWallet(
+    address: string,
+    network: string,
+    collections: string[],
+    page?: number,
+    limit?: number,
+    cursor?: string,
+  ) {
+    const url = `https://deep-index.moralis.io/api/v2/${address}/nft`;
+    let result: MorealisResultNftsByAddress[];
+    let lastCursor = '';
+
+    if (!cursor && page && page > 1) {
+      for (let callNumber = 0; callNumber < page; callNumber++) {
+        const options = {
+          method: 'GET',
+          params: {
+            chain: MoralisNetworks[network].id,
+            limit: limit || 100,
+            format: 'decimal',
+            token_addresses: collections,
+            cursor: lastCursor,
+          },
+          headers: {
+            Accept: 'application/json',
+            'X-API-Key': process.env.MORALIS_API_KEY,
+          },
+        };
+        const { data } =
+          await this.httpService.axiosRef.get<MoralisResponseNftsByAddress>(
+            url,
+            options,
+          );
+
+        lastCursor = data.cursor;
+        result = data.result;
+      }
+    } else {
+      const options = {
+        method: 'GET',
+        params: {
+          chain: MoralisNetworks[network].id,
+          limit: limit || 100,
+          format: 'decimal',
+          token_addresses: collections,
+          cursor: cursor || '',
+        },
+        headers: {
+          Accept: 'application/json',
+          'X-API-Key': process.env.MORALIS_API_KEY,
+        },
+      };
+      const { data } =
+        await this.httpService.axiosRef.get<MoralisResponseNftsByAddress>(
+          url,
+          options,
+        );
+      result = data.result;
+      lastCursor = data.cursor;
+    }
+
+    return result.map((token) => {
+      const metadata = JSON.parse(token.metadata);
+      return {
+        name: metadata.name,
+        collectionName: 'Unknown',
+        collectionAddress: collections.find(
+          (address) => address.toLocaleLowerCase() === token.token_address,
+        ),
+        tokenAddress: token.token_id,
+        imageUrl: metadata.image,
+        traits: metadata.attributes,
+        chain: MoralisNetworks[network].chain,
+        network: MoralisNetworks[network].name,
+        description: metadata.description,
+        cursor: lastCursor,
+      };
+    });
   }
 
   async findById(id: string) {

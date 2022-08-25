@@ -35,3 +35,35 @@ export enum ChainIdReference {
   SOLANA_DEVNET = 'solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1',
   SOLANA_MAINNET = 'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp',
 }
+
+interface IMorilisNetworks {
+  [key: string]: {
+    id: string;
+    chain: string;
+    name: string;
+  };
+}
+
+export const MoralisNetworks: IMorilisNetworks = {
+  [ChainIdReference.ETHEREUM_MAINNET]: {
+    id: 'eth',
+    chain: 'ETH',
+    name: 'Ethereum Mainnet',
+  },
+  [ChainIdReference.GOERLI_TESTNET]: {
+    id: 'goerli',
+    chain: 'GoerliETH',
+    name: 'Goerli Testnet',
+  },
+  [ChainIdReference.BINANCE_MAINNET]: {
+    id: 'bsc',
+    chain: 'BNB',
+    name: 'Binance Smart Chain Mainnet',
+  },
+  [ChainIdReference.BINANCE_TESTNET]: {
+    id: 'bsc%20testnet',
+    chain: 'tBNB',
+    name: 'Binance Smart Chain Testnet',
+  },
+};
+Object.freeze(MoralisNetworks);

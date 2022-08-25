@@ -97,6 +97,22 @@ export class NftCollectionService {
     return nftCollection;
   }
 
+  async findAddressesByChainId(
+    networkNamespace: string,
+    networkReference: string,
+  ) {
+    const collections = await this.findAll({
+      query: [],
+    });
+    return collections.data
+      .filter(
+        (collection) =>
+          collection.assetTypes[0].chainId.namespace === networkNamespace &&
+          collection.assetTypes[0].chainId.reference === networkReference,
+      )
+      .map((collection) => collection.assetTypes[0].assetName.reference);
+  }
+
   async update(id: string, updateNftCollectionDto: UpdateNftCollectionDto) {
     const nftCollection = await this.findById(id);
     Object.assign(nftCollection, updateNftCollectionDto);

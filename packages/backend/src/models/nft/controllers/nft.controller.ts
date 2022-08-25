@@ -64,34 +64,65 @@ export class NftController {
     @Param('address') address: string,
   ) {
     // TODO add ApiOkResponse
-    if (chain !== 'solana') return null; // TODO support other chains
-    const collections = await this.nftCollectionService.findAll({ query: [] });
+    if (chain === 'solana') {
+      const collections = await this.nftCollectionService.findAll({
+        query: [],
+      });
 
-    const result = await this.nftService.findByAddress(address);
+      const result = await this.nftService.findByAddress(address);
 
-    const collectionAddresses = collections.data.map(
-      (collection) => collection.assetTypes[0].assetName.reference,
-    );
+      const collectionAddresses = collections.data.map(
+        (collection) => collection.assetTypes[0].assetName.reference,
+      );
 
-    return collectionAddresses.includes(result.collectionAddress)
-      ? result
-      : null;
+      return collectionAddresses.includes(result.collectionAddress)
+        ? result
+        : null;
+    } else {
+      return this.nftService.findByContractAddressAndTokenIdEvm(
+        chain,
+        asset,
+        address,
+      );
+    }
   }
 
   @Get('wallet/:wallet')
   @ApiOperation({ description: "Returns a list of Nfts in a user's wallet" })
   @ApiOkResponse({ type: [NftDto] })
-  async findAllByWallet(@Query() query, @Param('wallet') wallet: string) {
+  async findAllByWallet(
+    @Query() query: { limit?: number; page?: number; cursor?: string },
+    @Param('wallet') walletAddress: string,
+  ) {
     // TODO add ApiOkResponse
-    const result = await this.nftService.findAllByWallet({ ...query }, wallet);
-    const collections = await this.nftCollectionService.findAll({ query: [] });
-    const collectionAddresses = collections.data.map(
-      (collection) => collection.assetTypes[0].assetName.reference,
-    );
+    const [networkNamespace, networkReference, address] =
+      walletAddress.split(':');
 
-    return result.filter((nft) =>
-      collectionAddresses.includes(nft.collectionAddress),
-    );
+    const collectionAddresses =
+      await this.nftCollectionService.findAddressesByChainId(
+        networkNamespace,
+        networkReference,
+      );
+
+    if (networkNamespace === 'solana') {
+      const result = await this.nftService.findAllBySolanaWallet(
+        { ...query },
+        address,
+      );
+      return result.filter((nft) =>
+        collectionAddresses.includes(nft.collectionAddress),
+      );
+    } else {
+      const network = `${networkNamespace}:${networkReference}`;
+      return this.nftService.findAllByEvmWallet(
+        address,
+        network,
+        collectionAddresses,
+        query.page,
+        query.limit,
+        query.cursor,
+      );
+    }
   }
 
   @Get(':id')
