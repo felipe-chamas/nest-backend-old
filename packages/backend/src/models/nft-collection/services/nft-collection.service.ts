@@ -104,13 +104,20 @@ export class NftCollectionService {
     const collections = await this.findAll({
       query: [],
     });
-    return collections.data
-      .filter(
-        (collection) =>
-          collection.assetTypes[0].chainId.namespace === networkNamespace &&
-          collection.assetTypes[0].chainId.reference === networkReference,
+
+    const collectionsAddresses = collections.data
+      .map((collection) =>
+        collection.assetTypes
+          .filter(
+            (type) =>
+              type.chainId.namespace === networkNamespace &&
+              type.chainId.reference === networkReference,
+          )
+          .map((type) => type.assetName.reference),
       )
-      .map((collection) => collection.assetTypes[0].assetName.reference);
+      .flat();
+
+    return collectionsAddresses;
   }
 
   async update(id: string, updateNftCollectionDto: UpdateNftCollectionDto) {

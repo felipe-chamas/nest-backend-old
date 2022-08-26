@@ -70,10 +70,13 @@ export class NftController {
       });
 
       const result = await this.nftService.findByAddress(address);
-
-      const collectionAddresses = collections.data.map(
-        (collection) => collection.assetTypes[0].assetName.reference,
-      );
+      const collectionAddresses = collections.data
+        .map((collection) => [
+          ...collection.assetTypes
+            .filter((type) => type.chainId.namespace === 'solana')
+            .map((type) => type.assetName.reference),
+        ])
+        .flat();
 
       return collectionAddresses.includes(result.collectionAddress)
         ? result
