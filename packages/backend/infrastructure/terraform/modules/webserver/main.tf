@@ -31,6 +31,7 @@ module "ecs" {
   venly_client_id       = var.venly_client_id
   venly_client_secret   = var.venly_client_secret
   venly_application_id  = var.venly_application_id
+  moralis_api_key       = var.moralis_api_key
 
   vpc_id = module.vpc_for_ecs_fargate.vpc_id
   # Service

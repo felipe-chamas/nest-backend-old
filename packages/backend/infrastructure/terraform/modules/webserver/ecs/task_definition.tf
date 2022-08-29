@@ -23,7 +23,8 @@ resource "aws_secretsmanager_secret_version" "secret_variables_version" {
       "venly_client_id": "${var.venly_client_id}",
       "venly_client_secret": "${var.venly_client_secret}",
       "venly_application_id": "${var.venly_application_id}",
-      "secret_value": "${random_string.random.result}"
+      "secret_value": "${random_string.random.result}",
+      "moralis_api_key": ${var.moralis_api_key}
     }
   EOF
 }
@@ -128,6 +129,10 @@ resource "aws_ecs_task_definition" "main" {
         {
           name : "SESSION_SECRET",
           valueFrom : "${aws_secretsmanager_secret.secret_variables.arn}:secret_value::"
+        },
+        {
+          name : "MORALIS_API_KEY",
+          valueFrom : "${aws_secretsmanager_secret.secret_variables.arn}:moralis_api_key::"
         },
       ]
     },

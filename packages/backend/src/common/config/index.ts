@@ -42,4 +42,7 @@ export default () => ({
     application_id: process.env.VENLY_APPLICATION_ID,
   },
   apiKey: process.env.API_KEY,
+  moralis: {
+    apiKey: process.env.MORALIS_API_KEY,
+  },
 });

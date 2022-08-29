@@ -147,3 +147,8 @@ variable "venly_application_id" {
   sensitive = true
 }
 
+variable "moralis_api_key" {
+  type      = string
+  sensitive = true
+}
+
