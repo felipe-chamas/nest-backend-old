@@ -4,13 +4,13 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import session from 'express-session';
 import cookieParser from 'cookie-parser';
 import compression from 'compression';
-
+import { WinstonModule } from 'nest-winston';
 import { Logger, ValidationPipe } from '@nestjs/common';
 
 import { AppModule } from './app/app.module';
 import { ConfigService } from '@nestjs/config';
 import { HttpExceptionFilter, LoggerInterceptor } from 'common/interceptors';
-import { logger, Swagger } from 'common/providers';
+import { logger, loggerOptions, Swagger } from 'common/providers';
 
 import ConnectRedis from 'connect-redis';
 import { createClient } from 'redis';
@@ -19,7 +19,9 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { Request, Response, NextFunction } from 'express';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    logger: WinstonModule.createLogger(loggerOptions),
+  });
 
   app.enableCors({
     origin: true,

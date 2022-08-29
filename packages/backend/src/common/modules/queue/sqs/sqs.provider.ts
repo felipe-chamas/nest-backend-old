@@ -46,7 +46,7 @@ export class SqsProvider {
       });
     });
     this.sqsConsumer.on('empty', () => {
-      logger.info('message queue is empty');
+      logger.debug('message queue is empty');
     });
     this.sqsConsumer.on('response_processed', () => {
       logger.info('response_processed');
