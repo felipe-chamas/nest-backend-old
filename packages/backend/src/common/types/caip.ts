@@ -61,7 +61,7 @@ export const MoralisNetworks: IMorilisNetworks = {
     name: 'Binance Smart Chain Mainnet',
   },
   [ChainIdReference.BINANCE_TESTNET]: {
-    id: 'bsc%20testnet',
+    id: 'bsc testnet',
     chain: 'tBNB',
     name: 'Binance Smart Chain Testnet',
   },
