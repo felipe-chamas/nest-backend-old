@@ -246,10 +246,10 @@ export class NftService {
     }
 
     return result.map((token) => {
-      const metadata = JSON.parse(token.metadata);
+      const metadata = token.metadata ? JSON.parse(token.metadata) : {};
       return {
         name: metadata.name,
-        collectionName: 'Unknown',
+        collectionName: token.name,
         collectionAddress: collections.find(
           (address) => address.toLocaleLowerCase() === token.token_address,
         ),

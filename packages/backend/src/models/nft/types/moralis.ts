@@ -10,9 +10,9 @@ export interface MorealisResultNftsByAddress {
   name: string;
   symbol: string;
   token_uri: string;
-  metadata: string;
-  last_token_uri_sync: string;
-  last_metadata_sync: string;
+  metadata?: string;
+  last_token_uri_sync?: string;
+  last_metadata_sync?: string;
 }
 
 export interface MoralisResponseNftsByAddress {
