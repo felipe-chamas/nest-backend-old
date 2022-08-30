@@ -31,6 +31,7 @@ import {
   MorealisResultNftsByAddress,
   MoralisResposeSearchNft,
 } from '../types/moralis';
+import { Metadata } from '../interface';
 
 @Injectable()
 export class NftService {
@@ -134,7 +135,9 @@ export class NftService {
 
     console.log(data);
 
-    const metadata = JSON.parse(data.metadata);
+    const metadata = data.metadata
+      ? JSON.parse(data.metadata)
+      : (await this.httpService.axiosRef.get<Metadata>(data.token_uri)).data;
 
     return {
       name: metadata.name,
@@ -245,23 +248,29 @@ export class NftService {
       lastCursor = data.cursor;
     }
 
-    return result.map((token) => {
-      const metadata = token.metadata ? JSON.parse(token.metadata) : {};
-      return {
-        name: metadata.name,
-        collectionName: token.name,
-        collectionAddress: collections.find(
-          (address) => address.toLocaleLowerCase() === token.token_address,
-        ),
-        tokenAddress: token.token_id,
-        imageUrl: metadata.image,
-        traits: metadata.attributes,
-        chain: MoralisNetworks[network].chain,
-        network: MoralisNetworks[network].name,
-        description: metadata.description,
-        cursor: lastCursor,
-      };
-    });
+    return Promise.all(
+      result.map(async (token) => {
+        const metadata = token.metadata
+          ? JSON.parse(token.metadata)
+          : (await this.httpService.axiosRef.get<Metadata>(token.token_uri))
+              .data;
+
+        return {
+          name: metadata.name,
+          collectionName: token.name,
+          collectionAddress: collections.find(
+            (address) => address.toLocaleLowerCase() === token.token_address,
+          ),
+          tokenAddress: token.token_id,
+          imageUrl: metadata.image,
+          traits: metadata.attributes,
+          chain: MoralisNetworks[network].chain,
+          network: MoralisNetworks[network].name,
+          description: metadata.description,
+          cursor: lastCursor,
+        };
+      }),
+    );
   }
 
   async findById(id: string) {
