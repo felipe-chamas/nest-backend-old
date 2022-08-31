@@ -105,13 +105,14 @@ npx hardhat deploy:game-token \
 ```ps1
 npx hardhat deploy:nft \
   --network binanceTestnet \
-  --name harvest-game-nft \
-  --symbol HGNFT \
-  --acl 0x001795d3526F05b8A1AcCE16bEd07d7B0139b698
+  --name 'The Harvest Ability Card' \
+  --symbol THAC \
+  --acl 0x001795d3526F05b8A1AcCE16bEd07d7B0139b698 \
+  --base-uri 'https://nft.theharvestgame.xyz/ability-card/'
 
-> 'NFT deployed to: 0x83269FeB3c2e078CD364b69B3a76c51074e45cFa'
+> 'NFT deployed to: 0x955FA0B94aF588Bfd0669e965B2A464943Ce3267'
 ```
 
 - **Address**
-  - [Proxy](https://testnet.bscscan.com/address/0x83269FeB3c2e078CD364b69B3a76c51074e45cFa)
-  - [Contract](https://testnet.bscscan.com/address/0xcAC00A9cECafef68103dda0F4e7fc35D77F2697b)
+  - [Proxy](https://testnet.bscscan.com/address/0x955FA0B94aF588Bfd0669e965B2A464943Ce3267)
+  - [Contract](https://testnet.bscscan.com/address/0xBE96b313e6b0f2570158fB24B2CC78CD9D22322d)
