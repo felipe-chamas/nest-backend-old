@@ -2,6 +2,8 @@ resource "random_string" "random" {
   length = 16
 }
 
+data "aws_caller_identity" "current" {}
+
 resource "aws_ecs_task_definition" "main" {
   family                   = "${var.namespace}-${terraform.workspace}-ecs-task-definition"
   task_role_arn            = aws_iam_role.main_ecs_tasks.arn
