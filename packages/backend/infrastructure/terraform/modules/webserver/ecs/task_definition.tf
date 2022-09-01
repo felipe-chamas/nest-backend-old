@@ -52,7 +52,7 @@ resource "aws_ecs_task_definition" "main" {
       ],
       secrets : [{
         name : "ENV_FILE",
-        valueFrom : "arn:aws:secretsmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:develop.env"
+        valueFrom : "arn:aws:secretsmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:.env"
       }]
     },
     {
