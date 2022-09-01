@@ -2,10 +2,6 @@ resource "random_string" "random" {
   length = 16
 }
 
-resource "aws_secretsmanager_secret" "secret_variables" {
-  name = "backend-secret-variables"
-}
-
 resource "aws_ecs_task_definition" "main" {
   family                   = "${var.namespace}-${terraform.workspace}-ecs-task-definition"
   task_role_arn            = aws_iam_role.main_ecs_tasks.arn
