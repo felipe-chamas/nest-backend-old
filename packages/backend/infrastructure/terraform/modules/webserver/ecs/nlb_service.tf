@@ -15,7 +15,7 @@ resource "aws_lb_target_group" "nlb_tg_blue" {
   depends_on = [
     aws_lb.nlb
   ]
-  name        = "${var.namespace}-${terraform.workspace}-nlb-tg-blue"
+  name        = "${var.namespace}-${terraform.workspace}-nlb-tg-1"
   port        = var.app_port
   protocol    = "TCP"
   vpc_id      = var.vpc_id
@@ -33,7 +33,7 @@ resource "aws_lb_target_group" "nlb_tg_green" {
   depends_on = [
     aws_lb.nlb
   ]
-  name        = "${var.namespace}-${terraform.workspace}-nlb-tg-green"
+  name        = "${var.namespace}-${terraform.workspace}-nlb-tg-2"
   port        = var.app_port
   protocol    = "TCP"
   vpc_id      = var.vpc_id
