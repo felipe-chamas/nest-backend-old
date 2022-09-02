@@ -10,8 +10,12 @@ resource "aws_ecs_service" "main" {
     subnets         = var.private_subnet_ids
   }
 
+  deployment_controller {
+    type = "CODE_DEPLOY"
+  }
+
   load_balancer {
-    target_group_arn = aws_lb_target_group.nlb_tg.arn
+    target_group_arn = aws_lb_target_group.nlb_tg_blue.arn
     container_name   = "${var.namespace}-${terraform.workspace}-ecs-container"
     container_port   = var.app_port
   }
@@ -19,4 +23,8 @@ resource "aws_ecs_service" "main" {
   depends_on = [
     aws_ecs_task_definition.main,
   ]
+
+  lifecycle {
+    ignore_changes = [load_balancer, task_definition]
+  }
 }

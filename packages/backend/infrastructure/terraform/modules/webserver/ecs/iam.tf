@@ -136,4 +136,26 @@ resource "aws_iam_role_policy_attachment" "ecs_service_scaling" {
   policy_arn = aws_iam_policy.ecs_service_scaling.arn
 }
 
+data "aws_iam_policy_document" "codedeploy_assume_role" {
+  version = "2012-10-17"
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+    principals {
+      type = "Service"
+      identifiers = [
+        "codedeploy.amazonaws.com"
+      ]
+    }
+  }
+}
 
+resource "aws_iam_role" "codedeploy_role" {
+  name               = "${var.namespace}-${terraform.workspace}-codedeploy-for-ecs"
+  assume_role_policy = data.aws_iam_policy_document.codedeploy_assume_role.json
+}
+
+resource "aws_iam_role_policy_attachment" "codedeploy_policy_attachment" {
+  policy_arn = "arn:aws:iam::aws:policy/AWSCodeDeployRoleForECS"
+  role       = aws_iam_role.codedeploy_role.name
+}

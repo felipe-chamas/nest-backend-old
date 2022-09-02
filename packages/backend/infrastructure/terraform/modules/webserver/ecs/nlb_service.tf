@@ -11,11 +11,11 @@ resource "aws_lb" "nlb" {
   }
 }
 
-resource "aws_lb_target_group" "nlb_tg" {
+resource "aws_lb_target_group" "nlb_tg_blue" {
   depends_on = [
     aws_lb.nlb
   ]
-  name        = "${var.namespace}-${terraform.workspace}-nlb-tg"
+  name        = "${var.namespace}-${terraform.workspace}-nlb-tg-blue"
   port        = var.app_port
   protocol    = "TCP"
   vpc_id      = var.vpc_id
@@ -23,6 +23,28 @@ resource "aws_lb_target_group" "nlb_tg" {
 
   # This should improve our deployment times
   deregistration_delay = 15
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_lb_target_group" "nlb_tg_green" {
+  depends_on = [
+    aws_lb.nlb
+  ]
+  name        = "${var.namespace}-${terraform.workspace}-nlb-tg-green"
+  port        = var.app_port
+  protocol    = "TCP"
+  vpc_id      = var.vpc_id
+  target_type = "ip"
+
+  # This should improve our deployment times
+  deregistration_delay = 15
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # Redirect all traffic from the NLB to the target group
@@ -32,7 +54,12 @@ resource "aws_lb_listener" "nlb_listener" {
   protocol          = "TCP"
 
   default_action {
-    target_group_arn = aws_lb_target_group.nlb_tg.id
+    target_group_arn = aws_lb_target_group.nlb_tg_blue.id
     type             = "forward"
+  }
+
+  lifecycle {
+    create_before_destroy = true
+    ignore_changes        = [default_action[0].target_group_arn]
   }
 }

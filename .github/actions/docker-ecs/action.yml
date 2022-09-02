@@ -25,6 +25,15 @@ inputs:
   task-definition-family:
     description: 'Task Definition Family'
     required: true
+  codedeploy-application:
+    description: 'CodeDeploy Application Name'
+    required: true
+  codedeploy-deployment-group:
+    description: 'CodeDeploy Deployment Group Name'
+    required: true
+  container-port:
+    description: 'Container Port Number'
+    required: true
 
 runs:
   using: 'composite'
@@ -66,9 +75,11 @@ runs:
         task-definition: task-definition.json
         container-name: ${{ inputs.container-name }}
         image: ${{ steps.login-ecr.outputs.registry }}/${{ inputs.registry-name }}:${{ env.IMAGE_TAG }}
-    - name: Shutdown cluster
+    - name: Setup AppSpec File
       shell: bash
-      run: aws ecs update-service --desired-count 0 --cluster "${{ inputs.cluster-name }}" --service "${{ inputs.service-name }}"
+      run: |
+        jq --arg container ${{ inputs.container-name }} '.Resources[0].TargetService.Properties.LoadBalancerInfo.ContainerName = $container' ./.github/codedeploy/appspec.template.json > appspec.tmp.json
+        jq --argjson port "${{ inputs.container-port }}" '.Resources[0].TargetService.Properties.LoadBalancerInfo.ContainerPort = $port' appspec.tmp.json > appspec.json
     - name: Deploy Amazon ECS task definition
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
@@ -77,6 +88,6 @@ runs:
         cluster: ${{ inputs.cluster-name }}
         force-new-deployment: true
         wait-for-service-stability: true
-    - name: Wait for service to stabilize
-      run: aws ecs update-service --desired-count 1 --cluster "${{ env.CLUSTER_NAME }}" --service "${{ env.SERVICE_NAME }}"
-      shell: bash
+        codedeploy-appspec: appspec.json
+        codedeploy-application: ${{ inputs.codedeploy-application }}
+        codedeploy-deployment-group: ${{ inputs.codedeploy-deployment-group }}

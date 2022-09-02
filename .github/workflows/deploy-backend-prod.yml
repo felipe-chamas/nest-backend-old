@@ -9,6 +9,9 @@ env:
   CLUSTER_NAME: 'webserver-production-cluster'
   CONTAINER_NAME: 'webserver-production-ecs-container'
   TASK_DEFINITION_FAMILY: 'webserver-production-ecs-task-definition'
+  CODEDEPLOY_APPLICATION: 'webserver-production-app'
+  CODEDEPLOY_DEPLOYMENT_GROUP: 'webserver-production-deployment-group'
+  CONTAINER_PORT: 3000
 
 jobs:
   deploy:
@@ -26,6 +29,9 @@ jobs:
           cluster-name: ${{ env.CLUSTER_NAME }}
           container-name: ${{ env.CONTAINER_NAME }}
           task-definition-family: ${{ env.TASK_DEFINITION_FAMILY }}
+          codedeploy-application: ${{ env.CODEDEPLOY_APPLICATION }}
+          codedeploy-deployment-group: ${{ env.CODEDEPLOY_DEPLOYMENT_GROUP }}
+          container-port: ${{ env.CONTAINER_PORT }}
   tags:
     name: Tag the deployment
     needs: [deploy]

@@ -14,6 +14,9 @@ env:
   CLUSTER_NAME: 'webserver-develop-cluster'
   CONTAINER_NAME: 'webserver-develop-ecs-container'
   TASK_DEFINITION_FAMILY: 'webserver-develop-ecs-task-definition'
+  CODEDEPLOY_APPLICATION: 'webserver-develop-app'
+  CODEDEPLOY_DEPLOYMENT_GROUP: 'webserver-develop-deployment-group'
+  CONTAINER_PORT: 3000
 
 jobs:
   test:
@@ -42,6 +45,9 @@ jobs:
           cluster-name: ${{ env.CLUSTER_NAME }}
           container-name: ${{ env.CONTAINER_NAME }}
           task-definition-family: ${{ env.TASK_DEFINITION_FAMILY }}
+          codedeploy-application: ${{ env.CODEDEPLOY_APPLICATION }}
+          codedeploy-deployment-group: ${{ env.CODEDEPLOY_DEPLOYMENT_GROUP }}
+          container-port: ${{ env.CONTAINER_PORT }}
   tags:
     name: Tag the deployment
     needs: [deploy]
