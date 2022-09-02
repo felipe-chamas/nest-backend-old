@@ -48,10 +48,12 @@ resource "aws_ecs_task_definition" "main" {
           value : terraform.workspace
         }
       ],
-      secrets : [{
-        name : "ENV_FILE",
-        valueFrom : "arn:aws:secretsmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:.env-NmJ4Sn"
-      }]
+      secrets : [
+        {
+          name : "ENV_FILE",
+          valueFrom : "arn:aws:secretsmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:.env"
+        }
+      ]
     },
     {
       name : "${var.namespace}-${terraform.workspace}-redis-container",

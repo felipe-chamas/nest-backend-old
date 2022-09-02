@@ -36,8 +36,9 @@ COPY --from=pruned-dependencies --chown=node:node /usr/src/app/node_modules ./no
 COPY --from=builder --chown=node:node /usr/src/app/dist/packages/backend ./dist
 COPY --from=builder --chown=node:node /usr/src/app/ormconfig.js ./
 
-RUN echo $ENV_FILE > .env
+RUN touch .env
+RUN chown node:node .env
 
 USER node
 EXPOSE 3000
-CMD ["node", "dist/main.js"]
+CMD printf "%s" "$ENV_FILE" > .env && node dist/main.js
