@@ -2,32 +2,7 @@ resource "random_string" "random" {
   length = 16
 }
 
-resource "aws_secretsmanager_secret" "secret_variables" {
-  name = "backend-secret-variables"
-}
-
-resource "aws_secretsmanager_secret_version" "secret_variables_version" {
-  secret_id     = aws_secretsmanager_secret.secret_variables.id
-  secret_string = <<EOF
-    {
-      "mongodb_uri": "${var.mongodb_uri}",
-      "discord_client_id": "${var.discord_client_id}",
-      "discord_client_secret": "${var.discord_client_secret}",
-      "discord_redirect_uri": "${var.discord_redirect_uri}",
-      "steam_api_key": "${var.steam_api_key}",
-      "steam_return_url": "${var.steam_return_url}",
-      "steam_realm": "${var.steam_realm}",
-      "frontend_url": "${var.frontend_url}",
-      "docs_token": "${var.docs_token}",
-      "quicknode_uri": "${var.quicknode_uri}",
-      "venly_client_id": "${var.venly_client_id}",
-      "venly_client_secret": "${var.venly_client_secret}",
-      "venly_application_id": "${var.venly_application_id}",
-      "secret_value": "${random_string.random.result}",
-      "moralis_api_key": ${var.moralis_api_key}
-    }
-  EOF
-}
+data "aws_caller_identity" "current" {}
 
 resource "aws_ecs_task_definition" "main" {
   family                   = "${var.namespace}-${terraform.workspace}-ecs-task-definition"
@@ -73,68 +48,10 @@ resource "aws_ecs_task_definition" "main" {
           value : terraform.workspace
         }
       ],
-      secrets : [
-        {
-          name : "MONGODB_URI",
-          valueFrom : "${aws_secretsmanager_secret.secret_variables.arn}:mongodb_uri::"
-        },
-        {
-          name : "DISCORD_CLIENT_ID",
-          valueFrom : "${aws_secretsmanager_secret.secret_variables.arn}:discord_client_id::"
-        },
-        {
-          name : "DISCORD_CLIENT_SECRET",
-          valueFrom : "${aws_secretsmanager_secret.secret_variables.arn}:discord_client_secret::"
-        },
-        {
-          name : "DISCORD_REDIRECT_URI",
-          valueFrom : "${aws_secretsmanager_secret.secret_variables.arn}:discord_redirect_uri::"
-        },
-        {
-          name : "STEAM_API_KEY",
-          valueFrom : "${aws_secretsmanager_secret.secret_variables.arn}:steam_api_key::"
-        },
-        {
-          name : "STEAM_RETURN_URL",
-          valueFrom : "${aws_secretsmanager_secret.secret_variables.arn}:steam_return_url::"
-        },
-        {
-          name : "STEAM_REALM",
-          valueFrom : "${aws_secretsmanager_secret.secret_variables.arn}:steam_realm::"
-        },
-        {
-          name : "FRONTEND_URL",
-          valueFrom : "${aws_secretsmanager_secret.secret_variables.arn}:frontend_url::"
-        },
-        {
-          name : "DOCS_TOKEN",
-          valueFrom : "${aws_secretsmanager_secret.secret_variables.arn}:docs_token::"
-        },
-        {
-          name : "QUICKNODE_URI",
-          valueFrom : "${aws_secretsmanager_secret.secret_variables.arn}:quicknode_uri::"
-        },
-        {
-          name : "VENLY_CLIENT_ID",
-          valueFrom : "${aws_secretsmanager_secret.secret_variables.arn}:venly_client_id::"
-        },
-        {
-          name : "VENLY_CLIENT_SECRET",
-          valueFrom : "${aws_secretsmanager_secret.secret_variables.arn}:venly_client_secret::"
-        },
-        {
-          name : "VENLY_APPLICATION_ID",
-          valueFrom : "${aws_secretsmanager_secret.secret_variables.arn}:venly_application_id::"
-        },
-        {
-          name : "SESSION_SECRET",
-          valueFrom : "${aws_secretsmanager_secret.secret_variables.arn}:secret_value::"
-        },
-        {
-          name : "MORALIS_API_KEY",
-          valueFrom : "${aws_secretsmanager_secret.secret_variables.arn}:moralis_api_key::"
-        },
-      ]
+      secrets : [{
+        name : "ENV_FILE",
+        valueFrom : "arn:aws:secretsmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:.env-NmJ4Sn"
+      }]
     },
     {
       name : "${var.namespace}-${terraform.workspace}-redis-container",
