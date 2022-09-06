@@ -26,14 +26,14 @@ RUN npm prune --omit=dev --legacy-peer-deps
 FROM base AS builder
 COPY --from=dependencies --chown=node:node /usr/src/app/node_modules ./node_modules
 COPY --chown=node:node . .
-RUN yarn run build:backend
+RUN yarn build
 
 ##############
 # Production #
 ##############
 FROM base AS production
 COPY --from=pruned-dependencies --chown=node:node /usr/src/app/node_modules ./node_modules
-COPY --from=builder --chown=node:node /usr/src/app/dist/packages/backend ./dist
+COPY --from=builder --chown=node:node /usr/src/app/dist ./dist
 COPY --from=builder --chown=node:node /usr/src/app/ormconfig.js ./
 
 RUN touch .env

@@ -1,7 +1,0 @@
-{
-  "version": 2,
-  "projects": {
-    "backend": "packages/backend",
-    "smart-contracts": "packages/smart-contracts"
-  }
-}

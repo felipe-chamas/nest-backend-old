@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      target: builder
+      target: dependencies
     environment:
       - PORT=8080
       - STAGE=local
@@ -33,7 +33,7 @@ services:
       - redis
     volumes:
       - .:/usr/src/app
-    command: yarn serve:backend
+    command: yarn start
   redis:
     image: redis
     environment:
