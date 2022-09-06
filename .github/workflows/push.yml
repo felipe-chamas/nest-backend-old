@@ -1,9 +1,6 @@
-name: NX Checks
+name: Code Checks
 
-on:
-  push:
-    branches-ignore:
-      - main
+on: push
 
 concurrency:
   group: ${{ github.head_ref || github.ref_name }}
