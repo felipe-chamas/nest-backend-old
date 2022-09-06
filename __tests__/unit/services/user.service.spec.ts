@@ -1,18 +1,18 @@
-import { Nft } from '@common/entities/nft.entity'
 import { Test, TestingModule } from '@nestjs/testing'
 import { getRepositoryToken } from '@nestjs/typeorm'
 import { MongoRepository } from 'typeorm'
 
+import { NftDto } from '@common/dto/entities/nft.dto'
 import { UserDto } from '@common/dto/entities/user.dto'
 import { UpdateUserDto } from '@common/dto/update-user.dto'
 import { UserService } from '@services/user.service'
 import { mockCreateUser, mockUpdateUser, mockUser } from '__mocks__/user.mock'
 
 export type MockType<T> = {
-  [P in keyof T]?: jest.Mock<Nft>
+  [P in keyof T]?: jest.Mock<NftDto>
 }
 
-export const repositoryMockFactory: () => MockType<MongoRepository<User>> = jest.fn(() => ({
+export const repositoryMockFactory: () => MockType<MongoRepository<UserDto>> = jest.fn(() => ({
   findOne: jest.fn((entity) => entity),
   find: jest.fn().mockReturnValue([mockUser, mockUser]),
   create: jest.fn().mockReturnValue(mockUser),
@@ -22,7 +22,7 @@ export const repositoryMockFactory: () => MockType<MongoRepository<User>> = jest
 describe('UserService', () => {
   let user
   let service: Partial<UserService>
-  let userRepo: MongoRepository<User>
+  let userRepo: MongoRepository<UserDto>
 
   beforeEach(async () => {
     service = {
@@ -39,14 +39,14 @@ describe('UserService', () => {
           useValue: service
         },
         {
-          provide: getRepositoryToken(User),
+          provide: getRepositoryToken(UserDto),
           useFactory: repositoryMockFactory
         }
       ]
     }).compile()
 
     service = module.get<UserService>(UserService)
-    userRepo = module.get(getRepositoryToken(User))
+    userRepo = module.get(getRepositoryToken(UserDto))
   })
 
   it('should be defined', () => {

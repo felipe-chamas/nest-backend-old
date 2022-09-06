@@ -3,8 +3,8 @@ import { Request } from 'express'
 import { ObjectID } from 'typeorm'
 
 import { CreateNftDto } from '@common/dto/create-nft.dto'
+import { NftDto } from '@common/dto/entities/nft.dto'
 import { UpdateNftDto } from '@common/dto/update-nft.dto'
-import { Nft } from '@common/entities/nft.entity'
 import { NftController } from '@controllers/nft.controller'
 import { NftCollectionService } from '@services/nft-collection.service'
 import { NftService } from '@services/nft.service'
@@ -22,7 +22,7 @@ describe('NftController', () => {
         Promise.resolve({
           ...mockCreateNftResponse,
           ...createNftDto
-        } as unknown as Nft),
+        } as unknown as NftDto),
       findAll: () => Promise.resolve([]),
       findById: jest.fn().mockImplementation(async () => {
         return {
@@ -34,7 +34,7 @@ describe('NftController', () => {
         Promise.resolve({
           ...mockNft,
           ...updatedNft
-        } as unknown as Nft),
+        } as unknown as NftDto),
       remove: jest.fn()
     }
     const module: TestingModule = await Test.createTestingModule({

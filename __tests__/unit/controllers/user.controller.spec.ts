@@ -14,14 +14,14 @@ describe('UserController', () => {
 
   beforeEach(async () => {
     service = {
-      findAll: () => Promise.resolve([mockUser as User]),
+      findAll: () => Promise.resolve([mockUser as UserDto]),
       findByUUID: jest.fn().mockImplementation(async (uuid: string) => {
-        return { ...mockUser, uuid: uuid } as User
+        return { ...mockUser, uuid: uuid } as UserDto
       }),
       update: (_: string, updatedUser: Partial<UpdateUserDto>) =>
         Promise.resolve({
           ...updatedUser
-        } as unknown as User),
+        } as unknown as UserDto),
       remove: jest.fn()
     }
 

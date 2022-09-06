@@ -20,8 +20,8 @@ import { SessionData } from 'express-session'
 
 import { Auth } from '@common/decorators/auth.decorators'
 import { GetPagination, Pagination } from '@common/decorators/pagination.decorators'
-import { UpdateUserDto } from '@common/dto/update-user.dto'
 import { UserDto } from '@common/dto/entities/user.dto'
+import { UpdateUserDto } from '@common/dto/update-user.dto'
 import { Role } from '@common/enums/role.enum'
 import { UserService } from '@services/user.service'
 

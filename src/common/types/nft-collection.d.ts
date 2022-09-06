@@ -1,6 +1,6 @@
-import { NftCollection } from '@common/dto/entities/nft-collection.entity'
+import { NftCollectionDto } from '@common/dto/entities/nft-collection.dto'
 
 export interface NftCollectionFacet {
-  data: NftCollection[]
+  data: NftCollectionDto[]
   total: number
 }

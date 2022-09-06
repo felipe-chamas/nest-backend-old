@@ -2,15 +2,15 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { getRepositoryToken } from '@nestjs/typeorm'
 import { MongoRepository } from 'typeorm'
 
-import { Nft } from '@common/entities/nft.entity'
+import { NftDto } from '@common/dto/entities/nft.dto'
 import { NftService } from '@services/nft.service'
 import { mockCreateNft, mockUpdateNft, mockNft } from '__mocks__/nft.mock'
 
 export type MockType<T> = {
-  [P in keyof T]?: jest.Mock<Nft>
+  [P in keyof T]?: jest.Mock<NftDto>
 }
 
-export const repositoryMockFactory: () => MockType<MongoRepository<Nft>> = jest.fn(() => ({
+export const repositoryMockFactory: () => MockType<MongoRepository<NftDto>> = jest.fn(() => ({
   findOne: jest.fn((entity) => entity),
   find: jest.fn().mockReturnValue([mockCreateNft, mockCreateNft]),
   create: jest.fn().mockReturnValue(mockCreateNft),
@@ -19,7 +19,7 @@ export const repositoryMockFactory: () => MockType<MongoRepository<Nft>> = jest.
 
 describe('NftService', () => {
   let service: Partial<NftService>
-  let neftRepo: MockType<MongoRepository<Nft>>
+  let neftRepo: MockType<MongoRepository<NftDto>>
 
   beforeEach(async () => {
     service = {
@@ -33,14 +33,14 @@ describe('NftService', () => {
       providers: [
         { provide: NftService, useValue: service },
         {
-          provide: getRepositoryToken(Nft),
+          provide: getRepositoryToken(NftDto),
           useFactory: repositoryMockFactory
         }
       ]
     }).compile()
 
     service = module.get<NftService>(NftService)
-    neftRepo = module.get(getRepositoryToken(Nft))
+    neftRepo = module.get(getRepositoryToken(NftDto))
   })
 
   it('should be defined', () => {

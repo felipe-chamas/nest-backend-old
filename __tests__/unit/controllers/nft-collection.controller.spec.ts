@@ -3,7 +3,7 @@ import { Request } from 'express'
 import { ObjectID } from 'typeorm'
 
 import { CreateNftCollectionDto } from '@common/dto/create-nft-collection.dto'
-import { NftCollection } from '@common/dto/entities/nft-collection.entity'
+import { NftCollectionDto } from '@common/dto/entities/nft-collection.dto'
 import { NftCollectionController } from '@controllers/nft-collection.controller'
 import { NftCollectionService } from '@services/nft-collection.service'
 import { mockCreateNftCollection, mockNftCollection } from '__mocks__/nft-collection.mock'
@@ -18,17 +18,17 @@ describe('NftCollectionController', () => {
         Promise.resolve({
           ...mockNftCollection,
           ...createNftCollectionDto
-        } as unknown as NftCollection),
+        } as unknown as NftCollectionDto),
       findAll: () =>
         Promise.resolve({
-          data: [mockNftCollection as NftCollection],
+          data: [mockNftCollection as NftCollectionDto],
           total: 1
         }),
       findById: jest.fn().mockImplementation(async () => {
         return {
           ...mockNftCollection,
           id: '123' as unknown as ObjectID
-        } as unknown as NftCollection
+        } as unknown as NftCollectionDto
       }),
       update: jest.fn().mockImplementation(async () =>
         Promise.resolve({

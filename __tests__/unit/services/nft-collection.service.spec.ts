@@ -1,17 +1,17 @@
-import { Nft } from '@common/entities/nft.entity'
 import { Test, TestingModule } from '@nestjs/testing'
 import { getRepositoryToken } from '@nestjs/typeorm'
 import { MongoRepository } from 'typeorm'
 
-import { NftCollection } from '@common/dto/entities/nft-collection.entity'
+import { NftCollectionDto } from '@common/dto/entities/nft-collection.dto'
+import { NftDto } from '@common/dto/entities/nft.dto'
 import { NftCollectionService } from '@services/nft-collection.service'
 import { mockCreateNftCollection, mockNftCollection } from '__mocks__/nft-collection.mock'
 
 export type MockType<T> = {
-  [P in keyof T]?: jest.Mock<Nft>
+  [P in keyof T]?: jest.Mock<NftDto>
 }
 
-export const repositoryMockFactory: () => MockType<MongoRepository<NftCollection>> = jest.fn(
+export const repositoryMockFactory: () => MockType<MongoRepository<NftCollectionDto>> = jest.fn(
   () => ({
     findOne: jest.fn((entity) => entity),
     find: jest.fn().mockReturnValue([mockNftCollection, mockNftCollection]),
@@ -23,7 +23,7 @@ export const repositoryMockFactory: () => MockType<MongoRepository<NftCollection
 describe('NftCollectionService', () => {
   let nftCollection
   let service: Partial<NftCollectionService>
-  let nftCollectionRepo: MongoRepository<NftCollection>
+  let nftCollectionRepo: MongoRepository<NftCollectionDto>
 
   beforeEach(async () => {
     service = {
@@ -40,14 +40,14 @@ describe('NftCollectionService', () => {
           useValue: service
         },
         {
-          provide: getRepositoryToken(NftCollection),
+          provide: getRepositoryToken(NftCollectionDto),
           useFactory: repositoryMockFactory
         }
       ]
     }).compile()
 
     service = module.get<NftCollectionService>(NftCollectionService)
-    nftCollectionRepo = module.get(getRepositoryToken(NftCollection))
+    nftCollectionRepo = module.get(getRepositoryToken(NftCollectionDto))
   })
 
   it('should be defined', () => {
