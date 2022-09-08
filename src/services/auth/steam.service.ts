@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { SessionData } from 'express-session'
 
-import { UserDto } from '@common/dto/entities/user.dto'
+import { UserDto } from '@common/schemas/user.schema'
 import { UserService } from '@services/user.service'
 
 import type { SteamDetails } from '@common/types/steam'

@@ -1,12 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { Request } from 'express'
-import { ObjectID } from 'typeorm'
+import { ObjectId } from 'mongoose'
 
 import { CreateNftCollectionDto } from '@common/dto/create-nft-collection.dto'
-import { NftCollectionDto } from '@common/dto/entities/nft-collection.dto'
+import { NftCollectionDocument, NftCollectionDto } from '@common/schemas/nft-collection.schema'
 import { NftCollectionController } from '@controllers/nft-collection.controller'
 import { NftCollectionService } from '@services/nft-collection.service'
-import { mockCreateNftCollection, mockNftCollection } from '__mocks__/nft-collection.mock'
+import { mockNftCollection } from '__mocks__/nft-collection.mock'
+
+type NftCollectionResult = NftCollectionDocument & { _id: ObjectId }
 
 describe('NftCollectionController', () => {
   let controller: NftCollectionController
@@ -18,16 +20,16 @@ describe('NftCollectionController', () => {
         Promise.resolve({
           ...mockNftCollection,
           ...createNftCollectionDto
-        } as unknown as NftCollectionDto),
+        } as NftCollectionResult),
       findAll: () =>
         Promise.resolve({
-          data: [mockNftCollection as NftCollectionDto],
+          data: [mockNftCollection as NftCollectionResult],
           total: 1
         }),
       findById: jest.fn().mockImplementation(async () => {
         return {
           ...mockNftCollection,
-          id: '123' as unknown as ObjectID
+          id: '123'
         } as unknown as NftCollectionDto
       }),
       update: jest.fn().mockImplementation(async () =>
@@ -55,14 +57,19 @@ describe('NftCollectionController', () => {
   })
 
   it('should create and nftCollection', async () => {
-    const result = await controller.create(mockCreateNftCollection)
+    const result = await controller.create({
+      name: mockNftCollection.name,
+      assetTypes: mockNftCollection.assetTypes
+    })
 
-    expect(result).toEqual({ ...mockCreateNftCollection, ...result })
+    expect(result).toEqual(mockNftCollection)
   })
 
   it('should fetch all nftCollections', async () => {
     const result = await controller.findAll({} as Request, {
-      query: [{ $skip: 0 }, { $limit: 10 }]
+      skip: 0,
+      limit: 10,
+      sort: {}
     })
     expect(result).toEqual({ data: [mockNftCollection], total: 1 })
   })

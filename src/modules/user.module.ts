@@ -1,11 +1,9 @@
 import { Module } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
+import { MongooseModule } from '@nestjs/mongoose'
 import { ThrottlerModule } from '@nestjs/throttler'
-import { TypeOrmModule } from '@nestjs/typeorm'
-import { MongoEntityManager, MongoRepository } from 'typeorm'
 
-import { NftDto } from '@common/dto/entities/nft.dto'
-import { UserDto } from '@common/dto/entities/user.dto'
+import { UserDto, UserSchema } from '@common/schemas/user.schema'
 import { UserController } from '@controllers/user.controller'
 import { UserService } from '@services/user.service'
 
@@ -23,10 +21,9 @@ import { GlobalConfigModule } from './config.module'
         max: configService.get('throttler.max')
       })
     }),
-    TypeOrmModule.forFeature([UserDto, NftDto]),
-    MongoEntityManager
+    MongooseModule.forFeature([{ name: UserDto.name, schema: UserSchema }])
   ],
-  exports: [UserService, TypeOrmModule],
-  providers: [UserService, MongoRepository]
+  exports: [UserService],
+  providers: [UserService]
 })
 export class UserModule {}

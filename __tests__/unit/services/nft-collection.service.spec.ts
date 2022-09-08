@@ -1,29 +1,37 @@
+import { getModelToken } from '@nestjs/mongoose'
 import { Test, TestingModule } from '@nestjs/testing'
-import { getRepositoryToken } from '@nestjs/typeorm'
-import { MongoRepository } from 'typeorm'
+import { SoftDeleteModel } from 'mongoose-delete'
 
-import { NftCollectionDto } from '@common/dto/entities/nft-collection.dto'
-import { NftDto } from '@common/dto/entities/nft.dto'
+import { CreateNftCollectionDto } from '@common/dto/create-nft-collection.dto'
+import { NftCollectionDocument, NftCollectionDto } from '@common/schemas/nft-collection.schema'
+import { NftDto } from '@common/schemas/nft.schema'
 import { NftCollectionService } from '@services/nft-collection.service'
-import { mockCreateNftCollection, mockNftCollection } from '__mocks__/nft-collection.mock'
+import { mockNftCollection } from '__mocks__/nft-collection.mock'
 
 export type MockType<T> = {
   [P in keyof T]?: jest.Mock<NftDto>
 }
 
-export const repositoryMockFactory: () => MockType<MongoRepository<NftCollectionDto>> = jest.fn(
-  () => ({
+const mockRepository = {
+  find() {
+    return [mockNftCollection, mockNftCollection]
+  },
+  save() {
+    return {}
+  }
+}
+
+export const repositoryMockFactory: () => MockType<SoftDeleteModel<NftCollectionDocument>> =
+  jest.fn(() => ({
     findOne: jest.fn((entity) => entity),
     find: jest.fn().mockReturnValue([mockNftCollection, mockNftCollection]),
     create: jest.fn().mockReturnValue(mockNftCollection),
     save: jest.fn().mockReturnValue(mockNftCollection)
-  })
-)
+  }))
 
 describe('NftCollectionService', () => {
-  let nftCollection
   let service: Partial<NftCollectionService>
-  let nftCollectionRepo: MongoRepository<NftCollectionDto>
+  let nftCollectionModel: SoftDeleteModel<NftCollectionDocument>
 
   beforeEach(async () => {
     service = {
@@ -40,14 +48,14 @@ describe('NftCollectionService', () => {
           useValue: service
         },
         {
-          provide: getRepositoryToken(NftCollectionDto),
-          useFactory: repositoryMockFactory
+          provide: getModelToken(NftCollectionDto.name),
+          useValue: mockRepository
         }
       ]
     }).compile()
 
     service = module.get<NftCollectionService>(NftCollectionService)
-    nftCollectionRepo = module.get(getRepositoryToken(NftCollectionDto))
+    nftCollectionModel = module.get(getModelToken(NftCollectionDto.name))
   })
 
   it('should be defined', () => {
@@ -55,41 +63,28 @@ describe('NftCollectionService', () => {
   })
 
   it('should create an nftCollection', async () => {
-    nftCollection = nftCollectionRepo.create(mockCreateNftCollection)
-    await nftCollectionRepo.save(nftCollection)
-
-    const result = await service.create(mockCreateNftCollection)
-    expect(result).toEqual({ ...mockCreateNftCollection, ...result })
+    const result = await service.create(mockNftCollection as CreateNftCollectionDto)
+    expect(result).toEqual(mockNftCollection)
   })
 
   it('should fetch all nftCollections', async () => {
-    const nftCollections = await nftCollectionRepo.find()
-    const result = await service.findAll({ query: [] })
+    const nftCollections = await nftCollectionModel.find()
+    const result = await service.findAll({ limit: 10, skip: 0, sort: {} })
     expect(result).toEqual(nftCollections)
   })
 
   it('should fetch a nftCollection', async () => {
-    nftCollection = nftCollectionRepo.create(mockCreateNftCollection)
-    await nftCollectionRepo.save(nftCollection)
-
-    const result = await service.findById(nftCollection.id)
-
-    expect(result.id).toBe(mockNftCollection.id)
+    const result = await service.findById(mockNftCollection._id)
+    expect(result._id).toBe(mockNftCollection._id)
   })
 
   it('should update a nftCollection', async () => {
-    nftCollection = nftCollectionRepo.create(mockCreateNftCollection)
-    await nftCollectionRepo.save(nftCollection)
-
-    const result = await service.update(nftCollection.id, nftCollection)
-    expect(result).toEqual({ ...nftCollection, ...result })
+    const result = await service.update(mockNftCollection._id, { name: 'New Name' })
+    expect(result).toEqual(mockNftCollection)
   })
 
   it('should remove a nftCollection', async () => {
-    nftCollection = nftCollectionRepo.create(mockCreateNftCollection)
-    await nftCollectionRepo.save(nftCollection)
-
-    const result = await service.remove(nftCollection.id)
+    const result = await service.remove(mockNftCollection._id)
     expect(result).toBeUndefined()
   })
 })

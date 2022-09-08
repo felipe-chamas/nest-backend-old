@@ -1,21 +1,20 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
-import { InjectRepository } from '@nestjs/typeorm'
+import { Injectable } from '@nestjs/common'
+import { InjectModel } from '@nestjs/mongoose'
 import { AccountId, AccountIdParams } from 'caip'
-import { ObjectId } from 'mongodb'
-import { MongoRepository } from 'typeorm'
+import { DeleteResult, UpdateResult } from 'mongodb'
 import { v4 as uuidV4 } from 'uuid'
 
 import { Pagination } from '@common/decorators/pagination.decorators'
 import { CreateUserDto } from '@common/dto/create-user.dto'
-import { UserDto } from '@common/dto/entities/user.dto'
 import { UpdateUserDto } from '@common/dto/update-user.dto'
-import { recoveryAgent } from '@common/utils'
+import { UserDto, UserDocument } from '@common/schemas/user.schema'
 
 import type { AccountIdDto } from '@common/types/caip'
+import type { SoftDeleteModel } from 'mongoose-delete'
 
 @Injectable()
 export class UserService {
-  constructor(@InjectRepository(UserDto) private readonly userRepo: MongoRepository<UserDto>) {}
+  constructor(@InjectModel(UserDto.name) private userModel: SoftDeleteModel<UserDocument>) {}
 
   async create(createUserDto: CreateUserDto) {
     const userData = {
@@ -25,137 +24,47 @@ export class UserService {
         (accountId: string | AccountIdParams) => new AccountId(accountId).toJSON() as AccountIdDto
       )
     }
-    const user = this.userRepo.create(userData)
-    await this.userRepo.save(user)
+    const user = new this.userModel(userData)
+    await user.save()
     return user
   }
 
-  async findAll({ query, ...match }: Pagination & Partial<UserDto>) {
-    const [users] = await this.userRepo
-      .aggregate<UserDto[]>([
-        {
-          $match: match
-        },
-        {
-          $addFields: {
-            id: '$_id'
-          }
-        },
-        {
-          $facet: {
-            metadata: [{ $count: 'total' }],
-            data: query
-          }
-        },
-        {
-          $project: {
-            data: 1,
-            total: { $arrayElemAt: ['$metadata.total', 0] }
-          }
-        }
-      ])
-      .toArray()
-
-    return users
+  async findAll({ skip, limit, sort, ...match }: Pagination & Partial<UserDto>) {
+    const data = await this.userModel.find(match).sort(sort).skip(skip).limit(limit).exec()
+    const total = await this.userModel.find(match).count()
+    return { data, total }
   }
 
   async findByEmail(email: string) {
-    const [user] = await this.userRepo
-      .aggregate<UserDto>([
-        {
-          $match: {
-            email
-          }
-        },
-        {
-          $addFields: {
-            id: '$_id'
-          }
-        }
-      ])
-      .toArray()
-
-    if (!user) throw new NotFoundException(`UserDto with email ${email} not found`)
-
+    const user = await this.userModel.findOne({ email }).exec()
     return user
   }
 
   async findById(id: string) {
-    const [user] = await this.userRepo
-      .aggregate<UserDto>([
-        {
-          $match: {
-            _id: new ObjectId(id)
-          }
-        },
-        {
-          $addFields: {
-            id: '$_id'
-          }
-        }
-      ])
-      .toArray()
-
-    if (!user) throw new NotFoundException(`UserDto with id ${id} not found`)
-
+    const user = await this.userModel.findById(id).exec()
     return user
   }
 
   async findByUUID(uuid: string): Promise<UserDto> {
-    const [user] = await this.userRepo
-      .aggregate<UserDto>([
-        {
-          $match: {
-            uuid
-          }
-        },
-        {
-          $addFields: {
-            id: '$_id'
-          }
-        }
-      ])
-      .toArray()
+    const user = await this.userModel.findOne({ uuid }).exec()
     return user
   }
 
   async findByAccountId(accountId: AccountId) {
-    const [user] = await this.userRepo
-      .aggregate<UserDto>([
-        {
-          $match: {
-            accountIds: {
-              $elemMatch: accountId.toJSON()
-            }
-          }
-        },
-        {
-          $addFields: {
-            id: '$_id'
-          }
-        }
-      ])
-      .toArray()
+    const [user] = await this.userModel.find().elemMatch('accountIds', accountId.toJSON()).exec()
     return user
   }
 
-  async update(id: string, updatedUser: UpdateUserDto) {
-    const user = await this.findById(id)
-
-    if (updatedUser.roles === null) {
-      updatedUser.roles = user.roles
-    }
-
-    Object.assign(user, updatedUser)
-    return await this.userRepo.save(user)
+  async update(id: string, update: UpdateUserDto) {
+    const user = await this.userModel.findByIdAndUpdate(id, update, { new: true }).exec()
+    return user
   }
 
-  async remove(id: string) {
-    const user = await this.findById(id)
-    return this.userRepo.softRemove(user)
+  async remove(id: string): Promise<DeleteResult> {
+    return await this.userModel.deleteById(id).exec()
   }
 
-  async recover(id?: string) {
-    return await recoveryAgent(this.userRepo, id)
+  async recover(id?: string): Promise<UpdateResult> {
+    return await this.userModel.restore({ _id: id }).exec()
   }
 }

@@ -1,132 +1,66 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
-import { InjectRepository } from '@nestjs/typeorm'
-import { AssetType } from 'caip'
-import { ObjectId } from 'mongodb'
-import { MongoRepository } from 'typeorm'
+import { Injectable } from '@nestjs/common'
+import { InjectModel } from '@nestjs/mongoose'
+import { AssetType, ChainId } from 'caip'
+import { DeleteResult, UpdateResult } from 'mongodb'
+import { SoftDeleteModel } from 'mongoose-delete'
 
 import { Pagination } from '@common/decorators/pagination.decorators'
 import { CreateNftCollectionDto } from '@common/dto/create-nft-collection.dto'
-import { NftCollectionDto } from '@common/dto/entities/nft-collection.dto'
 import { UpdateNftCollectionDto } from '@common/dto/update-nft-collection.dto'
-import { recoveryAgent } from '@common/utils'
-
-import type { NftCollectionFacet } from '@common/types/nft-collection'
+import { NftCollectionDocument, NftCollectionDto } from '@common/schemas/nft-collection.schema'
 
 @Injectable()
 export class NftCollectionService {
   constructor(
-    @InjectRepository(NftCollectionDto)
-    private readonly nftCollectionRepo: MongoRepository<NftCollectionDto>
+    @InjectModel(NftCollectionDto.name)
+    private nftCollectionModel: SoftDeleteModel<NftCollectionDocument>
   ) {}
 
   async create(createNftCollectionDto: CreateNftCollectionDto) {
-    const newNftCollection = this.nftCollectionRepo.create(createNftCollectionDto)
-    await this.nftCollectionRepo.save(newNftCollection)
+    const newNftCollection = new this.nftCollectionModel(createNftCollectionDto)
+    await newNftCollection.save()
     return newNftCollection
   }
 
-  async findAll({ query, ...match }: Pagination & Partial<NftCollectionDto>) {
-    const [nftCollections] = await this.nftCollectionRepo
-      .aggregate<NftCollectionFacet>([
-        {
-          $match: match
-        },
-        {
-          $addFields: {
-            id: '$_id'
-          }
-        },
-        {
-          $facet: {
-            metadata: [{ $count: 'total' }],
-            data: query
-          }
-        },
-        {
-          $project: {
-            data: 1,
-            total: { $arrayElemAt: ['$metadata.total', 0] }
-          }
-        }
-      ])
-      .toArray()
-
-    return nftCollections
+  async findAll({ skip, limit, sort, ...match }: Pagination & Partial<NftCollectionDto>) {
+    const data = await this.nftCollectionModel.find(match).sort(sort).skip(skip).limit(limit).exec()
+    const total = await this.nftCollectionModel.find(match).count()
+    return { data, total }
   }
 
   async findById(id: string) {
-    const [nftCollection] = await this.nftCollectionRepo
-      .aggregate<NftCollectionDto>([
-        {
-          $match: {
-            _id: new ObjectId(id)
-          }
-        },
-        {
-          $addFields: {
-            id: '$_id'
-          }
-        }
-      ])
-      .toArray()
-
-    if (!nftCollection) throw new NotFoundException(`NFT with id ${id} not found`)
-
+    const nftCollection = await this.nftCollectionModel.findById(id).exec()
     return nftCollection
   }
 
   async findByAssetType(assetType: AssetType) {
-    const [nftCollection] = await this.nftCollectionRepo
-      .aggregate<NftCollectionDto>([
-        {
-          $match: {
-            accountIds: {
-              $elemMatch: assetType.toJSON()
-            }
-          }
-        },
-        {
-          $addFields: {
-            id: '$_id'
-          }
-        }
-      ])
-      .toArray()
+    const [nftCollection] = await this.nftCollectionModel
+      .find()
+      .elemMatch('assetTypes', assetType.toJSON())
+      .exec()
     return nftCollection
   }
 
-  async findAddressesByChainId(networkNamespace: string, networkReference: string) {
-    const collections = await this.findAll({
-      query: []
-    })
-
-    const collectionsAddresses = collections.data
-      .map((collection) =>
-        collection.assetTypes
-          .filter(
-            (type) =>
-              type.chainId.namespace === networkNamespace &&
-              type.chainId.reference === networkReference
-          )
-          .map((type) => type.assetName.reference)
-      )
+  async findAddressesByChainId(chainId: ChainId) {
+    const nftCollections = await this.nftCollectionModel
+      .find()
+      .elemMatch('assetTypes', { chainId: chainId.toJSON() })
+      .exec()
+    return nftCollections
+      .map((collection) => collection.assetTypes.map((assetType) => assetType.assetName.reference))
       .flat()
-
-    return collectionsAddresses
   }
 
-  async update(id: string, updateNftCollectionDto: UpdateNftCollectionDto) {
-    const nftCollection = await this.findById(id)
-    Object.assign(nftCollection, updateNftCollectionDto)
-    return await this.nftCollectionRepo.save(nftCollection)
+  async update(id: string, update: UpdateNftCollectionDto) {
+    const nftCollection = await this.nftCollectionModel.findByIdAndUpdate(id, update).exec()
+    return nftCollection
   }
 
-  async remove(id: string) {
-    const nftCollection = await this.findById(id)
-    return this.nftCollectionRepo.softRemove(nftCollection)
+  async remove(id: string): Promise<DeleteResult> {
+    return await this.nftCollectionModel.deleteById(id).exec()
   }
 
-  async recover(id?: string) {
-    return await recoveryAgent(this.nftCollectionRepo, id)
+  async recover(id?: string): Promise<UpdateResult> {
+    return await this.nftCollectionModel.restore({ _id: id }).exec()
   }
 }

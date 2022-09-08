@@ -55,7 +55,7 @@ export class SignatureStrategy extends PassportStrategy(Strategy, 'signature') {
         })
 
     req.session.user = {
-      id: user.id.toString(),
+      id: user._id.toString(),
       roles: user.roles
     }
 

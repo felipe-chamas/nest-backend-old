@@ -1,10 +1,10 @@
 import { HttpService } from '@nestjs/axios'
 import { Injectable, NotFoundException } from '@nestjs/common'
-import { InjectRepository } from '@nestjs/typeorm'
+import { InjectModel } from '@nestjs/mongoose'
 import { AssetId } from 'caip'
-import { ObjectId } from 'mongodb'
+import { DeleteResult, UpdateResult } from 'mongodb'
+import { SoftDeleteModel } from 'mongoose-delete'
 import { firstValueFrom } from 'rxjs'
-import { MongoRepository } from 'typeorm'
 
 import { Pagination } from '@common/decorators/pagination.decorators'
 import { CreateNftDto } from '@common/dto/create-nft.dto'
@@ -13,11 +13,10 @@ import {
   PayableNFTWalletBodyDto,
   WalletBodyDto
 } from '@common/dto/create-wallet.dto'
-import { NftDto } from '@common/dto/entities/nft.dto'
 import { UpdateNftDto } from '@common/dto/update-nft.dto'
 import { MoralisNetworks } from '@common/enums/caip.enum'
 import { logger } from '@common/providers/logger'
-import { recoveryAgent } from '@common/utils'
+import { NftDocument, NftDto } from '@common/schemas/nft.schema'
 import { WalletService } from '@services/wallet.service'
 
 import type { Metadata } from '@common/types/metadata'
@@ -37,44 +36,20 @@ export class NftService {
   private readonly httpService = new HttpService()
 
   constructor(
-    @InjectRepository(NftDto)
-    private readonly nftRepo: MongoRepository<NftDto>,
+    @InjectModel(NftDto.name) private nftModel: SoftDeleteModel<NftDocument>,
     private readonly walletService: WalletService
   ) {}
 
   async create(createNftDto: CreateNftDto) {
-    const nft = this.nftRepo.create(createNftDto)
-    await this.nftRepo.save(nft)
+    const nft = new this.nftModel(createNftDto)
+    await nft.save()
     return nft
   }
 
-  async findAll({ query, ...match }: Pagination & Partial<NftDto>) {
-    const [nfts] = await this.nftRepo
-      .aggregate<NftDto[]>([
-        {
-          $match: match
-        },
-        {
-          $addFields: {
-            id: '$_id'
-          }
-        },
-        {
-          $facet: {
-            metadata: [{ $count: 'total' }],
-            data: query
-          }
-        },
-        {
-          $project: {
-            data: 1,
-            total: { $arrayElemAt: ['$metadata.total', 0] }
-          }
-        }
-      ])
-      .toArray()
-
-    return nfts
+  async findAll({ skip, limit, sort, ...match }: Pagination & Partial<NftDto>) {
+    const data = await this.nftModel.find(match).sort(sort).skip(skip).limit(limit).exec()
+    const total = await this.nftModel.find(match).count()
+    return { data, total }
   }
 
   async findByAddress(address: string): Promise<ExternalApiNft> {
@@ -263,59 +238,26 @@ export class NftService {
   }
 
   async findById(id: string) {
-    const [nft] = await this.nftRepo
-      .aggregate<NftDto>([
-        {
-          $match: {
-            _id: new ObjectId(id)
-          }
-        },
-        {
-          $addFields: {
-            id: '$_id'
-          }
-        }
-      ])
-      .toArray()
-
-    if (!nft) throw new NotFoundException(`NFT with id ${id} not found`)
-
+    const nft = await this.nftModel.findById(id).exec()
     return nft
   }
 
   async findByAssetId(assetId: AssetId) {
-    const [nft] = await this.nftRepo
-      .aggregate<NftDto>([
-        {
-          $match: {
-            accountIds: {
-              $elemMatch: assetId.toJSON()
-            }
-          }
-        },
-        {
-          $addFields: {
-            id: '$_id'
-          }
-        }
-      ])
-      .toArray()
+    const [nft] = await this.nftModel.find().elemMatch('assetIds', assetId.toJSON()).exec()
     return nft
   }
 
-  async update(id: string, updateNftDto: UpdateNftDto) {
-    const nft = await this.findById(id)
-    const newNft = { ...nft, ...updateNftDto }
-    return await this.nftRepo.save(newNft)
+  async update(id: string, update: UpdateNftDto) {
+    const nft = await this.nftModel.findByIdAndUpdate(id, update).exec()
+    return nft
   }
 
-  async remove(id: string) {
-    const nft = await this.findById(id)
-    return await this.nftRepo.softRemove(nft)
+  async remove(id: string): Promise<DeleteResult> {
+    return await this.nftModel.deleteById(id).exec()
   }
 
-  async recover(id?: string) {
-    return await recoveryAgent(this.nftRepo, id)
+  async recover(id?: string): Promise<UpdateResult> {
+    return await this.nftModel.restore({ _id: id }).exec()
   }
 
   async mint(body: WalletBodyDto) {

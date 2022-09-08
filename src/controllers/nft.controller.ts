@@ -7,7 +7,7 @@ import {
   ApiOperation,
   ApiTags
 } from '@nestjs/swagger'
-import { AssetId } from 'caip'
+import { AssetId, ChainId } from 'caip'
 
 import { Auth } from '@common/decorators/auth.decorators'
 import { GetPagination, Pagination } from '@common/decorators/pagination.decorators'
@@ -17,9 +17,9 @@ import {
   PayableNFTWalletBodyDto,
   WalletBodyDto
 } from '@common/dto/create-wallet.dto'
-import { NftDto } from '@common/dto/entities/nft.dto'
 import { UpdateNftDto } from '@common/dto/update-nft.dto'
 import { Role } from '@common/enums/role.enum'
+import { NftDto } from '@common/schemas/nft.schema'
 import { NftCollectionService } from '@services/nft-collection.service'
 import { NftService } from '@services/nft.service'
 
@@ -57,10 +57,7 @@ export class NftController {
   ) {
     // TODO add ApiOkResponse
     if (chain === 'solana') {
-      const collections = await this.nftCollectionService.findAll({
-        query: []
-      })
-
+      const collections = await this.nftCollectionService.findAll({ skip: 0, limit: 10, sort: {} })
       const result = await this.nftService.findByAddress(address)
       const collectionAddresses = collections.data
         .map((collection) => [
@@ -84,18 +81,20 @@ export class NftController {
     @Param('wallet') walletAddress: string
   ) {
     // TODO add ApiOkResponse
-    const [networkNamespace, networkReference, address] = walletAddress.split(':')
+    const [namespace, reference, address] = walletAddress.split(':')
 
-    const collectionAddresses = await this.nftCollectionService.findAddressesByChainId(
-      networkNamespace,
-      networkReference
-    )
+    const chainId = new ChainId({
+      namespace,
+      reference
+    })
 
-    if (networkNamespace === 'solana') {
+    const collectionAddresses = await this.nftCollectionService.findAddressesByChainId(chainId)
+
+    if (namespace === 'solana') {
       const result = await this.nftService.findAllBySolanaWallet({ ...query }, address)
       return result.filter((nft) => collectionAddresses.includes(nft.collectionAddress))
     } else {
-      const network = `${networkNamespace}:${networkReference}`
+      const network = `${namespace}:${reference}`
       return this.nftService.findAllByEvmWallet(
         address,
         network,

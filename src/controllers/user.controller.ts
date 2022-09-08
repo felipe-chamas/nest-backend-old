@@ -20,9 +20,9 @@ import { SessionData } from 'express-session'
 
 import { Auth } from '@common/decorators/auth.decorators'
 import { GetPagination, Pagination } from '@common/decorators/pagination.decorators'
-import { UserDto } from '@common/dto/entities/user.dto'
 import { UpdateUserDto } from '@common/dto/update-user.dto'
 import { Role } from '@common/enums/role.enum'
+import { UserDto } from '@common/schemas/user.schema'
 import { UserService } from '@services/user.service'
 
 @ApiTags('Users')

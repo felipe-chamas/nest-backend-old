@@ -1,46 +1,56 @@
+import { getModelToken } from '@nestjs/mongoose'
 import { Test, TestingModule } from '@nestjs/testing'
-import { getRepositoryToken } from '@nestjs/typeorm'
-import { MongoRepository } from 'typeorm'
+import { SoftDeleteModel } from 'mongoose-delete'
 
-import { NftDto } from '@common/dto/entities/nft.dto'
+import { CreateNftDto } from '@common/dto/create-nft.dto'
+import { NftDocument, NftDto } from '@common/schemas/nft.schema'
 import { NftService } from '@services/nft.service'
-import { mockCreateNft, mockUpdateNft, mockNft } from '__mocks__/nft.mock'
+import { mockNft } from '__mocks__/nft.mock'
 
 export type MockType<T> = {
   [P in keyof T]?: jest.Mock<NftDto>
 }
 
-export const repositoryMockFactory: () => MockType<MongoRepository<NftDto>> = jest.fn(() => ({
+const mockRepository = {
+  find() {
+    return [mockNft, mockNft]
+  },
+  save() {
+    return {}
+  }
+}
+
+export const repositoryMockFactory: () => MockType<SoftDeleteModel<NftDocument>> = jest.fn(() => ({
   findOne: jest.fn((entity) => entity),
-  find: jest.fn().mockReturnValue([mockCreateNft, mockCreateNft]),
-  create: jest.fn().mockReturnValue(mockCreateNft),
-  save: jest.fn().mockReturnValue(mockCreateNft)
+  find: jest.fn().mockReturnValue([mockNft, mockNft]),
+  create: jest.fn().mockReturnValue(mockNft),
+  save: jest.fn().mockReturnValue(mockNft)
 }))
 
 describe('NftService', () => {
   let service: Partial<NftService>
-  let neftRepo: MockType<MongoRepository<NftDto>>
+  let nftModel: SoftDeleteModel<NftDocument>
 
   beforeEach(async () => {
     service = {
-      create: jest.fn().mockReturnValue(mockCreateNft),
-      findAll: jest.fn().mockReturnValue([mockCreateNft, mockCreateNft]),
-      findById: jest.fn().mockReturnValue(mockCreateNft),
-      update: jest.fn().mockReturnValue(mockUpdateNft),
+      create: jest.fn().mockReturnValue(mockNft),
+      findAll: jest.fn().mockReturnValue([mockNft, mockNft]),
+      findById: jest.fn().mockReturnValue(mockNft),
+      update: jest.fn().mockReturnValue(mockNft),
       remove: jest.fn()
     }
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         { provide: NftService, useValue: service },
         {
-          provide: getRepositoryToken(NftDto),
-          useFactory: repositoryMockFactory
+          provide: getModelToken(NftDto.name),
+          useValue: mockRepository
         }
       ]
     }).compile()
 
     service = module.get<NftService>(NftService)
-    neftRepo = module.get(getRepositoryToken(NftDto))
+    nftModel = module.get(getModelToken(NftDto.name))
   })
 
   it('should be defined', () => {
@@ -48,35 +58,26 @@ describe('NftService', () => {
   })
 
   it('should create an nft', async () => {
-    const nft = neftRepo.create(mockCreateNft)
-    await neftRepo.save(nft)
-
-    const result = await service.create(mockCreateNft)
-    expect(result).toEqual({ ...mockCreateNft, ...result })
+    const result = await service.create(mockNft as CreateNftDto)
+    expect(result).toEqual(mockNft)
   })
 
   it('should find an nft', async () => {
-    const nft = neftRepo.create(mockCreateNft)
-    await neftRepo.save(nft)
-
-    const id = nft.id
-    const result = await service.findById(id.toString())
-    expect(result).toEqual({ ...mockCreateNft, ...result })
+    const result = await service.findById(mockNft._id)
+    expect(result).toEqual(mockNft)
   })
 
   it('should find all nfts', async () => {
-    const nfts = await neftRepo.find()
-    const result = await service.findAll({ query: [] })
+    const nfts = await nftModel.find()
+    const result = await service.findAll({ limit: 10, skip: 0, sort: {} })
     expect(result).toEqual(nfts)
   })
 
   it('should update an nft', async () => {
-    const nft = neftRepo.create(mockCreateNft)
-    await neftRepo.save(nft)
-
-    const nftId = nft.id as unknown as string
-    const result = await service.update(nftId, mockUpdateNft)
-    expect(result).toEqual({ ...mockUpdateNft, ...result })
+    const result = await service.update(mockNft._id, {
+      metadata: { ...mockNft.metadata, description: 'New Description' }
+    })
+    expect(result).toEqual(mockNft)
   })
 
   it('should delete an nft', async () => {

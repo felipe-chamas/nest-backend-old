@@ -1,59 +1,37 @@
-import { CreateNftDto } from '@common/dto/create-nft.dto'
-import { UpdateNftDto } from '@common/dto/update-nft.dto'
+import { NftDocument } from '@common/schemas/nft.schema'
 
-export const mockCreateNft = {
-  id: '624b3c3adb4b27a36fc4d450',
-  userId: '624b3c3adb4b27a36fc4d450',
-  nftCollectionId: '624b40189c5293c6f75945f1',
-  metadata: {
-    base: 'jellyfish',
-    rich_property: {
-      name: 'ears',
-      value: 'tiny',
-      display_value: 'small'
+const mockMetadata = {
+  name: 'starfish',
+  image: 'https://example.com',
+  description: 'Starfish from the sea',
+  attributes: [
+    {
+      trait_type: 'name',
+      value: 'starfish'
+    },
+    {
+      trait_type: 'eyes',
+      value: 'big'
     }
-  },
-  createdAt: new Date(),
-  updatedAt: new Date()
-} as unknown as CreateNftDto
-
-export const mockUpdateNft = {
-  userId: '624b3c3adb4b27a36fc4d450',
-  nftCollectionId: '624b40189c5293c6f75945f1',
-  metadata: {
-    base: 'jellyfish',
-    rich_property: {
-      name: 'ears',
-      value: 'tiny',
-      display_value: 'small'
-    }
-  }
-} as unknown as UpdateNftDto
-
-export const mockCreateNftResponse = {
-  metadata: {
-    base: 'jellyfish',
-    rich_property: {
-      name: 'ears',
-      value: 'tiny',
-      display_value: 'small'
-    }
-  },
-  userId: '624b3c3adb4b27a36fc4d450',
-  nftCollectionId: '624b40189c5293c6f75945f1',
-  id: '624b3c3adb4b27a36fc4d450'
+  ]
 }
 
-export const mockNft = {
-  id: '624b466796780a1276e70e53',
-  metadata: {
-    base: 'starfish',
-    rich_property: {
-      name: 'eyes',
-      value: 'big',
-      display_value: 'Big'
-    }
-  },
-  userId: '624b3c3adb4b27a36fc4d450',
-  nftCollectionId: '624b40189c5293c6f75945f1'
+const mockAssetIds = [
+  {
+    chainId: {
+      namespace: 'eip155',
+      reference: '56'
+    },
+    assetName: {
+      namespace: 'ERC721',
+      reference: '0xE9f9245615A4571d322fe6EA03Ab82C44b432CEa'
+    },
+    tokenId: '1'
+  }
+]
+
+export const mockNft: Partial<NftDocument> = {
+  _id: '624b466796780a1276e70e53',
+  metadata: mockMetadata,
+  assetIds: mockAssetIds
 }

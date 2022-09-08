@@ -4,9 +4,9 @@ import { ApiBody, ApiExcludeEndpoint, ApiOkResponse, ApiOperation, ApiTags } fro
 import { Auth } from '@common/decorators/auth.decorators'
 import { GetPagination, Pagination } from '@common/decorators/pagination.decorators'
 import { CreateNftCollectionDto } from '@common/dto/create-nft-collection.dto'
-import { NftCollectionDto } from '@common/dto/entities/nft-collection.dto'
 import { UpdateNftCollectionDto } from '@common/dto/update-nft-collection.dto'
 import { Role } from '@common/enums/role.enum'
+import { NftCollectionDto } from '@common/schemas/nft-collection.schema'
 import { NftCollectionService } from '@services/nft-collection.service'
 
 @ApiTags('NftCollections')

@@ -23,6 +23,7 @@ services:
       - VENLY_CLIENT_SECRET=${VENLY_CLIENT_SECRET}
       - VENLY_APPLICATION_ID=${VENLY_APPLICATION_ID}
       - MORALIS_API_KEY=${MORALIS_API_KEY}
+      - API_KEY=${API_KEY}
     ports:
       - 8080:8080
     depends_on:

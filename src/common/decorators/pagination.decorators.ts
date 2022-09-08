@@ -1,12 +1,11 @@
-import { createParamDecorator, ExecutionContext } from '@nestjs/common'
+import { BadRequestException, createParamDecorator, ExecutionContext } from '@nestjs/common'
 import { Request } from 'express'
-
-type Sort = { [key: string]: 1 | -1 }
-
-type PaginationQuery = Array<{ $sort: Sort } | { $skip: number } | { $limit: number }>
+import { SortOrder } from 'mongoose'
 
 export interface Pagination {
-  query: PaginationQuery
+  skip: number
+  limit: number
+  sort: { [key: string]: SortOrder }
 }
 
 const DEFAULT_NUMBER_OF_RESULTS = 10
@@ -14,28 +13,38 @@ const DEFAULT_NUMBER_OF_RESULTS = 10
 export const GetPagination = createParamDecorator((data, ctx: ExecutionContext): Pagination => {
   const req: Request = ctx.switchToHttp().getRequest()
 
-  const query: PaginationQuery = []
+  const pagination: Pagination = {
+    skip: 0,
+    limit: DEFAULT_NUMBER_OF_RESULTS,
+    sort: {}
+  }
 
   if (req.query.sort) {
-    const sort = req.query.sort.toString()
-    query.push({
-      $sort: {
-        [sort.slice(1)]: sort[0] === '-' ? -1 : sort[0] === '+' ? 1 : 1
-      }
+    const sorts = req.query.sort.toString().split(',')
+    sorts.forEach((sort) => {
+      const [sortValue, sortOrder] = sort.split('-')
+      if (
+        sortOrder !== 'asc' &&
+        sortOrder !== 'desc' &&
+        sortOrder !== 'ascending' &&
+        sortOrder !== 'descending'
+      )
+        throw new BadRequestException(`Expected value of SortOrder but received: ${sortOrder}`)
+      pagination.sort[sortValue] = sortOrder as SortOrder
     })
   }
 
-  query.push(req.query.skip ? { $skip: parseInt(req.query.skip.toString()) } : { $skip: 0 })
+  if (req.query.skip) {
+    pagination.skip = parseInt(req.query.skip.toString())
+  }
 
-  query.push(
-    req.query.limit
-      ? { $limit: parseInt(req.query.limit.toString()) }
-      : { $limit: DEFAULT_NUMBER_OF_RESULTS }
-  )
+  if (req.query.limit) {
+    pagination.limit = parseInt(req.query.limit.toString())
+  }
 
   delete req.query.sort
   delete req.query.skip
   delete req.query.limit
 
-  return { query }
+  return pagination
 })

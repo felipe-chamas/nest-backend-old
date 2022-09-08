@@ -1,22 +1,24 @@
 import { Module } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { TypeOrmModule } from '@nestjs/typeorm'
-import { getConnectionOptions } from 'typeorm'
+import { MongooseModule } from '@nestjs/mongoose'
+import { Connection } from 'mongoose'
+import MongooseAutoPopulate from 'mongoose-autopopulate'
+import MongooseDelete from 'mongoose-delete'
 
 import { logger } from '@common/providers/logger'
 
 @Module({
   imports: [
-    TypeOrmModule.forRootAsync({
+    MongooseModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: async (config: ConfigService) =>
-        Object.assign(await getConnectionOptions(), {
-          useNewUrlParser: true,
-          useCreateIndex: true,
-          useUnifiedTopology: true,
-          autoLoadEntities: true,
-          synchronize: config.get<string>('stage') === 'development' ? true : false
-        })
+      useFactory: (config: ConfigService) => ({
+        uri: config.get<string>('mongo_uri'),
+        connectionFactory: (connection: Connection) => {
+          connection.plugin(MongooseAutoPopulate)
+          connection.plugin(MongooseDelete, { deletedAt: true })
+          return connection
+        }
+      })
     })
   ]
 })

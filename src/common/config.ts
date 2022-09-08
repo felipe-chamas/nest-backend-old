@@ -1,17 +1,6 @@
 export default () => ({
   port: parseInt(process.env.PORT, 10) || 3000,
   stage: process.env.STAGE || 'development',
-  sqs: {
-    queueUrl: process.env.EVENTS_QUEUE_URL
-  },
-  blockchain: {
-    jsonRpcProvider: {
-      '1': process.env.ETHEREUM_MAINNET_RPC_PROVIDER,
-      '5': process.env.GOERLI_TESTNET_RPC_PROVIDER,
-      '56': process.env.BINANCE_MAINNET_RPC_PROVIDER,
-      '97': process.env.BINANCE_TESTNET_RPC_PROVIDER
-    }
-  },
   throttler: {
     ttl: process.env.THROTTLER_TTL || '1m',
     limit: process.env.THROTTLER_LIMIT || '10/1m',
@@ -19,6 +8,7 @@ export default () => ({
   },
   session_secret: process.env.SESSION_SECRET,
   redis_url: process.env.REDIS_URL,
+  mongo_uri: process.env.MONGODB_URI,
   docs: {
     token: process.env.DOCS_TOKEN
   },

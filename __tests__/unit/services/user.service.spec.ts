@@ -1,18 +1,28 @@
+import { getModelToken } from '@nestjs/mongoose'
 import { Test, TestingModule } from '@nestjs/testing'
-import { getRepositoryToken } from '@nestjs/typeorm'
-import { MongoRepository } from 'typeorm'
+import { SoftDeleteModel } from 'mongoose-delete'
 
-import { NftDto } from '@common/dto/entities/nft.dto'
-import { UserDto } from '@common/dto/entities/user.dto'
+import { CreateUserDto } from '@common/dto/create-user.dto'
 import { UpdateUserDto } from '@common/dto/update-user.dto'
+import { NftDto } from '@common/schemas/nft.schema'
+import { UserDocument, UserDto } from '@common/schemas/user.schema'
 import { UserService } from '@services/user.service'
-import { mockCreateUser, mockUpdateUser, mockUser } from '__mocks__/user.mock'
+import { mockUser } from '__mocks__/user.mock'
 
 export type MockType<T> = {
   [P in keyof T]?: jest.Mock<NftDto>
 }
 
-export const repositoryMockFactory: () => MockType<MongoRepository<UserDto>> = jest.fn(() => ({
+const mockRepository = {
+  find() {
+    return [mockUser, mockUser]
+  },
+  save() {
+    return {}
+  }
+}
+
+export const repositoryMockFactory: () => MockType<SoftDeleteModel<UserDocument>> = jest.fn(() => ({
   findOne: jest.fn((entity) => entity),
   find: jest.fn().mockReturnValue([mockUser, mockUser]),
   create: jest.fn().mockReturnValue(mockUser),
@@ -20,9 +30,8 @@ export const repositoryMockFactory: () => MockType<MongoRepository<UserDto>> = j
 }))
 
 describe('UserService', () => {
-  let user
   let service: Partial<UserService>
-  let userRepo: MongoRepository<UserDto>
+  let userModel: SoftDeleteModel<UserDocument>
 
   beforeEach(async () => {
     service = {
@@ -39,14 +48,14 @@ describe('UserService', () => {
           useValue: service
         },
         {
-          provide: getRepositoryToken(UserDto),
-          useFactory: repositoryMockFactory
+          provide: getModelToken(UserDto.name),
+          useValue: mockRepository
         }
       ]
     }).compile()
 
     service = module.get<UserService>(UserService)
-    userRepo = module.get(getRepositoryToken(UserDto))
+    userModel = module.get(getModelToken(UserDto.name))
   })
 
   it('should be defined', () => {
@@ -54,40 +63,28 @@ describe('UserService', () => {
   })
 
   it('it should create an user', async () => {
-    user = userRepo.create(mockCreateUser)
-    await userRepo.save(user)
-
-    const result = await service.create(user)
-    expect(result.id).toEqual(user.id)
+    const result = await service.create(mockUser as CreateUserDto)
+    expect(result._id).toEqual(mockUser._id)
   })
 
   it('should fetch all users', async () => {
-    const users = await userRepo.find()
-    const result = await service.findAll({ query: [] })
+    const users = await userModel.find()
+    const result = await service.findAll({ limit: 10, skip: 0, sort: {} })
     expect(result).toEqual(users)
   })
 
   it('should fetch a user', async () => {
-    user = userRepo.create(mockCreateUser)
-    await userRepo.save(user)
-    const result = await service.findById(user.id)
-    expect(result.id).toBeTruthy()
+    const result = await service.findById(mockUser._id)
+    expect(result._id).toBeTruthy()
   })
 
   it('should update a user', async () => {
-    user = userRepo.create(mockCreateUser)
-    await userRepo.save(user)
-
-    const result = await service.update(user.id, mockUpdateUser as UpdateUserDto)
-
-    expect(result.name).toEqual(mockUpdateUser.name)
+    const result = await service.update(mockUser._id, { name: 'New Name' } as UpdateUserDto)
+    expect(result.name).toEqual(mockUser.name)
   })
 
   it('should remove a user', async () => {
-    user = mockUser
-
-    const result = await service.remove(user.id)
-
+    const result = await service.remove(mockUser._id)
     expect(result).toBeUndefined()
   })
 })
