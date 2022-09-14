@@ -2,11 +2,6 @@ name: Backend-CI/CD Development Deploy
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - 'src/*'
 
 env:
   REGISTRY_NAME: 'webserver-develop-ecr'
@@ -19,19 +14,8 @@ env:
   CONTAINER_PORT: 3000
 
 jobs:
-  test:
-    name: Test
-    runs-on: ubuntu-latest
-    container:
-      image: node
-    steps:
-      - uses: actions/checkout@v3
-      - run: yarn install --frozen-lockfile
-      - run: yarn nx run-many --target=lint --projects=backend
-      - run: yarn nx run-many --target=test --projects=backend
   deploy:
     name: Deploy Develop
-    needs: [test]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
