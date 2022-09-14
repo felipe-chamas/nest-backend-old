@@ -34,7 +34,6 @@ RUN yarn build
 FROM base AS production
 COPY --from=pruned-dependencies --chown=node:node /usr/src/app/node_modules ./node_modules
 COPY --from=builder --chown=node:node /usr/src/app/dist ./dist
-COPY --from=builder --chown=node:node /usr/src/app/ormconfig.js ./
 
 RUN touch .env
 RUN chown node:node .env
