@@ -40,4 +40,4 @@ RUN chown node:node .env
 
 USER node
 EXPOSE 3000
-CMD printf "%s" "$ENV_FILE" > .env && node dist/main.js
+CMD printf "%s" "$ENV_FILE" > .env && node dist/src/main.js
