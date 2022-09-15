@@ -4,39 +4,39 @@ import { AccountId, AccountIdParams } from 'caip'
 import { DeleteResult, UpdateResult } from 'mongodb'
 import { v4 as uuidV4 } from 'uuid'
 
-import { Pagination } from '@common/decorators/pagination.decorators'
 import { CreateUserDto } from '@common/dto/create-user.dto'
 import { UpdateUserDto } from '@common/dto/update-user.dto'
 import { UserDto, UserDocument } from '@common/schemas/user.schema'
+
+import { VenlyService } from './utils/venly.service'
 
 import type { AccountIdDto } from '@common/types/caip'
 import type { SoftDeleteModel } from 'mongoose-delete'
 
 @Injectable()
 export class UserService {
-  constructor(@InjectModel(UserDto.name) private userModel: SoftDeleteModel<UserDocument>) {}
+  constructor(
+    @InjectModel(UserDto.name) private userModel: SoftDeleteModel<UserDocument>,
+    private readonly venlyService: VenlyService
+  ) {}
 
   async create(createUserDto: CreateUserDto) {
+    const uuid = uuidV4()
+    const wallet = await this.venlyService.createWallet({
+      pincode: createUserDto.pincode,
+      uuid
+    })
     const userData = {
       ...createUserDto,
-      uuid: uuidV4(),
+      uuid,
       accountIds: createUserDto.accountIds.map(
         (accountId: string | AccountIdParams) => new AccountId(accountId).toJSON() as AccountIdDto
-      )
+      ),
+      wallet
     }
     const user = new this.userModel(userData)
     await user.save()
-    return user
-  }
 
-  async findAll({ skip, limit, sort, ...match }: Pagination & Partial<UserDto>) {
-    const data = await this.userModel.find(match).sort(sort).skip(skip).limit(limit).exec()
-    const total = await this.userModel.find(match).count()
-    return { data, total }
-  }
-
-  async findByEmail(email: string) {
-    const user = await this.userModel.findOne({ email }).exec()
     return user
   }
 

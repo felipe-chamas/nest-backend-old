@@ -6,9 +6,9 @@ import { FractalAuthModule } from '@modules/auth/fractal.module'
 import { SignatureAuthModule } from '@modules/auth/signature.module'
 import { SteamAuthModule } from '@modules/auth/steam.module'
 import { NftCollectionModule } from '@modules/nft-collection.module'
+import { NftGameModule } from '@modules/nft-game.module'
 import { NftModule } from '@modules/nft.module'
 import { UserModule } from '@modules/user.module'
-import { WalletModule } from '@modules/wallet.module'
 
 export const routes: Routes = [
   {
@@ -16,18 +16,18 @@ export const routes: Routes = [
     module: NftModule,
     children: [
       {
-        path: 'wallet',
-        module: WalletModule
+        path: 'game',
+        module: NftGameModule
+      },
+      {
+        path: 'collection',
+        module: NftCollectionModule
       }
     ]
   },
   {
     path: 'user',
     module: UserModule
-  },
-  {
-    path: 'nft-collection',
-    module: NftCollectionModule
   },
   {
     path: 'auth',

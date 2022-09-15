@@ -9,6 +9,7 @@ import {
   ApiPropertyUserName,
   ApiPropertyUserRoles
 } from '@common/decorators/docs.decorators'
+import { IsPincode } from '@common/decorators/venly.decorators'
 import { Role } from '@common/enums/role.enum'
 import { SocialAccounts } from '@common/types/social'
 
@@ -35,4 +36,7 @@ export class CreateUserDto {
   @ApiPropertyUserAccountIds()
   @IsAccountIdArray
   accountIds: AccountIdParams[]
+
+  @IsPincode
+  pincode: string
 }

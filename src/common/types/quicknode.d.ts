@@ -13,6 +13,7 @@ export interface ExternalApiNft {
 export interface QuickNodeFetchNftsResponse {
   result: {
     assets: ExternalApiNft[]
+    totalPages: number
   }
 }
 

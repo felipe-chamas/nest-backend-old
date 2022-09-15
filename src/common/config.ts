@@ -1,11 +1,6 @@
 export default () => ({
   port: parseInt(process.env.PORT, 10) || 3000,
   stage: process.env.STAGE || 'development',
-  throttler: {
-    ttl: process.env.THROTTLER_TTL || '1m',
-    limit: process.env.THROTTLER_LIMIT || '10/1m',
-    throttler: process.env.THROTTLER_MAX || '100/1m'
-  },
   session_secret: process.env.SESSION_SECRET,
   redis_url: process.env.REDIS_URL,
   mongo_uri: process.env.MONGODB_URI,

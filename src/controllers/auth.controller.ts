@@ -3,7 +3,7 @@ import { SessionData } from 'express-session'
 
 @Controller()
 export class AuthController {
-  @Post('/logout')
+  @Post('logout')
   async submitAgreement(@Session() session: SessionData) {
     session.destroy()
     return 'OK'

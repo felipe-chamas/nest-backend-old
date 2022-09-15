@@ -48,10 +48,12 @@ export class SignatureStrategy extends PassportStrategy(Strategy, 'signature') {
 
     const foundUser = await this.userService.findByAccountId(accountId)
 
+    // TODO: Dynamically chose pincode for new user
     const user = foundUser
       ? foundUser
       : await this.userService.create({
-          accountIds: [accountId.toJSON()]
+          accountIds: [accountId.toJSON()],
+          pincode: '12345'
         })
 
     req.session.user = {

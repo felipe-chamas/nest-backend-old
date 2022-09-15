@@ -1,7 +1,4 @@
 // Ref: EVM references based on list data - https://github.com/ethereum-lists/chains/tree/master/_data/chains
-
-import type { IMoralisNetworks } from '@common/types/caip'
-
 // Ref: Solana references based on GenesisHash - https://docs.solana.com/clusters
 export enum ChainIdReference {
   ETHEREUM_MAINNET = 'eip155:1',
@@ -12,27 +9,3 @@ export enum ChainIdReference {
   SOLANA_DEVNET = 'solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1',
   SOLANA_MAINNET = 'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp'
 }
-
-export const MoralisNetworks: IMoralisNetworks = {
-  [ChainIdReference.ETHEREUM_MAINNET]: {
-    id: 'eth',
-    chain: 'ETH',
-    name: 'Ethereum Mainnet'
-  },
-  [ChainIdReference.GOERLI_TESTNET]: {
-    id: 'goerli',
-    chain: 'GoerliETH',
-    name: 'Goerli Testnet'
-  },
-  [ChainIdReference.BINANCE_MAINNET]: {
-    id: 'bsc',
-    chain: 'BNB',
-    name: 'Binance Smart Chain Mainnet'
-  },
-  [ChainIdReference.BINANCE_TESTNET]: {
-    id: 'bsc testnet',
-    chain: 'tBNB',
-    name: 'Binance Smart Chain Testnet'
-  }
-}
-Object.freeze(MoralisNetworks)

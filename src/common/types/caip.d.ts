@@ -23,11 +23,3 @@ export interface AssetIdDto {
   assetName: AssetNameDto
   tokenId: string
 }
-
-interface IMoralisNetworks {
-  [key: string]: {
-    id: string
-    chain: string
-    name: string
-  }
-}

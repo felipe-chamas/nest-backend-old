@@ -4,12 +4,11 @@ import { SoftDeleteModel } from 'mongoose-delete'
 
 import { CreateNftCollectionDto } from '@common/dto/create-nft-collection.dto'
 import { NftCollectionDocument, NftCollectionDto } from '@common/schemas/nft-collection.schema'
-import { NftDto } from '@common/schemas/nft.schema'
 import { NftCollectionService } from '@services/nft-collection.service'
 import { mockNftCollection } from '__mocks__/nft-collection.mock'
 
 export type MockType<T> = {
-  [P in keyof T]?: jest.Mock<NftDto>
+  [P in keyof T]?: jest.Mock<SoftDeleteModel<NftCollectionDocument>>
 }
 
 const mockRepository = {

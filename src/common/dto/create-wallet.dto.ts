@@ -10,7 +10,7 @@ import type { AssetIdDto } from '@common/types/caip'
 export class WalletBodyDto {
   @IsString()
   @ApiPropertyUserId()
-  userId: string
+  uuid: string
 
   @IsPincode
   @ApiProperty({

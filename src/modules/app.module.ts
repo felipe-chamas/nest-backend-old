@@ -6,21 +6,21 @@ import { routes } from '@routes'
 
 import { AuthModule } from './auth.module'
 import { GlobalConfigModule } from './config.module'
-import { MongoDbProvider } from './mongo.module'
 import { NftCollectionModule } from './nft-collection.module'
+import { NftGameModule } from './nft-game.module'
 import { NftModule } from './nft.module'
 import { UserModule } from './user.module'
-import { WalletModule } from './wallet.module'
+import { MongoDbProvider } from './utils/mongo.module'
 
 @Module({
   imports: [
     GlobalConfigModule,
     RouterModule.forRoutes(routes),
     MongoDbProvider,
-    WalletModule,
-    UserModule,
-    NftModule,
+    NftGameModule,
     NftCollectionModule,
+    NftModule,
+    UserModule,
     AuthModule
   ],
   controllers: [AppController]

@@ -12,7 +12,7 @@ import { UserService } from '@services/user.service'
 export class SignatureAuthController {
   constructor(private service: SignatureAuthService, private userService: UserService) {}
 
-  @Post('/request')
+  @Post('request')
   async requestAgreement(
     @Body() { accountId }: RequestForAgreementDto,
     @Session() session: SessionData
@@ -26,7 +26,7 @@ export class SignatureAuthController {
   }
 
   @UseGuards(AuthGuard('signature'))
-  @Post('/login')
+  @Post('login')
   async submitAgreement(@Session() session: SessionData) {
     const user = this.userService.findById(session.user.id)
     return user

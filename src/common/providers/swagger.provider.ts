@@ -2,9 +2,9 @@ import { INestApplication } from '@nestjs/common'
 import { SwaggerModule, DocumentBuilder, SwaggerDocumentOptions } from '@nestjs/swagger'
 
 import { NftCollectionModule } from '@modules/nft-collection.module'
+import { NftGameModule } from '@modules/nft-game.module'
 import { NftModule } from '@modules/nft.module'
 import { UserModule } from '@modules/user.module'
-import { WalletModule } from '@modules/wallet.module'
 
 export class Swagger {
   static init(app: INestApplication) {
@@ -31,7 +31,7 @@ export class Swagger {
       .build()
 
     const options: SwaggerDocumentOptions = {
-      include: [UserModule, NftModule, NftCollectionModule, WalletModule]
+      include: [UserModule, NftModule, NftCollectionModule, NftGameModule]
     }
 
     const document = SwaggerModule.createDocument(app, swaggerConfig, options)

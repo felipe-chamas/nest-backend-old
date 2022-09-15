@@ -6,7 +6,8 @@ import {
   Param,
   Delete,
   Session,
-  UnauthorizedException
+  UnauthorizedException,
+  Post
 } from '@nestjs/common'
 import {
   ApiBody,
@@ -19,7 +20,7 @@ import {
 import { SessionData } from 'express-session'
 
 import { Auth } from '@common/decorators/auth.decorators'
-import { GetPagination, Pagination } from '@common/decorators/pagination.decorators'
+import { CreateUserDto } from '@common/dto/create-user.dto'
 import { UpdateUserDto } from '@common/dto/update-user.dto'
 import { Role } from '@common/enums/role.enum'
 import { UserDto } from '@common/schemas/user.schema'
@@ -38,15 +39,6 @@ export class UserController {
   @ApiExcludeEndpoint()
   remove(@Param('id') id: string) {
     return this.userService.remove(id)
-  }
-
-  @Auth(Role.USER_ADMIN)
-  @ApiOperation({ description: 'Returns a list of Users' })
-  @ApiOkResponse({ type: [UserDto] })
-  @Get()
-  @ApiExcludeEndpoint()
-  findAll(@GetPagination() pagination: Pagination) {
-    return this.userService.findAll(pagination)
   }
 
   @Get('whoami')
@@ -80,6 +72,12 @@ export class UserController {
   @ApiOkResponse({ type: UserDto })
   async findByUUID(@Param('uuid') uuid: string) {
     const user = await this.userService.findByUUID(uuid)
+    return user
+  }
+
+  @Post()
+  async create(@Body() body: CreateUserDto) {
+    const user = await this.userService.create(body)
     return user
   }
 }

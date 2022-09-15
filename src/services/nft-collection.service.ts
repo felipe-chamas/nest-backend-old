@@ -47,7 +47,15 @@ export class NftCollectionService {
       .elemMatch('assetTypes', { chainId: chainId.toJSON() })
       .exec()
     return nftCollections
-      .map((collection) => collection.assetTypes.map((assetType) => assetType.assetName.reference))
+      .map((collection) =>
+        collection.assetTypes
+          .filter(
+            (assetType) =>
+              assetType.chainId.reference === chainId.reference &&
+              assetType.chainId.namespace === chainId.namespace
+          )
+          .map((assetType) => assetType.assetName.reference)
+      )
       .flat()
   }
 

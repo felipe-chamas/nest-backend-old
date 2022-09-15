@@ -17,7 +17,6 @@ describe('UserController', () => {
 
   beforeEach(async () => {
     service = {
-      findAll: () => Promise.resolve({ data: [mockUser as UserResult], total: 1 }),
       findByUUID: jest.fn().mockImplementation(async (uuid: string) => {
         return { ...mockUser, uuid: uuid } as UserResult
       }),

@@ -12,14 +12,14 @@ export class DiscordController {
     private readonly userService: UserService
   ) {}
 
-  @Post('/link')
+  @Post('link')
   @UseGuards(AuthGuard('discord'))
   async link(@Session() session: SessionData) {
     const user = await this.userService.findById(session.user.id)
     return user
   }
 
-  @Post('/unlink')
+  @Post('unlink')
   async unlink(@Session() session: SessionData) {
     return this.discordService.deleteDiscordData(session)
   }

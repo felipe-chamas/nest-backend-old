@@ -18,13 +18,13 @@ import { SteamService } from '@services/auth/steam.service'
 export class SteamController {
   constructor(private readonly steamService: SteamService) {}
 
-  @Get('/link')
+  @Get('link')
   @UseGuards(AuthGuard('steam'))
   async link() {
     return
   }
 
-  @Get('/callback')
+  @Get('callback')
   @UseGuards(AuthGuard('steam'))
   async callback(@Req() req: Request, @Res() res: Response) {
     const queryString = Object.keys(req.user)
@@ -35,7 +35,7 @@ export class SteamController {
     res.redirect(`${process.env.FRONTEND_URL}/profile/settings?${queryString}`)
   }
 
-  @Post('/save')
+  @Post('save')
   async save(@Req() req: Request) {
     if (!req.session.user) throw new UnauthorizedException('No user authenticated in session')
     return this.steamService.updateOrCreateUser(req.session, {
@@ -44,7 +44,7 @@ export class SteamController {
     })
   }
 
-  @Post('/unlink')
+  @Post('unlink')
   async unlink(@Session() session: SessionData) {
     return this.steamService.deleteSteamData(session)
   }
