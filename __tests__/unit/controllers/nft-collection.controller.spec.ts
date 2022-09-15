@@ -56,15 +56,6 @@ describe('NftCollectionController', () => {
     expect(controller).toBeDefined()
   })
 
-  it('should create and nftCollection', async () => {
-    const result = await controller.create({
-      name: mockNftCollection.name,
-      assetTypes: mockNftCollection.assetTypes
-    })
-
-    expect(result).toEqual(mockNftCollection)
-  })
-
   it('should fetch all nftCollections', async () => {
     const result = await controller.findAll({} as Request, {
       skip: 0,

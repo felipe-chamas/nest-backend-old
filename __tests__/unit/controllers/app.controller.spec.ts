@@ -1,22 +1,21 @@
-import { Test, TestingModule } from '@nestjs/testing'
+import { Test } from '@nestjs/testing'
 
 import { AppController } from '@controllers/app.controller'
 
 describe('AppController', () => {
-  let app: TestingModule
+  let controller: AppController
 
   beforeAll(async () => {
-    app = await Test.createTestingModule({
+    const module = await Test.createTestingModule({
       controllers: [AppController]
     }).compile()
+
+    controller = module.get<AppController>(AppController)
   })
 
-  describe('getData', () => {
-    it('should return "Welcome to backend!"', () => {
-      const appController = app.get<AppController>(AppController)
-      expect(appController.getData()).toEqual({
-        message: 'Welcome!'
-      })
+  it('should return "Welcome!"', () => {
+    expect(controller.getData()).toEqual({
+      message: 'Welcome!'
     })
   })
 })

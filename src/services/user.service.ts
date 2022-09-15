@@ -34,7 +34,7 @@ export class UserService {
       ),
       wallet
     }
-    const user = new this.userModel(userData)
+    const user = await this.userModel.create(userData)
     await user.save()
 
     return user

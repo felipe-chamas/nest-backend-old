@@ -1,44 +1,29 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { SessionData } from 'express-session'
-import { ObjectId } from 'mongoose'
 
 import { UpdateUserDto } from '@common/dto/update-user.dto'
 import { Role } from '@common/enums/role.enum'
-import { UserDocument } from '@common/schemas/user.schema'
 import { UserController } from '@controllers/user.controller'
 import { UserService } from '@services/user.service'
-import { mockUser, mockAdmin } from '__mocks__/user.mock'
-
-type UserResult = UserDocument & { _id: ObjectId }
+import { mockUser, mockAdmin, mockUserService } from '__mocks__/user.mock'
 
 describe('UserController', () => {
   let controller: UserController
   let service: Partial<UserService>
 
   beforeEach(async () => {
-    service = {
-      findByUUID: jest.fn().mockImplementation(async (uuid: string) => {
-        return { ...mockUser, uuid: uuid } as UserResult
-      }),
-      update: (_: string, updatedUser: Partial<UpdateUserDto>) =>
-        Promise.resolve({
-          ...mockUser,
-          ...updatedUser
-        } as UserResult),
-      remove: jest.fn()
-    }
-
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UserController],
       providers: [
         {
           provide: UserService,
-          useValue: service
+          useValue: mockUserService
         }
       ]
     }).compile()
 
     controller = module.get<UserController>(UserController)
+    service = module.get<UserService>(UserService)
   })
 
   it('should be defined', () => {
