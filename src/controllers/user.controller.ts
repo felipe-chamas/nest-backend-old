@@ -23,6 +23,7 @@ import { AccountId } from 'caip'
 import { SessionData } from 'express-session'
 
 import { Auth } from '@common/decorators/auth.decorators'
+import { GetPagination, Pagination } from '@common/decorators/pagination.decorators'
 import { WalletBodyDto } from '@common/dto/create-wallet.dto'
 import { Role } from '@common/enums/role.enum'
 import { UserDto } from '@common/schemas/user.schema'
@@ -37,6 +38,15 @@ export class UserController {
     private readonly userService: UserService,
     private readonly venlyService: VenlyService
   ) {}
+
+  @Auth(Role.USER_ADMIN)
+  @ApiOperation({ description: 'Returns a list of Users' })
+  @ApiOkResponse({ type: [UserDto] })
+  @Get()
+  @ApiExcludeEndpoint()
+  findAll(@GetPagination() pagination: Pagination) {
+    return this.userService.findAll(pagination)
+  }
 
   @Auth(Role.USER_ADMIN)
   @ApiOperation({ description: 'Deletes a User' })

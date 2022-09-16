@@ -4,6 +4,7 @@ import { AccountId } from 'caip'
 import { DeleteResult, UpdateResult } from 'mongodb'
 import { v4 as uuidV4 } from 'uuid'
 
+import { Pagination } from '@common/decorators/pagination.decorators'
 import { UserDto, UserDocument } from '@common/schemas/user.schema'
 import { AccountIdDto } from '@common/types/caip'
 
@@ -22,6 +23,12 @@ export class UserService {
     const user = await this.userModel.create(userData)
     await user.save()
     return user
+  }
+
+  async findAll({ skip, limit, sort, ...match }: Pagination & Partial<UserDto>) {
+    const data = await this.userModel.find(match).sort(sort).skip(skip).limit(limit).exec()
+    const total = await this.userModel.find(match).count()
+    return { data, total }
   }
 
   async findByUUID(uuid: string): Promise<UserDto> {
