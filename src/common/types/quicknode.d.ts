@@ -4,7 +4,7 @@ export interface ExternalApiNft {
   tokenAddress: string
   collectionAddress: string
   imageUrl: string
-  traits: { [key: string]: string }[]
+  traits: { trait_type: string; value: string }[]
   chain: string
   network: string
   description: string
@@ -28,6 +28,7 @@ export interface SolscanTokenAccountResponse {
         trait_type: string
         value: string
       }[]
+      uri: string
     }
     collection: { key: string }
   }

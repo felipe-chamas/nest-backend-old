@@ -46,18 +46,10 @@ export class SignatureStrategy extends PassportStrategy(Strategy, 'signature') {
         new BadRequestException('Provided signature does not match address of agreement request')
       )
 
-    const foundUser = await this.userService.findByAccountId(accountId)
-
-    // TODO: Dynamically chose pincode for new user
-    const user = foundUser
-      ? foundUser
-      : await this.userService.create({
-          accountIds: [accountId.toJSON()],
-          pincode: '12345'
-        })
+    const user = await this.userService.findOrCreateByAccountId(accountId)
 
     req.session.user = {
-      id: user._id.toString(),
+      uuid: user.uuid,
       roles: user.roles
     }
 

@@ -38,18 +38,10 @@ export class FractalStrategy extends PassportStrategy(Strategy, 'fractal') {
     if (!accountPublicKey || accountPublicKey !== accountId.address)
       return done(new UnauthorizedException('Invalid public key'))
 
-    const foundUser = await this.userService.findByAccountId(accountId)
-
-    // TODO: Dynamically chose pincode for new user
-    const user = foundUser
-      ? foundUser
-      : await this.userService.create({
-          accountIds: [accountId.toJSON()],
-          pincode: '12345'
-        })
+    const user = await this.userService.findOrCreateByAccountId(accountId)
 
     req.session.user = {
-      id: user.id.toString(),
+      uuid: user.uuid,
       roles: user.roles
     }
 

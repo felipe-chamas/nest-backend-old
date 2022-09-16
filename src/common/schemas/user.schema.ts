@@ -10,14 +10,14 @@ import type { Document } from 'mongoose'
 
 @Schema({ timestamps: true, collection: 'user' })
 export class UserDto {
-  @Prop()
+  @Prop({ unique: true, index: true })
   uuid: string
 
   @Prop()
-  name?: string
+  name: string
 
   @Prop()
-  email?: string
+  email: string
 
   @Prop()
   roles: Role[]
@@ -26,13 +26,13 @@ export class UserDto {
   accountIds: AccountIdDto[]
 
   @Prop()
-  wallet?: WalletDto
+  wallet: WalletDto
 
   @Prop({ type: mongoose.Schema.Types.Mixed })
-  socialAccounts?: SocialAccounts
+  socialAccounts: SocialAccounts
 
   @Prop()
-  avatarUrl?: string
+  imageUrl: string
 }
 
 export type UserDocument = UserDto & Document

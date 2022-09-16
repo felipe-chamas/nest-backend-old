@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { Request } from 'express'
 import { ObjectId } from 'mongoose'
 
-import { CreateNftCollectionDto } from '@common/dto/create-nft-collection.dto'
 import { NftCollectionDocument, NftCollectionDto } from '@common/schemas/nft-collection.schema'
 import { NftCollectionController } from '@controllers/nft-collection.controller'
 import { NftCollectionService } from '@services/nft-collection.service'
@@ -16,7 +15,7 @@ describe('NftCollectionController', () => {
 
   beforeEach(async () => {
     service = {
-      create: (createNftCollectionDto: CreateNftCollectionDto) =>
+      create: (createNftCollectionDto: Partial<NftCollectionDto>) =>
         Promise.resolve({
           ...mockNftCollection,
           ...createNftCollectionDto

@@ -54,7 +54,7 @@ export class AuthGuard implements CanActivate {
       return false
     }
 
-    if (requiredRoles.includes(Role.OWNER) && user.id === request.params.id) {
+    if (requiredRoles.includes(Role.OWNER) && user.uuid === request.params.uuid) {
       return true
     }
 

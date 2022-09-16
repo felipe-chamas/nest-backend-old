@@ -1,26 +1,37 @@
-import { Controller, Post, Session, UseGuards } from '@nestjs/common'
+import { Controller, Post, Req, Session, UseGuards } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
+import { Request } from 'express'
 import { SessionData } from 'express-session'
 
-import { DiscordService } from '@services/auth/discord.service'
 import { UserService } from '@services/user.service'
 
 @Controller()
 export class DiscordController {
-  constructor(
-    private readonly discordService: DiscordService,
-    private readonly userService: UserService
-  ) {}
+  constructor(private readonly userService: UserService) {}
 
   @Post('link')
   @UseGuards(AuthGuard('discord'))
-  async link(@Session() session: SessionData) {
-    const user = await this.userService.findById(session.user.id)
-    return user
+  async link(@Req() req: Request, @Session() session: SessionData) {
+    const user = await this.userService.findByUUID(session.user.uuid)
+    return this.userService.update(session.user.uuid, {
+      socialAccounts: {
+        ...user.socialAccounts,
+        discord: {
+          id: req.user.id,
+          username: `${req.user.username}#${req.user.discriminator}`
+        }
+      }
+    })
   }
 
   @Post('unlink')
   async unlink(@Session() session: SessionData) {
-    return this.discordService.deleteDiscordData(session)
+    const user = await this.userService.findByUUID(session.user.uuid)
+    return this.userService.update(session.user.uuid, {
+      socialAccounts: {
+        ...user.socialAccounts,
+        discord: null
+      }
+    })
   }
 }

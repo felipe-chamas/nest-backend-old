@@ -2,16 +2,12 @@ import { Injectable, UnauthorizedException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { PassportStrategy } from '@nestjs/passport'
 import { Request } from 'express'
+import { VerifiedCallback } from 'passport-custom'
 import { Profile, Strategy } from 'passport-discord'
-
-import { DiscordService } from '@services/auth/discord.service'
 
 @Injectable()
 export class DiscordStrategy extends PassportStrategy(Strategy, 'discord') {
-  constructor(
-    private readonly discordService: DiscordService,
-    private readonly config: ConfigService
-  ) {
+  constructor(private readonly config: ConfigService) {
     super({
       clientID: config.get<string>('discord.clientID'),
       clientSecret: config.get<string>('discord.clientSecret'),
@@ -22,15 +18,15 @@ export class DiscordStrategy extends PassportStrategy(Strategy, 'discord') {
     })
   }
 
-  async validate(req: Request, _accessToken: string, _refreshToken: string, profile: Profile) {
+  async validate(
+    req: Request,
+    _accessToken: string,
+    _refreshToken: string,
+    profile: Profile,
+    done: VerifiedCallback
+  ) {
     if (!req.session.user) throw new UnauthorizedException('No user authenticated in session')
-    return this.discordService.updateOrCreateUser(
-      req.session,
-      {
-        id: profile.id,
-        username: `${profile.username}#${profile.discriminator}`
-      },
-      profile.email
-    )
+    req.user = profile
+    return done(null, profile)
   }
 }

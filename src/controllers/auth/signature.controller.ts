@@ -28,7 +28,7 @@ export class SignatureAuthController {
   @UseGuards(AuthGuard('signature'))
   @Post('login')
   async submitAgreement(@Session() session: SessionData) {
-    const user = this.userService.findById(session.user.id)
+    const user = this.userService.findByUUID(session.user.uuid)
     return user
   }
 }

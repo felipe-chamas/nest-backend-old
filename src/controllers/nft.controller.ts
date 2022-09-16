@@ -53,7 +53,7 @@ export class NftController {
       case ChainIdReference.SOLANA_MAINNET:
         const nfts = await this.solanaService.getAccountNfts(accountId)
         const filteredNfts = nfts.filter((nft) =>
-          nftCollectionAddresses.includes(nft.collectionAddress)
+          nftCollectionAddresses.includes(nft.assetId.assetName.reference)
         )
         return filteredNfts
       case ChainIdReference.BINANCE_TESTNET:

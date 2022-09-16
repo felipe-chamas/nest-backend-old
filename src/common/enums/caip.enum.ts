@@ -1,8 +1,6 @@
 // Ref: EVM references based on list data - https://github.com/ethereum-lists/chains/tree/master/_data/chains
 // Ref: Solana references based on GenesisHash - https://docs.solana.com/clusters
 export enum ChainIdReference {
-  ETHEREUM_MAINNET = 'eip155:1',
-  GOERLI_TESTNET = 'eip155:5',
   BINANCE_MAINNET = 'eip155:56',
   BINANCE_TESTNET = 'eip155:97',
   SOLANA_TESTNET = 'solana:4uhcVJyU9pJkvQyS88uRDiswHXSCkY3z',

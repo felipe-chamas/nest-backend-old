@@ -1,7 +1,6 @@
 import { getModelToken } from '@nestjs/mongoose'
 import { Test, TestingModule } from '@nestjs/testing'
 
-import { UpdateUserDto } from '@common/dto/update-user.dto'
 import { UserDto } from '@common/schemas/user.schema'
 import { UserService } from '@services/user.service'
 import { VenlyService } from '@services/utils/venly.service'
@@ -34,17 +33,17 @@ describe('UserService', () => {
   })
 
   it('should fetch a user', async () => {
-    const result = await service.findById(mockUser._id)
-    expect(result._id).toBeTruthy()
+    const result = await service.findByUUID(mockUser.uuid)
+    expect(result.uuid).toBeTruthy()
   })
 
   it('should update a user', async () => {
-    const result = await service.update(mockUser._id, { name: 'New Name' } as UpdateUserDto)
+    const result = await service.update(mockUser.uuid, { name: 'New Name' })
     expect(result.name).toEqual(mockUser.name)
   })
 
   it('should remove a user', async () => {
-    const result = await service.remove(mockUser._id)
+    const result = await service.remove(mockUser.uuid)
     expect(result).toBeUndefined()
   })
 })

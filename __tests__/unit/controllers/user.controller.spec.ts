@@ -1,11 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { SessionData } from 'express-session'
 
-import { UpdateUserDto } from '@common/dto/update-user.dto'
 import { Role } from '@common/enums/role.enum'
 import { UserController } from '@controllers/user.controller'
 import { UserService } from '@services/user.service'
+import { VenlyService } from '@services/utils/venly.service'
 import { mockUser, mockAdmin, mockUserService } from '__mocks__/user.mock'
+import { mockVenlyService } from '__mocks__/venly.mock'
 
 describe('UserController', () => {
   let controller: UserController
@@ -18,6 +19,10 @@ describe('UserController', () => {
         {
           provide: UserService,
           useValue: mockUserService
+        },
+        {
+          provide: VenlyService,
+          useValue: mockVenlyService
         }
       ]
     }).compile()
@@ -44,10 +49,10 @@ describe('UserController', () => {
       const updatedUser = {
         email: 'testEmail@test.com',
         roles: [Role.USER_ADMIN]
-      } as UpdateUserDto
+      }
 
-      const result = await controller.update(mockUser._id, updatedUser, {
-        user: { id: mockAdmin._id, roles: mockAdmin.roles }
+      const result = await controller.update(mockUser.uuid, updatedUser, {
+        user: { uuid: mockAdmin.uuid, roles: mockAdmin.roles }
       } as SessionData)
 
       expect(result).toMatchObject(updatedUser)
@@ -55,12 +60,12 @@ describe('UserController', () => {
 
     it('should not update roles when logged in user is not ROLES_ADMIN', async () => {
       const result = await controller.update(
-        mockUser._id,
+        mockUser.uuid,
         {
           email: 'testEmail@test.com',
           roles: [Role.USER_ADMIN]
-        } as UpdateUserDto,
-        { user: { id: mockUser._id, roles: mockUser.roles } } as SessionData
+        },
+        { user: { uuid: mockUser.uuid, roles: mockUser.roles } } as SessionData
       )
 
       expect(result).toMatchObject({ roles: [] })
@@ -68,7 +73,7 @@ describe('UserController', () => {
   })
 
   it('should delete an user', () => {
-    controller.remove(mockUser._id)
-    expect(service.remove).toHaveBeenCalledWith(mockUser._id)
+    controller.remove(mockUser.uuid)
+    expect(service.remove).toHaveBeenCalledWith(mockUser.uuid)
   })
 })

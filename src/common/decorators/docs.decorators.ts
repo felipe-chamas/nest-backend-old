@@ -39,13 +39,6 @@ export const ApiPropertyAssetIds = () =>
     ]
   })
 
-export const ApiPropertyUserId = () =>
-  ApiProperty({
-    type: () => String,
-    description: 'User id.',
-    example: '507f1f77bcf86cd799439011'
-  })
-
 export const ApiPropertyUserUUID = () =>
   ApiProperty({
     type: () => String,

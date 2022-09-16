@@ -38,11 +38,11 @@ export class NftGameController {
   @ApiExcludeEndpoint()
   @ApiCreatedResponse()
   @ApiBody({ type: WalletBodyDto })
-  async mint(@Body() { uuid, ...body }: WalletBodyDto) {
+  async mint(@Body() { uuid, pincode }: WalletBodyDto) {
     const user = await this.userService.findByUUID(uuid)
     const walletId = user.wallet.id
     const walletAddress = user.wallet.address
-    return this.venlyService.mint({ walletId, walletAddress, ...body })
+    return this.venlyService.mint({ walletId, walletAddress, pincode })
   }
 
   @Auth(Role.NFT_ADMIN)
@@ -52,10 +52,10 @@ export class NftGameController {
   })
   @ApiOkResponse({ type: String })
   @ApiBody({ type: NFTWalletBodyDto })
-  async unbox(@Body() { uuid, ...body }: NFTWalletBodyDto) {
+  async unbox(@Body() { uuid, assetId, pincode }: NFTWalletBodyDto) {
     const user = await this.userService.findByUUID(uuid)
     const walletId = user.wallet.id
-    return this.venlyService.unbox({ walletId, ...body })
+    return this.venlyService.unbox({ walletId, assetId, pincode })
   }
 
   @Auth(Role.NFT_ADMIN)
@@ -65,9 +65,9 @@ export class NftGameController {
   })
   @ApiOkResponse({ type: String })
   @ApiBody({ type: PayableNFTWalletBodyDto })
-  async upgrade(@Body() { uuid, ...body }: PayableNFTWalletBodyDto) {
+  async upgrade(@Body() { uuid, assetId, value, pincode }: PayableNFTWalletBodyDto) {
     const user = await this.userService.findByUUID(uuid)
     const walletId = user.wallet.id
-    return this.venlyService.upgrade({ walletId, ...body })
+    return this.venlyService.upgrade({ walletId, assetId, value, pincode })
   }
 }

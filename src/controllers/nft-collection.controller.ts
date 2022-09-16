@@ -1,10 +1,15 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common'
-import { ApiBody, ApiExcludeEndpoint, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger'
+import {
+  ApiBody,
+  ApiExcludeEndpoint,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+  PartialType
+} from '@nestjs/swagger'
 
 import { Auth } from '@common/decorators/auth.decorators'
 import { GetPagination, Pagination } from '@common/decorators/pagination.decorators'
-import { CreateNftCollectionDto } from '@common/dto/create-nft-collection.dto'
-import { UpdateNftCollectionDto } from '@common/dto/update-nft-collection.dto'
 import { Role } from '@common/enums/role.enum'
 import { NftCollectionDto } from '@common/schemas/nft-collection.schema'
 import { NftCollectionService } from '@services/nft-collection.service'
@@ -42,20 +47,20 @@ export class NftCollectionController {
   @Auth(Role.NFT_ADMIN)
   @Patch(':id')
   @ApiOperation({ description: 'Updates an Nft collection with given `id`' })
+  @ApiBody({ type: PartialType(NftCollectionDto) })
   @ApiOkResponse({ type: NftCollectionDto })
-  @ApiBody({ type: UpdateNftCollectionDto })
   @ApiExcludeEndpoint()
-  update(@Param('id') id: string, @Body() updateNftCollectionDto: UpdateNftCollectionDto) {
+  update(@Param('id') id: string, @Body() updateNftCollectionDto: Partial<NftCollectionDto>) {
     return this.nftCollectionService.update(id, updateNftCollectionDto)
   }
 
   @Auth(Role.NFT_ADMIN)
   @Post()
   @ApiOperation({ description: 'Creates an Nft collection' })
-  @ApiOkResponse({ type: CreateNftCollectionDto })
-  @ApiBody({ type: CreateNftCollectionDto })
+  @ApiBody({ type: PartialType(NftCollectionDto) })
+  @ApiOkResponse({ type: NftCollectionDto })
   @ApiExcludeEndpoint()
-  create(@Body() createNftCollectionDto: CreateNftCollectionDto) {
+  create(@Body() createNftCollectionDto: Partial<NftCollectionDto>) {
     return this.nftCollectionService.create(createNftCollectionDto)
   }
 }

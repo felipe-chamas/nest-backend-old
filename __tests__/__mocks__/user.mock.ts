@@ -1,14 +1,12 @@
 import { ObjectId } from 'mongoose'
 
-import { UpdateUserDto } from '@common/dto/update-user.dto'
 import { Role } from '@common/enums/role.enum'
-import { UserDocument } from '@common/schemas/user.schema'
+import { UserDocument, UserDto } from '@common/schemas/user.schema'
 import { UserService } from '@services/user.service'
 
 import { mockWithMongooseMethodChaining } from './utils'
 
 export const mockUser: Partial<UserDocument> = {
-  _id: '624b3c3adb4b27a36fc4d450',
   uuid: '09649b73-9b23-4ec4-ae12-7b01891bac98',
   name: 'John Doe',
   email: 'john@gmail.com',
@@ -35,7 +33,7 @@ export const mockUserService: Partial<UserService> = {
   findByUUID: jest.fn().mockImplementation(async (uuid: string) => {
     return { ...mockUser, uuid: uuid } as UserResult
   }),
-  update: (_: string, updatedUser: Partial<UpdateUserDto>) =>
+  update: (_: string, updatedUser: Partial<UserDto>) =>
     Promise.resolve({
       ...mockUser,
       ...updatedUser
@@ -44,9 +42,9 @@ export const mockUserService: Partial<UserService> = {
 }
 
 export const userModelMockFactory = jest.fn().mockImplementation(() => ({
-  findById: mockWithMongooseMethodChaining(mockUser),
-  findByIdAndUpdate: mockWithMongooseMethodChaining(mockUser),
+  findOne: mockWithMongooseMethodChaining(mockUser),
+  findOneAndUpdate: mockWithMongooseMethodChaining(mockUser),
   find: mockWithMongooseMethodChaining([mockUser, mockAdmin]),
-  deleteById: mockWithMongooseMethodChaining(undefined),
+  deleteOne: mockWithMongooseMethodChaining(undefined),
   save: jest.fn().mockReturnValue(mockUser)
 }))

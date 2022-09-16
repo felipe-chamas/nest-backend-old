@@ -5,9 +5,24 @@ declare module 'express-session' {
   interface SessionData {
     agreement?: AgreementSession
     user?: {
-      id: string
+      uuid: string
       roles: Role[]
     }
     destroy: (callback?: unknown) => void
+  }
+}
+
+declare global {
+  namespace Express {
+    interface User {
+      id: string
+      displayName?: string
+      username?: string
+      discriminator?: string
+      _json?: {
+        realname: string
+        avatarfull: string
+      }
+    }
   }
 }

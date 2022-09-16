@@ -20,10 +20,8 @@ export class SignatureAuthService {
 
   verifySignature(network: string, message: string, signature: string, address: string): boolean {
     switch (network) {
-      case ChainIdReference.ETHEREUM_MAINNET:
       case ChainIdReference.BINANCE_MAINNET:
       case ChainIdReference.BINANCE_TESTNET:
-      case ChainIdReference.GOERLI_TESTNET:
         return this.verifyEthereumSignature(message, signature, address)
       case ChainIdReference.SOLANA_MAINNET:
       case ChainIdReference.SOLANA_DEVNET:

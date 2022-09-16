@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { PassportStrategy } from '@nestjs/passport'
+import { Profile } from 'passport'
+import { VerifiedCallback } from 'passport-custom'
 import { Strategy } from 'passport-steam'
-
-import { SteamService } from '@services/auth/steam.service'
 
 @Injectable()
 export class SteamStrategy extends PassportStrategy(Strategy, 'steam') {
-  constructor(private readonly steamService: SteamService, private readonly config: ConfigService) {
+  constructor(private readonly config: ConfigService) {
     super({
       returnURL: config.get<string>('steam.returnURL'),
       realm: config.get<string>('steam.realm'),
@@ -15,8 +15,7 @@ export class SteamStrategy extends PassportStrategy(Strategy, 'steam') {
     })
   }
 
-  async validate(identifier, profile, done) {
-    profile.identifier = identifier
+  async validate(_identifier: string, profile: Profile, done: VerifiedCallback) {
     return done(null, profile)
   }
 }

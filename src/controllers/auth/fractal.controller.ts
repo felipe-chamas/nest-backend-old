@@ -8,10 +8,10 @@ import { UserService } from '@services/user.service'
 export class FractalAuthController {
   constructor(private userService: UserService) {}
 
-  @UseGuards(AuthGuard('fractal'))
   @Post('login')
+  @UseGuards(AuthGuard('fractal'))
   async submitAgreement(@Session() session: SessionData) {
-    const user = this.userService.findById(session.user.id)
+    const user = this.userService.findByUUID(session.user.uuid)
     return user
   }
 }

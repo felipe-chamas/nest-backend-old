@@ -5,8 +5,6 @@ import { DeleteResult, UpdateResult } from 'mongodb'
 import { SoftDeleteModel } from 'mongoose-delete'
 
 import { Pagination } from '@common/decorators/pagination.decorators'
-import { CreateNftCollectionDto } from '@common/dto/create-nft-collection.dto'
-import { UpdateNftCollectionDto } from '@common/dto/update-nft-collection.dto'
 import { NftCollectionDocument, NftCollectionDto } from '@common/schemas/nft-collection.schema'
 
 @Injectable()
@@ -16,7 +14,7 @@ export class NftCollectionService {
     private nftCollectionModel: SoftDeleteModel<NftCollectionDocument>
   ) {}
 
-  async create(createNftCollectionDto: CreateNftCollectionDto) {
+  async create(createNftCollectionDto: Partial<NftCollectionDto>) {
     const newNftCollection = new this.nftCollectionModel(createNftCollectionDto)
     await newNftCollection.save()
     return newNftCollection
@@ -59,7 +57,7 @@ export class NftCollectionService {
       .flat()
   }
 
-  async update(id: string, update: UpdateNftCollectionDto) {
+  async update(id: string, update: Partial<NftCollectionDto>) {
     const nftCollection = await this.nftCollectionModel.findByIdAndUpdate(id, update).exec()
     return nftCollection
   }
