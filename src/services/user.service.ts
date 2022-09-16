@@ -48,17 +48,6 @@ export class UserService {
     else return this.create({ accountIds: [accountId.toJSON() as AccountIdDto] })
   }
 
-  async addUUIDByAccountId(accountId: AccountId) {
-    const user = await this.userModel
-      .findOneAndUpdate(
-        { accountIds: { $elemMatch: accountId.toJSON() } },
-        { uuid: uuidV4() },
-        { new: true }
-      )
-      .exec()
-    return user
-  }
-
   async update(uuid: string, update: Partial<UserDto>) {
     const user = await this.userModel.findOneAndUpdate({ uuid }, update, { new: true }).exec()
     return user

@@ -19,7 +19,6 @@ import {
   ApiTags,
   PartialType
 } from '@nestjs/swagger'
-import { AccountId } from 'caip'
 import { SessionData } from 'express-session'
 
 import { Auth } from '@common/decorators/auth.decorators'
@@ -27,7 +26,6 @@ import { GetPagination, Pagination } from '@common/decorators/pagination.decorat
 import { WalletBodyDto } from '@common/dto/create-wallet.dto'
 import { Role } from '@common/enums/role.enum'
 import { UserDto } from '@common/schemas/user.schema'
-import { AccountIdDto } from '@common/types/caip'
 import { UserService } from '@services/user.service'
 import { VenlyService } from '@services/utils/venly.service'
 
@@ -118,12 +116,5 @@ export class UserController {
     if (!user) throw new NotFoundException(`Can't find user with uuid: ${uuid}`)
     const wallet = await this.venlyService.createWallet({ uuid, pincode })
     return this.userService.update(uuid, { wallet })
-  }
-
-  @Auth(Role.USER_ADMIN)
-  @Post('fix-uuid')
-  async addUUID(@Body() { accountId }: { accountId: AccountIdDto }) {
-    const user = await this.userService.addUUIDByAccountId(new AccountId(accountId))
-    return user
   }
 }
