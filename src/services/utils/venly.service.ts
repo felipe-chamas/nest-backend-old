@@ -5,7 +5,7 @@ import { ConfigService } from '@nestjs/config'
 import { AssetId } from 'caip'
 import { plainToInstance } from 'class-transformer'
 
-import { WalletBodyDto } from '@common/dto/create-wallet.dto'
+import { WalletBodyDto } from '@common/dto/venly.dto'
 import { WalletDto } from '@common/dto/wallet.dto'
 
 import { HttpVenlyApiService } from './venly/api.service'

@@ -1,7 +1,8 @@
 import { Controller, Get, Param } from '@nestjs/common'
-import { ApiExcludeEndpoint, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger'
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger'
 import { AccountId, AssetId, AssetType } from 'caip'
 
+import { NftDto } from '@common/dto/nft.dto'
 import { ChainIdReference } from '@common/enums/caip.enum'
 import { NftCollectionService } from '@services/nft-collection.service'
 import { EvmService } from '@services/utils/evm.service'
@@ -17,11 +18,10 @@ export class NftController {
   ) {}
 
   @Get(':chainId/:assetName/:tokenId')
-  @ApiExcludeEndpoint()
   @ApiOperation({
     description: 'Returns an Nft with provided `chainId`, `assetName` and `tokenId` information.'
   })
-  @ApiOkResponse({})
+  @ApiOkResponse({ type: NftDto })
   async findOne(
     @Param('chainId') chainId: string,
     @Param('assetName') assetName: string,
@@ -42,6 +42,10 @@ export class NftController {
   }
 
   @Get(':chainId/:address')
+  @ApiOperation({
+    description: 'Returns a list of Nfts owned by `:chainId/:address`, filtered by DB collections'
+  })
+  @ApiOkResponse({ type: [NftDto] })
   async findByAccount(@Param('chainId') chainId: string, @Param('address') address: string) {
     const accountId = new AccountId({ chainId, address })
     const nftCollectionAddresses = await this.nftCollectionService.findAddressesByChainId(

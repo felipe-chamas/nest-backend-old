@@ -25,9 +25,10 @@ export class Swagger {
           '</ol>'
         ].join('<br/>')
       )
-      .setVersion('0.3')
-      .addTag('Wallets')
+      .setVersion('0.4')
       .addTag('Nfts')
+      .addTag('Game Control')
+      .addTag('Users')
       .build()
 
     const options: SwaggerDocumentOptions = {

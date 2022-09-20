@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common'
 import {
   ApiBody,
-  ApiExcludeEndpoint,
+  ApiExcludeController,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -15,6 +15,7 @@ import { NftCollectionDto } from '@common/schemas/nft-collection.schema'
 import { NftCollectionService } from '@services/nft-collection.service'
 
 @ApiTags('NftCollections')
+@ApiExcludeController()
 @Controller()
 export class NftCollectionController {
   constructor(private readonly nftCollectionService: NftCollectionService) {}
@@ -23,7 +24,6 @@ export class NftCollectionController {
   @Delete(':id')
   @ApiOperation({ description: 'Deletes an Nft collection with given `id`' })
   @ApiOkResponse({ type: NftCollectionDto })
-  @ApiExcludeEndpoint()
   remove(@Param('id') id: string) {
     return this.nftCollectionService.remove(id)
   }
@@ -31,7 +31,6 @@ export class NftCollectionController {
   @Get(':id')
   @ApiOperation({ description: 'Returns an Nft collection with given `id`' })
   @ApiOkResponse({ type: NftCollectionDto })
-  @ApiExcludeEndpoint()
   findOne(@Param('id') id: string) {
     return this.nftCollectionService.findById(id)
   }
@@ -39,7 +38,6 @@ export class NftCollectionController {
   @Get()
   @ApiOperation({ description: 'Returns a list of Nft collections' })
   @ApiOkResponse({ type: [NftCollectionDto], schema: { type: 'array' } })
-  @ApiExcludeEndpoint()
   findAll(@Query() query, @GetPagination() pagination: Pagination) {
     return this.nftCollectionService.findAll({ ...query, ...pagination })
   }
@@ -49,7 +47,6 @@ export class NftCollectionController {
   @ApiOperation({ description: 'Updates an Nft collection with given `id`' })
   @ApiBody({ type: PartialType(NftCollectionDto) })
   @ApiOkResponse({ type: NftCollectionDto })
-  @ApiExcludeEndpoint()
   update(@Param('id') id: string, @Body() updateNftCollectionDto: Partial<NftCollectionDto>) {
     return this.nftCollectionService.update(id, updateNftCollectionDto)
   }
@@ -59,7 +56,6 @@ export class NftCollectionController {
   @ApiOperation({ description: 'Creates an Nft collection' })
   @ApiBody({ type: PartialType(NftCollectionDto) })
   @ApiOkResponse({ type: NftCollectionDto })
-  @ApiExcludeEndpoint()
   create(@Body() createNftCollectionDto: Partial<NftCollectionDto>) {
     return this.nftCollectionService.create(createNftCollectionDto)
   }

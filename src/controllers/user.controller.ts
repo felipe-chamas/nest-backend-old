@@ -23,7 +23,7 @@ import { SessionData } from 'express-session'
 
 import { Auth } from '@common/decorators/auth.decorators'
 import { GetPagination, Pagination } from '@common/decorators/pagination.decorators'
-import { WalletBodyDto } from '@common/dto/create-wallet.dto'
+import { WalletBodyDto } from '@common/dto/venly.dto'
 import { Role } from '@common/enums/role.enum'
 import { UserDto } from '@common/schemas/user.schema'
 import { UserService } from '@services/user.service'

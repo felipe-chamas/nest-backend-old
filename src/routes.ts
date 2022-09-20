@@ -16,14 +16,14 @@ export const routes: Routes = [
     module: NftModule,
     children: [
       {
-        path: 'game',
-        module: NftGameModule
-      },
-      {
         path: 'collection',
         module: NftCollectionModule
       }
     ]
+  },
+  {
+    path: 'game',
+    module: NftGameModule
   },
   {
     path: 'user',

@@ -18,6 +18,22 @@ export const ApiPropertyMetadata = () =>
     }
   })
 
+export const ApiPropertyAssetId = () =>
+  ApiProperty({
+    description: 'Asset Id representing the `tokenId` minted on the blockchain.',
+    example: {
+      chainId: {
+        namespace: 'solana',
+        reference: 'EtWTRABZaYq6iMfeYKouRu166VU2xqa1'
+      },
+      assetName: {
+        namespace: 'NonFungible',
+        reference: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
+      },
+      tokenId: '2wmVCSfPxGPjrnMMn7rchp4uaeoTqN39mXFC2zhPdri9'
+    }
+  })
+
 export const ApiPropertyAssetIds = () =>
   ApiProperty({
     description: [
@@ -37,6 +53,12 @@ export const ApiPropertyAssetIds = () =>
         tokenId: '2wmVCSfPxGPjrnMMn7rchp4uaeoTqN39mXFC2zhPdri9'
       }
     ]
+  })
+
+export const ApiPropertyTokenUri = () =>
+  ApiProperty({
+    description: 'URI to get metadata from token',
+    example: 'ipfs://base-token-uri/123'
   })
 
 export const ApiPropertyUserUUID = () =>
@@ -272,6 +294,13 @@ export const ApiPropertyWalletCreatedAt = () =>
 export const ApiPropertyWalletGameTokenBalance = () =>
   ApiProperty({
     description: 'Wallet balance in Game Tokens.',
+    type: () => String,
+    example: '42.123'
+  })
+
+export const ApiPropertyValue = () =>
+  ApiProperty({
+    description: 'Payable blockchain value to execute function',
     type: () => String,
     example: '42.123'
   })

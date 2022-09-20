@@ -3,6 +3,8 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { ConfigService } from '@nestjs/config'
 import { AccountId, AssetId, ChainId } from 'caip'
 
+import { NftDto } from '@common/dto/nft.dto'
+import { Nft } from '@common/types/nft'
 import {
   ExternalApiNft,
   QuickNodeFetchNftsResponse,
@@ -12,7 +14,6 @@ import {
 import { HttpQuicknodeApiService } from './quicknode/api.service'
 
 import type { AssetIdDto } from '@common/types/caip'
-import type { Nft } from '@common/types/nft'
 
 @Injectable()
 export class SolanaService {
@@ -29,7 +30,7 @@ export class SolanaService {
         : 'https://public-api-test.solscan.io'
   }
 
-  async getNft(assetId: AssetId): Promise<Nft> {
+  async getNft(assetId: AssetId): Promise<NftDto> {
     const { data: nft, status } = await this.httpService.axiosRef.get<SolscanTokenAccountResponse>(
       `account/${assetId.tokenId}`,
       {
@@ -46,7 +47,7 @@ export class SolanaService {
     }
   }
 
-  async getAccountNfts(accountId: AccountId) {
+  async getAccountNfts(accountId: AccountId): Promise<NftDto[]> {
     const nfts: Nft[][] = []
     const { data, status } = await this.quicknodeService.axiosRef.post<QuickNodeFetchNftsResponse>(
       '',

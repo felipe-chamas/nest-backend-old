@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config'
 import { AccountId, AssetId, ChainId } from 'caip'
 import { ethers } from 'ethers'
 
+import { NftDto } from '@common/dto/nft.dto'
 import { logger } from '@common/providers/logger'
 import {
   MoralisResponseNftsByAddress,
@@ -26,7 +27,7 @@ export class EvmService {
     this.moralisService.axiosRef.defaults.headers['X-API-Key'] = this.config.get('moralis.apiKey')
   }
 
-  async getNft(assetId: AssetId) {
+  async getNft(assetId: AssetId): Promise<NftDto> {
     const chain = ethers.utils.hexlify(parseInt(assetId.chainId.reference))
     const { data, status } = await this.moralisService.axiosRef.get<MoralisResponseSearchNft>(
       `nft/${assetId.assetName.reference}/${assetId.tokenId}`,
@@ -42,7 +43,7 @@ export class EvmService {
     return this.formatNft(assetId.chainId, data)
   }
 
-  async getAccountNfts(accountId: AccountId, collections: string[]) {
+  async getAccountNfts(accountId: AccountId, collections: string[]): Promise<NftDto[]> {
     const chain = ethers.utils.hexlify(parseInt(accountId.chainId.reference))
     const nfts: Nft[][] = []
     let cursor: string | null = ''

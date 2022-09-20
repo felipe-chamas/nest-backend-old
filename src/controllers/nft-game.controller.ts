@@ -13,13 +13,9 @@ import { Role } from '@common/enums/role.enum'
 import { UserService } from '@services/user.service'
 import { VenlyService } from '@services/utils/venly.service'
 
-import {
-  NFTWalletBodyDto,
-  PayableNFTWalletBodyDto,
-  WalletBodyDto
-} from '../common/dto/create-wallet.dto'
+import { NFTWalletBodyDto, PayableNFTWalletBodyDto, WalletBodyDto } from '../common/dto/venly.dto'
 
-@ApiTags('Wallets')
+@ApiTags('Game Control')
 @Controller()
 export class NftGameController {
   constructor(
