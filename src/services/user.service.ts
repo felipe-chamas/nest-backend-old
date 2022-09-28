@@ -42,10 +42,15 @@ export class UserService {
     return user
   }
 
+  async findOrCreateBySteamId(steamId: string) {
+    const userData = { 'socialAccounts.steam.id': steamId }
+    const user = await this.userModel.findOne(userData).exec()
+    return user ?? this.create({ socialAccounts: { steam: { id: steamId } } })
+  }
+
   async findOrCreateByAccountId(accountId: AccountId) {
     const [user] = await this.userModel.find().elemMatch('accountIds', accountId.toJSON()).exec()
-    if (user) return user
-    else return this.create({ accountIds: [accountId.toJSON() as AccountIdDto] })
+    return user ?? this.create({ accountIds: [accountId.toJSON() as AccountIdDto] })
   }
 
   async update(uuid: string, update: Partial<UserDto>) {

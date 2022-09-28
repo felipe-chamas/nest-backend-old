@@ -101,9 +101,7 @@ export class UserController {
   @ApiParam({ name: 'steamId', type: String })
   @ApiOkResponse({ type: UserDto })
   async findBySteamId(@Param('steamId') steamId: string) {
-    const user = await this.userService.findBySteamId(steamId)
-    if (!user) throw new NotFoundException(`Can't find user with steamId: ${steamId}`)
-    return user
+    return this.userService.findOrCreateBySteamId(steamId)
   }
 
   @Auth(Role.USER_ADMIN)
