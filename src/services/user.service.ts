@@ -57,7 +57,7 @@ export class UserService {
   async findOrCreateBySteamId(steamId: string) {
     const userData = { 'socialAccounts.steam.id': steamId }
     const user = await this.userModel.findOne(userData).exec()
-    if (user) return user
+    if (user && user.imageUrl) return user
 
     const { data, status } = await this.steamService.axiosRef.get<SteamResponseGetPlayerSummaries>(
       `/ISteamUser/GetPlayerSummaries/v2/`,
@@ -71,6 +71,8 @@ export class UserService {
     if (status !== 200) throw new BadRequestException()
 
     const [player] = data.response.players
+
+    if (user) return this.update(user.uuid, { imageUrl: player.avatarfull })
 
     return this.create({
       name: player.realname ?? player.personaname,
