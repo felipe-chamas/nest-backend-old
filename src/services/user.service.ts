@@ -73,7 +73,7 @@ export class UserService {
     const [player] = data.response.players
 
     return this.create({
-      name: player.personaname,
+      name: player.realname ?? player.personaname,
       imageUrl: player.avatarfull,
       socialAccounts: { steam: { id: steamId, username: player.personaname } }
     })
