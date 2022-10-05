@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common'
+import { Controller, DefaultValuePipe, Get, Param, ParseArrayPipe, Query } from '@nestjs/common'
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger'
 import { AccountId, AssetId, AssetType } from 'caip'
 
@@ -43,14 +43,24 @@ export class NftController {
 
   @Get(':chainId/:address')
   @ApiOperation({
-    description: 'Returns a list of Nfts owned by `:chainId/:address`, filtered by DB collections'
+    description: 'Returns a list of Nfts owned by `:chainId/:address`, filtered by NftCollections'
   })
   @ApiOkResponse({ type: [NftDto] })
-  async findByAccount(@Param('chainId') chainId: string, @Param('address') address: string) {
-    const accountId = new AccountId({ chainId, address })
-    const nftCollectionAddresses = await this.nftCollectionService.findAddressesByChainId(
-      accountId.chainId
+  async findByAccount(
+    @Param('chainId') chainId: string,
+    @Param('address') address: string,
+    @Query(
+      'nftCollectionAddresses',
+      new DefaultValuePipe([]),
+      new ParseArrayPipe({ items: String, separator: ',' })
     )
+    nftCollectionAddresses: string[]
+  ) {
+    const accountId = new AccountId({ chainId, address })
+    nftCollectionAddresses =
+      nftCollectionAddresses.length > 0
+        ? nftCollectionAddresses
+        : await this.nftCollectionService.findAddressesByChainId(accountId.chainId)
     switch (chainId) {
       case ChainIdReference.SOLANA_DEVNET:
       case ChainIdReference.SOLANA_TESTNET:
