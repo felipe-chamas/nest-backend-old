@@ -5,6 +5,7 @@ import { UserDto, UserSchema } from '@common/schemas/user.schema'
 import { UserController } from '@controllers/user.controller'
 import { UserService } from '@services/user.service'
 
+import { HttpSteamApiModule } from './utils/steam/api.module'
 import { VenlyModule } from './utils/venly.module'
 
 @Module({
@@ -16,7 +17,8 @@ import { VenlyModule } from './utils/venly.module'
         schema: UserSchema
       }
     ]),
-    VenlyModule
+    VenlyModule,
+    HttpSteamApiModule
   ],
   exports: [UserService],
   providers: [UserService]
