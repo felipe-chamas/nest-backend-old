@@ -1,10 +1,11 @@
-import { Controller, Post, Body } from '@nestjs/common'
+import { Controller, Post, Body, Get, Param, Query, NotFoundException } from '@nestjs/common'
 import {
   ApiBody,
   ApiCreatedResponse,
   ApiExcludeEndpoint,
   ApiOkResponse,
   ApiOperation,
+  ApiParam,
   ApiTags
 } from '@nestjs/swagger'
 
@@ -65,5 +66,29 @@ export class NftGameController {
     const user = await this.userService.findByUUID(uuid)
     const walletId = user.wallet.id
     return this.venlyService.upgrade({ walletId, assetId, value, pincode })
+  }
+
+  @Auth(Role.USER_ADMIN)
+  @Get('user/:uuid/nft')
+  @ApiOperation({ description: 'Returns user nfts' })
+  @ApiParam({ name: 'uuid', type: String })
+  async getUserNfts(@Param('uuid') uuid: string, @Query() { nfts }) {
+    const user = await this.userService.findByUUID(uuid)
+    if (!user) throw new NotFoundException(`Can't find user with uuid: ${uuid}`)
+    const walletId = user.wallet?.id
+    const userNfts = await this.venlyService.getNfts({ walletId, nfts })
+    return userNfts
+  }
+
+  @Auth(Role.USER_ADMIN)
+  @Get('user/:uuid/balance')
+  @ApiOperation({ description: 'Returns user token balance' })
+  @ApiParam({ name: 'uuid', type: String })
+  async getUserBalance(@Param('uuid') uuid: string, @Query() { token }) {
+    const user = await this.userService.findByUUID(uuid)
+    if (!user) throw new NotFoundException(`Can't find user with uuid: ${uuid}`)
+    const walletId = user.wallet?.id
+    const userNfts = await this.venlyService.getTokenBalance({ walletId, token })
+    return userNfts
   }
 }

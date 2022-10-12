@@ -74,11 +74,31 @@ export class VenlyService {
 
   async getWallet(walletId: string) {
     await this.getAccessToken()
-
     const {
       data: { result }
     } = await this.apiService.axiosRef.get<GetWalletResult>(`wallets/${walletId}`)
+    return result
+  }
 
+  async getTokenBalance({ walletId, token }) {
+    await this.getAccessToken()
+    const {
+      data: { result }
+    } = await this.apiService.axiosRef.get<GetWalletResult>(
+      token ? `wallets/${walletId}/balance/tokens/${token}` : `wallets/${walletId}/balance/tokens`
+    )
+    return result
+  }
+
+  async getNfts({ walletId, nfts }) {
+    await this.getAccessToken()
+    const {
+      data: { result }
+    } = await this.apiService.axiosRef.get<GetWalletResult>(`wallets/${walletId}/nonfungibles`, {
+      params: {
+        'contract-addresses': nfts
+      }
+    })
     return result
   }
 

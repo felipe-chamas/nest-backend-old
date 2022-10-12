@@ -19,7 +19,16 @@ export const mockUser: Partial<UserDocument> = {
       address: '0xE9f9245615A4571d322fe6EA03Ab82C44b432CEa'
     }
   ],
-  roles: []
+  roles: [],
+  wallet: {
+    id: '1234567890',
+    address: '0xB3f467ea508529e7BE0780373C3F87e22688c927',
+    walletType: 'WHITE_LABEL',
+    secretType: 'ETHEREUM',
+    identifier: '12345',
+    description: 'test wallet',
+    createdAt: '2022-05-14'
+  }
 }
 
 export const mockAdmin: Partial<UserDocument> = {
@@ -31,6 +40,7 @@ type UserResult = UserDocument & { _id: ObjectId }
 
 export const mockUserService: Partial<UserService> = {
   findByUUID: jest.fn().mockImplementation(async (uuid: string) => {
+    if (uuid === 'badUUID') return null
     return { ...mockUser, uuid: uuid } as UserResult
   }),
   update: (_: string, updatedUser: Partial<UserDto>) =>
