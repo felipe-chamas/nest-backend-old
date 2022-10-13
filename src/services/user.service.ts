@@ -68,7 +68,7 @@ export class UserService {
       }
     )
     logger.info(data)
-    if (status !== 200) throw new BadRequestException()
+    if (status !== 200 || data.response.players.length === 0) throw new BadRequestException()
 
     const [player] = data.response.players
 

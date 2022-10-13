@@ -3,7 +3,8 @@ export default () => ({
   stage: process.env.STAGE || 'development',
   session_secret: process.env.SESSION_SECRET,
   redis_url: process.env.REDIS_URL,
-  mongo_uri: process.env.MONGODB_URI,
+  mongo_uri:
+    process.env.NODE_ENV === 'test' ? process.env.MONGODB_CICD_URI : process.env.MONGODB_URI,
   docs: {
     token: process.env.DOCS_TOKEN
   },

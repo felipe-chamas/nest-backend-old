@@ -83,7 +83,18 @@ jobs:
       - name: Install Dependencies
         if: steps.yarn-cache.outputs.cache-hit != 'true'
         run: yarn install --frozen-lockfile
-      - run: yarn test:e2e
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEVELOP }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEVELOP }}
+          aws-region: ${{ secrets.AWS_REGION_DEVELOP }}
+      - name: Install ENVs
+        run: yarn get:secrets
+      - name: Run Test
+        env:
+          MONGODB_CICD_URI: ${{ secrets.MONGODB_CICD_URI }}
+        run: yarn test:e2e
   build:
     name: Build
     runs-on: ubuntu-latest

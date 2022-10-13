@@ -205,4 +205,16 @@ export class VenlyService {
 
     return transactionHash
   }
+
+  async ArchiveWallet(walletId: string) {
+    await this.getAccessToken()
+
+    const {
+      data: { result }
+    } = await this.apiService.axiosRef.patch<GetWalletResult>(`wallets/${walletId}`, {
+      archived: true
+    })
+
+    return result
+  }
 }

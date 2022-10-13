@@ -11,7 +11,7 @@ import { logger } from '@common/providers/logger'
   imports: [
     MongooseModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
+      useFactory: async (config: ConfigService) => ({
         uri: config.get<string>('mongo_uri'),
         connectionFactory: (connection: Connection) => {
           connection.plugin(MongooseAutoPopulate)
