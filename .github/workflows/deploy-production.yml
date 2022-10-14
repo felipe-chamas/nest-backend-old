@@ -1,29 +1,29 @@
-name: Backend-CI/CD Development Deploy
+name: Deploy to production
 
 on:
   workflow_dispatch:
 
 env:
-  REGISTRY_NAME: 'webserver-develop-ecr'
-  SERVICE_NAME: 'webserver-develop-service'
-  CLUSTER_NAME: 'webserver-develop-cluster'
-  CONTAINER_NAME: 'webserver-develop-ecs-container'
-  TASK_DEFINITION_FAMILY: 'webserver-develop-ecs-task-definition'
-  CODEDEPLOY_APPLICATION: 'webserver-develop-app'
-  CODEDEPLOY_DEPLOYMENT_GROUP: 'webserver-develop-deployment-group'
+  REGISTRY_NAME: 'webserver-production-ecr'
+  SERVICE_NAME: 'webserver-production-service'
+  CLUSTER_NAME: 'webserver-production-cluster'
+  CONTAINER_NAME: 'webserver-production-ecs-container'
+  TASK_DEFINITION_FAMILY: 'webserver-production-ecs-task-definition'
+  CODEDEPLOY_APPLICATION: 'webserver-production-app'
+  CODEDEPLOY_DEPLOYMENT_GROUP: 'webserver-production-deployment-group'
   CONTAINER_PORT: 3000
 
 jobs:
   deploy:
-    name: Deploy Develop
+    name: Deploy Production
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/docker-ecs
         with:
-          aws-secret-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEVELOP }}
-          aws-access-key: ${{ secrets.AWS_ACCESS_KEY_ID_DEVELOP }}
-          aws-region: ${{ secrets.AWS_REGION_DEVELOP }}
+          aws-secret-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PRODUCTION }}
+          aws-access-key: ${{ secrets.AWS_ACCESS_KEY_ID_PRODUCTION }}
+          aws-region: ${{ secrets.AWS_REGION_PRODUCTION }}
           registry-name: ${{ env.REGISTRY_NAME }}
           service-name: ${{ env.SERVICE_NAME }}
           cluster-name: ${{ env.CLUSTER_NAME }}
@@ -40,9 +40,9 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEVELOP }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEVELOP }}
-          aws-region: ${{ secrets.AWS_REGION_DEVELOP }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PRODUCTION }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PRODUCTION }}
+          aws-region: ${{ secrets.AWS_REGION_PRODUCTION }}
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v1
       - name: Get the version from last task definition
@@ -50,7 +50,7 @@ jobs:
         run: echo "LAST_TASK_VERSION=$(aws ecs describe-task-definition --task-definition "${{ env.TASK_DEFINITION_FAMILY }}" --query taskDefinition.revision --output text)" >> $GITHUB_ENV
       - name: Set GitHub env variables
         shell: bash
-        run: echo "GITHUB_TAG=$(echo develop)/$(echo $GITHUB_SHA | cut -c 1-6)-$(echo ${{env.LAST_TASK_VERSION}})" >> $GITHUB_ENV
+        run: echo "GITHUB_TAG=$(echo production)/$(echo $GITHUB_SHA | cut -c 1-6)-$(echo ${{env.LAST_TASK_VERSION}})" >> $GITHUB_ENV
       - uses: actions/checkout@v3
         with:
           fetch-depth: '0'
