@@ -57,7 +57,7 @@ export class UserService {
   async findOrCreateBySteamId(steamId: string) {
     const userData = { 'socialAccounts.steam.id': steamId }
     const user = await this.userModel.findOne(userData).exec()
-    if (user && user.imageUrl) return user
+    if (user && user.imageUrl && user.socialAccounts.steam?.username) return user
 
     const { data, status } = await this.steamService.axiosRef.get<SteamResponseGetPlayerSummaries>(
       `/ISteamUser/GetPlayerSummaries/v2/`,
