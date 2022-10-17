@@ -72,7 +72,18 @@ export class UserService {
 
     const [player] = data.response.players
 
-    if (user) return this.update(user.uuid, { imageUrl: player.avatarfull })
+    if (user)
+      return this.update(user.uuid, {
+        imageUrl: player.avatarfull,
+        socialAccounts: {
+          ...user.socialAccounts,
+          steam: {
+            ...user.socialAccounts.steam,
+            id: steamId,
+            username: player.personaname
+          }
+        }
+      })
 
     return this.create({
       name: player.realname ?? player.personaname,
