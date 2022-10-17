@@ -219,6 +219,10 @@ export const ApiPropertyUserSocialAccounts = () =>
         steam: {
           id: '263930811698332411',
           username: 'vitalik_buterin'
+        },
+        epic: {
+          id: '2432847239847329',
+          username: 'vitalik_buterin'
         }
       }
     ]

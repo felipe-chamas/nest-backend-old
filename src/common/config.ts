@@ -18,6 +18,11 @@ export default () => ({
     realm: process.env.STEAM_REALM,
     apiKey: process.env.STEAM_API_KEY
   },
+  epic: {
+    clientID: process.env.EPIC_CLIENT_ID,
+    clientSecret: process.env.EPIC_SECRET_KEY,
+    deploymentID: process.env.EPIC_DEPLOYMENT_ID
+  },
   frontend_url: process.env.FRONTEND_URL,
   quicknode: {
     quicknode_uri: process.env.QUICKNODE_URI

@@ -2,6 +2,7 @@ import { Routes } from 'nest-router'
 
 import { AuthModule } from '@modules/auth.module'
 import { DiscordAuthModule } from '@modules/auth/discord.module'
+import { EpicAuthModule } from '@modules/auth/epic.module'
 import { FractalAuthModule } from '@modules/auth/fractal.module'
 import { SignatureAuthModule } from '@modules/auth/signature.module'
 import { SteamAuthModule } from '@modules/auth/steam.module'
@@ -40,6 +41,10 @@ export const routes: Routes = [
       {
         path: 'steam',
         module: SteamAuthModule
+      },
+      {
+        path: 'epic',
+        module: EpicAuthModule
       },
       {
         path: 'fractal',

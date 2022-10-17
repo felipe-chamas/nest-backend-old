@@ -6,4 +6,5 @@ export interface SocialDetails {
 export interface SocialAccounts {
   discord?: SocialDetails
   steam?: SocialDetails
+  epic?: SocialDetails
 }
