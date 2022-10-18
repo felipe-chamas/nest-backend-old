@@ -1,12 +1,4 @@
-import {
-  UnauthorizedException,
-  Controller,
-  Post,
-  Get,
-  Session,
-  UseGuards,
-  Req
-} from '@nestjs/common'
+import { Controller, Post, Get, Session, UseGuards, Req } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 import { Request } from 'express'
 import { SessionData } from 'express-session'
@@ -41,7 +33,15 @@ export class SteamController {
   @Post('save')
   @UseGuards(AuthGuard('steam'))
   async save(@Req() req: Request, @Session() session: SessionData) {
-    if (!session.user) throw new UnauthorizedException('No user authenticated in session')
+    console.log(session.user)
+    if (!session.user) {
+      const user = await this.userService.findOrCreateBySteamId(req.user.id)
+      session.user = {
+        uuid: user.uuid,
+        roles: user.roles
+      }
+      return user
+    }
     const user = await this.userService.findByUUID(session.user.uuid)
     return this.userService.update(session.user.uuid, {
       imageUrl: user.imageUrl ?? req.user._json?.avatarfull,
