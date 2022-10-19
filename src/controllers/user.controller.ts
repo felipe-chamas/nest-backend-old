@@ -104,7 +104,7 @@ export class UserController {
     return this.userService.findOrCreateBySteamId(steamId)
   }
 
-  @Auth(Role.USER_ADMIN)
+  @Auth(Role.USER_ADMIN, Role.OWNER)
   @Post('wallet')
   @ApiOperation({ description: 'Creates a wallet for this user' })
   @ApiParam({ name: 'uuid', type: String })
