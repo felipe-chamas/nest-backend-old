@@ -76,8 +76,10 @@ export class NftGameController {
     const user = await this.userService.findByUUID(uuid)
     if (!user) throw new NotFoundException(`Can't find user with uuid: ${uuid}`)
     const walletId = user.wallet?.id
-    const userNfts = await this.venlyService.getNfts({ walletId, nfts })
-    return userNfts
+    // FIXME this return value is not correct
+    if (walletId) {
+      return await this.venlyService.getNfts({ walletId, nfts })
+    } else return []
   }
 
   @Auth(Role.USER_ADMIN)
@@ -88,7 +90,10 @@ export class NftGameController {
     const user = await this.userService.findByUUID(uuid)
     if (!user) throw new NotFoundException(`Can't find user with uuid: ${uuid}`)
     const walletId = user.wallet?.id
-    const userNfts = await this.venlyService.getTokenBalance({ walletId, token })
-    return userNfts
+    // FIXME this return value is not correct
+    if (walletId) {
+      return this.venlyService.getTokenBalance({ walletId, token })
+    }
+    return null
   }
 }

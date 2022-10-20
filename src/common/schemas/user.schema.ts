@@ -42,7 +42,7 @@ export class UserDto {
 
   @ApiPropertyWallet()
   @Prop()
-  wallet: WalletDto
+  wallet?: WalletDto
 
   @ApiPropertyUserSocialAccounts()
   @Prop({ type: mongoose.Schema.Types.Mixed })
