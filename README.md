@@ -2,7 +2,7 @@
 
 ### TODOs:
 
-- [x] Change typeORM to mongoose
+- [x] Change typeORM to mongoose.
 - [x] Remove unused routes
 - [x] Remove unused entities/columns
 - [x] Create VenlyService
