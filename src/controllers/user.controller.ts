@@ -112,7 +112,7 @@ export class UserController {
   async createWallet(@Body() { uuid, pincode }: WalletBodyDto) {
     const user = await this.userService.findByUUID(uuid)
     if (!user) throw new NotFoundException(`Can't find user with uuid: ${uuid}`)
-    const wallet = await this.venlyService.createWallet({ uuid, pincode })
+    const wallet = await this.venlyService.createWallet({ pincode, uuid })
     return this.userService.update(uuid, { wallet })
   }
 }

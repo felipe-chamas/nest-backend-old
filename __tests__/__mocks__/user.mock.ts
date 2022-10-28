@@ -35,7 +35,28 @@ export const mockAdmin: Partial<UserDocument> = {
   ...mockUser,
   roles: [Role.USER_ADMIN, Role.ROLE_ADMIN, Role.NFT_ADMIN, Role.MARKETPLACE_ADMIN]
 }
-
+export const testSteamId = '76561199405194880'
+export const findOrCreateBySteamIdResponse = {
+  success: true,
+  result: [
+    {
+      uuid: 'testUserNoImage',
+      name: 'John Doe',
+      email: 'john@gmail.com',
+      accountIds: [
+        {
+          chainId: {
+            namespace: 'eip155',
+            reference: '56'
+          },
+          address: '0xE9f9245615A4571d322fe6EA03Ab82C44b432CEa'
+        }
+      ],
+      roles: [],
+      socialAccounts: { steam: { id: testSteamId, username: 'John Doe' } }
+    }
+  ]
+}
 type UserResult = UserDocument & { _id: ObjectId }
 
 export const mockUserService: Partial<UserService> = {
@@ -48,7 +69,12 @@ export const mockUserService: Partial<UserService> = {
       ...mockUser,
       ...updatedUser
     } as UserResult),
-  remove: jest.fn()
+  remove: jest.fn(),
+
+  findOrCreateBySteamId: jest.fn().mockImplementation(async (steamId: string) => {
+    if (!steamId) throw new Error('Required data missing')
+    return findOrCreateBySteamIdResponse.result
+  })
 }
 
 export const userModelMockFactory = jest.fn().mockImplementation(() => ({

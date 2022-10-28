@@ -1,3 +1,4 @@
+import { NotFoundException } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
 import { SessionData } from 'express-session'
 
@@ -5,8 +6,14 @@ import { Role } from '@common/enums/role.enum'
 import { UserController } from '@controllers/user.controller'
 import { UserService } from '@services/user.service'
 import { VenlyService } from '@services/utils/venly.service'
-import { mockUser, mockAdmin, mockUserService } from '__mocks__/user.mock'
-import { mockVenlyService } from '__mocks__/venly.mock'
+import { testSteamId } from '__mocks__/dbUsers'
+import {
+  mockUser,
+  mockAdmin,
+  mockUserService,
+  findOrCreateBySteamIdResponse
+} from '__mocks__/user.mock'
+import { mockVenlyService, createWalletResponse } from '__mocks__/venly.mock'
 
 describe('UserController', () => {
   let controller: UserController
@@ -44,6 +51,34 @@ describe('UserController', () => {
     })
   })
 
+  describe('createWallet', () => {
+    const pincode = '123456'
+    const uuid = mockUser.uuid
+    it('If user not exist throw an error', async () => {
+      const uuid = 'badUUID'
+      try {
+        await controller.createWallet({
+          uuid: uuid,
+          pincode: pincode
+        })
+      } catch (error) {
+        expect(error).toBeInstanceOf(NotFoundException)
+      }
+    })
+    it('createWallet must be called with correct data', async () => {
+      await controller.createWallet({ uuid, pincode: pincode })
+      const mockFunction = mockVenlyService.createWallet as jest.Mock
+      expect(mockFunction.mock.calls[0][0]).toMatchObject({
+        pincode: pincode,
+        uuid: uuid
+      })
+    })
+    it('must return correct data', async () => {
+      const response = await controller.createWallet({ uuid, pincode: pincode })
+      expect(response.wallet).toMatchObject(createWalletResponse.result)
+    })
+  })
+
   describe('Update', () => {
     it('should update an user', async () => {
       const updatedUser = {
@@ -75,5 +110,17 @@ describe('UserController', () => {
   it('should delete an user', () => {
     controller.remove(mockUser.uuid)
     expect(service.remove).toHaveBeenCalledWith(mockUser.uuid)
+  })
+
+  describe('findBySteamId', () => {
+    it('findBySteamId must be called with correct data', async () => {
+      await controller.findBySteamId(testSteamId)
+      const mockFunction = mockUserService.findOrCreateBySteamId as jest.Mock
+      expect(mockFunction.mock.calls[0][0]).toEqual(testSteamId)
+    })
+    it('must return correct data', async () => {
+      const response = await controller.findBySteamId(testSteamId)
+      expect(response).toMatchObject(findOrCreateBySteamIdResponse.result)
+    })
   })
 })

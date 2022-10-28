@@ -1,4 +1,7 @@
+import { WalletBodyDto } from '@common/dto/venly.dto'
 import { VenlyService } from '@services/utils/venly.service'
+
+import { mockUser } from './user.mock'
 
 export const nonFungibleResponse = {
   success: true,
@@ -167,7 +170,12 @@ export const tokenBalnceResponse = {
     }
   ]
 }
-
+export const createWalletResponse = {
+  success: true,
+  result: [
+    { pincode: '123456', identifier: mockUser.uuid, secretType: 'MATIC', walletType: 'WHITE_LABEL' }
+  ]
+}
 export const mockVenlyService: Partial<VenlyService> = {
   getNfts: jest.fn().mockImplementation(async ({ walletId, nfts }) => {
     if (!walletId && !nfts) throw new Error('Required data missing')
@@ -176,5 +184,9 @@ export const mockVenlyService: Partial<VenlyService> = {
   getTokenBalance: jest.fn().mockImplementation(async ({ walletId, token }) => {
     if (!walletId && !token) throw new Error('Required data missing')
     return tokenBalnceResponse.result
+  }),
+  createWallet: jest.fn().mockImplementation(async ({ pincode, uuid }: WalletBodyDto) => {
+    if (!pincode || !uuid) throw new Error('Required data missing')
+    return createWalletResponse.result
   })
 }

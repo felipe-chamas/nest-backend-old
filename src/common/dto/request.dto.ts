@@ -21,9 +21,9 @@ export class RequestForAgreementDto {
 export class LinkEpicDto {
   @IsNotEmpty()
   @IsString()
-  code : string;
-  
+  code: string
+
   @IsNotEmpty()
   @IsString()
-  userId: string;
+  userId: string
 }
