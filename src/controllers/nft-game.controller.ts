@@ -51,6 +51,7 @@ export class NftGameController {
   @ApiBody({ type: NFTWalletBodyDto })
   async unbox(@Body() { uuid, assetId, pincode }: NFTWalletBodyDto) {
     const user = await this.userService.findByUUID(uuid)
+    if (!user) throw new NotFoundException(`Can't find user with uuid: ${uuid}`)
     const walletId = user.wallet.id
     return this.venlyService.unbox({ walletId, assetId, pincode })
   }
@@ -64,7 +65,10 @@ export class NftGameController {
   @ApiBody({ type: PayableNFTWalletBodyDto })
   async upgrade(@Body() { uuid, assetId, value, pincode }: PayableNFTWalletBodyDto) {
     const user = await this.userService.findByUUID(uuid)
+    if (!user) throw new NotFoundException(`Can't find user with uuid: ${uuid}`)
+
     const walletId = user.wallet.id
+
     return this.venlyService.upgrade({ walletId, assetId, value, pincode })
   }
 

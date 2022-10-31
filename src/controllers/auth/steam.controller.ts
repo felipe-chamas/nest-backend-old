@@ -33,7 +33,6 @@ export class SteamController {
   @Post('save')
   @UseGuards(AuthGuard('steam'))
   async save(@Req() req: Request, @Session() session: SessionData) {
-    console.log(session.user)
     if (!session.user) {
       const user = await this.userService.findOrCreateBySteamId(req.user.id)
       session.user = {

@@ -170,12 +170,23 @@ export const tokenBalnceResponse = {
     }
   ]
 }
+
+export const transactionResponse = {
+  success: true,
+  result: [
+    {
+      transactionHash: '3c58e866f9fdda95fab25d71e700e765'
+    }
+  ]
+}
+
 export const createWalletResponse = {
   success: true,
   result: [
     { pincode: '123456', identifier: mockUser.uuid, secretType: 'MATIC', walletType: 'WHITE_LABEL' }
   ]
 }
+
 export const mockVenlyService: Partial<VenlyService> = {
   getNfts: jest.fn().mockImplementation(async ({ walletId, nfts }) => {
     if (!walletId && !nfts) throw new Error('Required data missing')
@@ -184,6 +195,14 @@ export const mockVenlyService: Partial<VenlyService> = {
   getTokenBalance: jest.fn().mockImplementation(async ({ walletId, token }) => {
     if (!walletId && !token) throw new Error('Required data missing')
     return tokenBalnceResponse.result
+  }),
+  upgrade: jest.fn().mockImplementation(async ({ walletId, assetId, value, pincode }) => {
+    if (!pincode && !walletId && !assetId && !value) throw new Error('Required data missing')
+    return transactionResponse.result
+  }),
+  unbox: jest.fn().mockImplementation(async ({ walletId, assetId, pincode }) => {
+    if (!pincode && !walletId && !assetId) throw new Error('Required data missing')
+    return transactionResponse.result
   }),
   createWallet: jest.fn().mockImplementation(async ({ pincode, uuid }: WalletBodyDto) => {
     if (!pincode || !uuid) throw new Error('Required data missing')

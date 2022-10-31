@@ -33,9 +33,10 @@ export class NftCollectionService {
 
   async findByAssetType(assetType: AssetType) {
     const [nftCollection] = await this.nftCollectionModel
-      .find()
+      ?.find()
       .elemMatch('assetTypes', assetType.toJSON())
       .exec()
+
     return nftCollection
   }
 
@@ -44,6 +45,7 @@ export class NftCollectionService {
       .find()
       .elemMatch('assetTypes', { chainId: chainId.toJSON() })
       .exec()
+
     return nftCollections
       .map((collection) =>
         collection.assetTypes

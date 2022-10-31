@@ -30,6 +30,7 @@ export class NftController {
     const assetId = new AssetId({ chainId, assetName, tokenId })
     const assetType = new AssetType({ chainId, assetName })
     if (!(await this.nftCollectionService.findByAssetType(assetType))) return null
+
     switch (chainId) {
       case ChainIdReference.SOLANA_DEVNET:
       case ChainIdReference.SOLANA_TESTNET:
@@ -66,6 +67,7 @@ export class NftController {
       case ChainIdReference.SOLANA_TESTNET:
       case ChainIdReference.SOLANA_MAINNET:
         const nfts = await this.solanaService.getAccountNfts(accountId)
+
         const filteredNfts = nfts.filter((nft) =>
           nftCollectionAddresses.includes(nft.assetId.assetName.reference)
         )

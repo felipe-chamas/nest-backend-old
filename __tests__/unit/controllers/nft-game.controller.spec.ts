@@ -5,7 +5,12 @@ import { NftGameController } from '@controllers/nft-game.controller'
 import { UserService } from '@services/user.service'
 import { VenlyService } from '@services/utils/venly.service'
 import { mockUserService, mockUser } from '__mocks__/user.mock'
-import { mockVenlyService, nonFungibleResponse, tokenBalnceResponse } from '__mocks__/venly.mock'
+import {
+  mockVenlyService,
+  nonFungibleResponse,
+  tokenBalnceResponse,
+  transactionResponse
+} from '__mocks__/venly.mock'
 
 describe('nftGameController', () => {
   let controller: NftGameController
@@ -67,6 +72,7 @@ describe('nftGameController', () => {
 
     it('getNfts must be called with correct data', async () => {
       await controller.getUserBalance('testUUID', { token: 'testToken' })
+
       const mockFunction = mockVenlyService.getTokenBalance as jest.Mock
       expect(mockFunction.mock.calls[0][0]).toMatchObject({
         walletId: mockUser.wallet.id,
@@ -76,6 +82,113 @@ describe('nftGameController', () => {
     it('must return correct data', async () => {
       const response = await controller.getUserBalance('testUUID', { token: 'testToken' })
       expect(response).toMatchObject(tokenBalnceResponse.result)
+    })
+  })
+
+  describe('upgrade', () => {
+    const assetIdTest = {
+      chainId: {
+        namespace: 'namespace-chain-id',
+        reference: 'reference-chain-id'
+      },
+      assetName: {
+        namespace: 'namespace-asset',
+        reference: 'reference-asset'
+      },
+      tokenId: 'tokenId'
+    }
+
+    it('If user not exist throw an error', async () => {
+      const uuid = 'badUUID'
+      try {
+        await controller.upgrade({
+          uuid: uuid,
+          assetId: assetIdTest,
+          value: 2,
+          pincode: 'code'
+        })
+      } catch (error) {
+        expect(error).toBeInstanceOf(NotFoundException)
+      }
+    })
+
+    it('upgrade must be called with correct data', async () => {
+      await controller.upgrade({
+        uuid: 'uuid-user',
+        assetId: assetIdTest,
+        value: 2,
+        pincode: 'code'
+      })
+
+      const mockFunction = mockVenlyService.upgrade as jest.Mock
+
+      expect(mockFunction.mock.calls[0][0]).toMatchObject({
+        walletId: mockUser.wallet.id,
+        assetId: assetIdTest,
+        value: 2,
+        pincode: 'code'
+      })
+    })
+
+    it('must return correct data', async () => {
+      const response = await controller.upgrade({
+        uuid: 'uuid-user',
+        assetId: assetIdTest,
+        value: 2,
+        pincode: 'code'
+      })
+      expect(response).toMatchObject(transactionResponse.result)
+    })
+  })
+
+  describe('unbox', () => {
+    const assetIdTest = {
+      chainId: {
+        namespace: 'namespace-chain-id',
+        reference: 'reference-chain-id'
+      },
+      assetName: {
+        namespace: 'namespace-asset',
+        reference: 'reference-asset'
+      },
+      tokenId: 'tokenId'
+    }
+    it('If user not exist throw an error', async () => {
+      const uuid = 'badUUID'
+      try {
+        await controller.unbox({
+          uuid: uuid,
+          assetId: assetIdTest,
+          pincode: 'code'
+        })
+      } catch (error) {
+        expect(error).toBeInstanceOf(NotFoundException)
+      }
+    })
+
+    it('unbox must be called with correct data', async () => {
+      await controller.unbox({
+        uuid: 'uuid-user',
+        assetId: assetIdTest,
+        pincode: 'code'
+      })
+
+      const mockFunction = mockVenlyService.unbox as jest.Mock
+
+      expect(mockFunction.mock.calls[0][0]).toMatchObject({
+        walletId: mockUser.wallet.id,
+        assetId: assetIdTest,
+        pincode: 'code'
+      })
+    })
+
+    it('must return correct data', async () => {
+      const response = await controller.unbox({
+        uuid: 'uuid-user',
+        assetId: assetIdTest,
+        pincode: 'code'
+      })
+      expect(response).toMatchObject(transactionResponse.result)
     })
   })
 })
