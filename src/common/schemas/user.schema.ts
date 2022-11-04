@@ -56,3 +56,5 @@ export class UserDto {
 export type UserDocument = UserDto & Document
 
 export const UserSchema = SchemaFactory.createForClass(UserDto)
+
+UserSchema.index({ 'socialAccounts.steam.id': 1 })
