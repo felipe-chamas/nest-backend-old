@@ -188,10 +188,6 @@ export const createWalletResponse = {
 }
 
 export const mockVenlyService: Partial<VenlyService> = {
-  getNfts: jest.fn().mockImplementation(async ({ walletId, nfts }) => {
-    if (!walletId && !nfts) throw new Error('Required data missing')
-    return nonFungibleResponse.result
-  }),
   getTokenBalance: jest.fn().mockImplementation(async ({ walletId, token }) => {
     if (!walletId && !token) throw new Error('Required data missing')
     return tokenBalnceResponse.result

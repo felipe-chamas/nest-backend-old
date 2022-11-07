@@ -308,3 +308,10 @@ export const ApiPropertyValue = () =>
     type: () => String,
     example: '42.123'
   })
+
+export const ApiPropertyTo = () =>
+  ApiProperty({
+    description: 'Address to transfer NFTs',
+    type: () => String,
+    example: '0xcd234a471b72ba2f1ccf0a70fcaba648a5eecd8d'
+  })

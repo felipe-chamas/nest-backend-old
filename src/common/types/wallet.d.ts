@@ -27,6 +27,35 @@ export interface Wallet extends WalletDto {
     decimals: number
   }
 }
+interface NftAttributes {
+  type: string
+  name: string
+  value: string
+}
+export interface NftData {
+  id: string
+  name: string
+  description: string
+  url: string
+  imageUrl: string
+  imagePreviewUrl: string
+  imageThumbnailUrl: string
+  animationUrls: string[]
+  fungible: boolean
+  contract: {
+    name: string
+    address: string
+    symbol: string
+    type: string
+    verified: boolean
+    premium: boolean
+    categories: any[]
+  }
+  attributes: NftAttributes[]
+  balance: number
+  finalBalance: number
+  transferFees: boolean
+}
 
 export interface CreateWalletResult {
   success: boolean
@@ -36,6 +65,11 @@ export interface CreateWalletResult {
 export interface GetWalletResult {
   success: boolean
   result: Wallet
+}
+
+export interface GetNftsResponse {
+  success: boolean
+  result: NftData[]
 }
 
 export interface MintResult {

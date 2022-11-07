@@ -72,7 +72,7 @@ describe('userController (e2e)', () => {
           expect(body.wallet.id).toBeDefined()
           expect(body.wallet.address).toBeDefined()
           expect(body.wallet.walletType).toEqual('WHITE_LABEL')
-          expect(body.wallet.secretType).toEqual('MATIC')
+          expect(body.wallet.secretType).toEqual('BSC')
           expect(body.wallet.identifier).toEqual(walletUser.uuid)
           createdWalletsIds.push(body.wallet.id)
         })

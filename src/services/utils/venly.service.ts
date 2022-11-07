@@ -7,6 +7,7 @@ import { plainToInstance } from 'class-transformer'
 
 import { WalletBodyDto } from '@common/dto/venly.dto'
 import { WalletDto } from '@common/dto/wallet.dto'
+import { AssetIdDto } from '@common/types/caip'
 
 import { HttpVenlyApiService } from './venly/api.service'
 import { HttpVenlyAuthService } from './venly/auth.service'
@@ -25,6 +26,7 @@ export class VenlyService {
   application_id: string
 
   nftCollectionAddress: string
+  binanceId: string
 
   constructor(
     private readonly config: ConfigService,
@@ -39,6 +41,8 @@ export class VenlyService {
     // TODO: change testnet address once deployed in MATIC
     this.nftCollectionAddress =
       this.config.get('stage') === 'production' ? '' : '0x83269feb3c2e078cd364b69b3a76c51074e45cfa'
+
+    this.binanceId = this.config.get('stage') === 'production' ? '56' : '97'
 
     this.apiService.axiosRef.defaults.baseURL =
       this.config.get('stage') === 'production'
@@ -90,18 +94,6 @@ export class VenlyService {
     return result
   }
 
-  async getNfts({ walletId, nfts }) {
-    await this.getAccessToken()
-    const {
-      data: { result }
-    } = await this.apiService.axiosRef.get<GetWalletResult>(`wallets/${walletId}/nonfungibles`, {
-      params: {
-        'contract-addresses': nfts
-      }
-    })
-    return result
-  }
-
   async createWallet({ pincode, uuid }: WalletBodyDto) {
     await this.getAccessToken()
 
@@ -110,7 +102,7 @@ export class VenlyService {
     } = await this.apiService.axiosRef.post<CreateWalletResult>('wallets', {
       pincode,
       identifier: uuid,
-      secretType: 'MATIC',
+      secretType: 'BSC',
       walletType: 'WHITE_LABEL'
     })
 
@@ -131,7 +123,7 @@ export class VenlyService {
         walletId,
         type: 'CONTRACT_EXECUTION',
         to: this.nftCollectionAddress,
-        secretType: 'MATIC',
+        secretType: 'BSC',
         functionName: 'mint',
         value: 0,
         inputs: [
@@ -161,7 +153,7 @@ export class VenlyService {
         walletId,
         type: 'CONTRACT_EXECUTION',
         to: caipAssetId.assetName.reference,
-        secretType: 'MATIC',
+        secretType: 'BSC',
         functionName: 'unbox',
         value: 0,
         inputs: [
@@ -191,7 +183,7 @@ export class VenlyService {
         walletId,
         type: 'CONTRACT_EXECUTION',
         to: caipAssetId.assetName.reference,
-        secretType: 'MATIC',
+        secretType: 'BSC',
         functionName: 'upgrade',
         value,
         inputs: [
@@ -204,6 +196,55 @@ export class VenlyService {
     })
 
     return transactionHash
+  }
+
+  async transfer(
+    from: string,
+    to: string,
+    assetIds: AssetIdDto[],
+    pincode: string,
+    walletId: string
+  ) {
+    const contractToTokenIds = assetIds.reduce((acc, assetId) => {
+      const address = assetId.assetName.reference
+      const id = assetId.tokenId
+
+      return { ...acc, [address]: [...(acc[address] || []), id] }
+    }, {})
+
+    await this.getAccessToken()
+
+    const promiseArr = Object.keys(contractToTokenIds).map((address) => {
+      const isSingle = contractToTokenIds[address].length === 1
+      return this.apiService.axiosRef.post<MintResult>('transactions/execute', {
+        pincode,
+        transactionRequest: {
+          walletId,
+          type: 'CONTRACT_EXECUTION',
+          to: address,
+          secretType: 'BSC',
+          functionName: isSingle ? 'transferFrom' : 'batchTransfer',
+          value: 0,
+          inputs: [
+            {
+              type: 'address',
+              value: from
+            },
+            {
+              type: 'address',
+              value: to
+            },
+            {
+              type: isSingle ? 'uint256' : 'uint256[]',
+              value: isSingle ? contractToTokenIds[address][0] : contractToTokenIds[address]
+            }
+          ]
+        }
+      })
+    })
+
+    const responses = await Promise.all(promiseArr)
+    return responses.map((response) => response.data.result.transactionHash)
   }
 
   async ArchiveWallet(walletId: string) {

@@ -1,16 +1,17 @@
 import { NotFoundException } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { Test, TestingModule } from '@nestjs/testing'
+import { AccountId } from 'caip'
 
 import { NftGameController } from '@controllers/nft-game.controller'
 import { UserService } from '@services/user.service'
+import { EvmService } from '@services/utils/evm.service'
 import { VenlyService } from '@services/utils/venly.service'
+import { mockEvmService } from '__mocks__/evm.mock'
 import { mockUserService, mockUser } from '__mocks__/user.mock'
-import {
-  mockVenlyService,
-  nonFungibleResponse,
-  tokenBalnceResponse,
-  transactionResponse
-} from '__mocks__/venly.mock'
+import { mockVenlyService, tokenBalnceResponse, transactionResponse } from '__mocks__/venly.mock'
+
+import { mockNftEvm } from '../../__mocks__/nft.mock'
 
 describe('nftGameController', () => {
   let controller: NftGameController
@@ -20,12 +21,20 @@ describe('nftGameController', () => {
       controllers: [NftGameController],
       providers: [
         {
+          provide: VenlyService,
+          useValue: mockVenlyService
+        },
+        {
           provide: UserService,
           useValue: mockUserService
         },
         {
-          provide: VenlyService,
-          useValue: mockVenlyService
+          provide: EvmService,
+          useValue: mockEvmService
+        },
+        {
+          provide: ConfigService,
+          useValue: { get: () => '97' }
         }
       ]
     }).compile()
@@ -47,16 +56,21 @@ describe('nftGameController', () => {
       }
     })
     it('getNfts must be called with correct data', async () => {
-      await controller.getUserNfts('testUUID', { nfts: 'testNft' })
-      const mockFunction = mockVenlyService.getNfts as jest.Mock
-      expect(mockFunction.mock.calls[0][0]).toMatchObject({
-        walletId: mockUser.wallet.id,
-        nfts: 'testNft'
+      await controller.getUserNfts('testUUID', { nfts: ['testNft'] })
+      const mockFunction = mockEvmService.getAccountNfts as jest.Mock
+      const accountId = new AccountId({
+        address: mockUser.wallet.address,
+        chainId: {
+          namespace: 'eip155',
+          reference: '97'
+        }
       })
+      expect(mockFunction.mock.calls[0][0]).toMatchObject(accountId)
+      expect(mockFunction.mock.calls[0][1]).toMatchObject(['testNft'])
     })
     it('must return correct data', async () => {
-      const response = await controller.getUserNfts('testUUID', { nfts: 'testNft' })
-      expect(response).toMatchObject(nonFungibleResponse.result)
+      const response = await controller.getUserNfts('testUUID', { nfts: ['testNft'] })
+      expect(response).toMatchObject([mockNftEvm])
     })
   })
 
