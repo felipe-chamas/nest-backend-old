@@ -1,7 +1,7 @@
 ########
 # Base #
 ########
-FROM node:16-alpine AS base
+FROM node:19-alpine AS base
 USER $user
 RUN mkdir -p /usr/src/app
 RUN mkdir /usr/src/app/logs
