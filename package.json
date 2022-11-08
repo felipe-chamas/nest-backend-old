@@ -76,7 +76,7 @@
     "@types/express-session": "^1.17.4",
     "@types/jest": "27.0.2",
     "@types/mongoose-delete": "^0.5.9",
-    "@types/node": "16.11.7",
+    "@types/node": "18.11.9",
     "@types/passport": "^1.0.7",
     "@types/passport-discord": "^0.1.5",
     "@types/supertest": "^2.0.12",
