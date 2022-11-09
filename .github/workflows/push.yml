@@ -1,6 +1,11 @@
 name: Push
 
-on: push
+on:
+  pull_request:
+    types: [opened, synchronize]
+  push:
+    branches:
+      - main
 
 concurrency:
   group: ${{ github.head_ref || github.ref_name }}
