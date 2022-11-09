@@ -20,3 +20,4 @@ updates:
     reviewers:
       - "aviggiano"
       - "felipe-chamas"
+    open-pull-requests-limit: 25
