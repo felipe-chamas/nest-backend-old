@@ -57,7 +57,7 @@
     "passport-custom": "^1.1.1",
     "passport-discord": "^0.1.4",
     "passport-steam": "^1.0.17",
-    "redis": "^4.0.6",
+    "redis": "^4.4.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.5.7",
     "swagger-ui-express": "^4.5.0",
