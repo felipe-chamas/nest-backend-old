@@ -60,7 +60,7 @@
     "redis": "^4.4.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.5.7",
-    "swagger-ui-express": "^4.5.0",
+    "swagger-ui-express": "^4.6.0",
     "tweetnacl": "^1.0.3",
     "uuid": "^9.0.0",
     "winston": "^3.7.2"
