@@ -35,5 +35,8 @@ export default () => ({
   apiKey: process.env.API_KEY,
   moralis: {
     apiKey: process.env.MORALIS_API_KEY
+  },
+  slack: {
+    slackUrl: process.env.SLACK_URL
   }
 })

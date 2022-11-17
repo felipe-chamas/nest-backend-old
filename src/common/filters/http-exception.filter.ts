@@ -1,11 +1,14 @@
 import { ExceptionFilter, Catch, ArgumentsHost, HttpException } from '@nestjs/common'
+import axios from 'axios'
 import { Request, Response } from 'express'
+
+import config from '@common/config'
 
 import { logger } from '../providers/logger'
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
-  catch(exception: HttpException, host: ArgumentsHost) {
+  async catch(exception: HttpException, host: ArgumentsHost) {
     const ctx = host.switchToHttp()
     const request = ctx.getRequest<Request>()
     const response = ctx.getResponse<Response>()
@@ -13,6 +16,21 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const { method, url } = request
     const status = exception.getStatus()
     const validationError = exception.getResponse()
+
+    if (status === 500) {
+      const slackUrl = config().slack.slackUrl
+      await axios.post(slackUrl, {
+        blocks: [
+          {
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: `*Falco Bakend Alert*: \n - *path:* ${request.url}\n - *status code:* ${status} \n - *name:* ${exception.name}\n - *message:* ${exception.message}`
+            }
+          }
+        ]
+      })
+    }
 
     logger.log({
       level: 'error',

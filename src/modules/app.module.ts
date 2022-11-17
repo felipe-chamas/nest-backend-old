@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common'
+import { APP_FILTER } from '@nestjs/core'
 import { RouterModule } from 'nest-router'
 
+import { HttpExceptionFilter } from '@common/filters/http-exception.filter'
 import { AppController } from '@controllers/app.controller'
 import { routes } from '@routes'
 
@@ -23,6 +25,12 @@ import { MongoDbProvider } from './utils/mongo.module'
     UserModule,
     AuthModule
   ],
-  controllers: [AppController]
+  controllers: [AppController],
+  providers: [
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter
+    }
+  ]
 })
 export class AppModule {}
