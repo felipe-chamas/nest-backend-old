@@ -17,8 +17,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const status = exception.getStatus()
     const validationError = exception.getResponse()
 
-    if (status === 500) {
-      const slackUrl = config().slack.slackUrl
+    const {
+      slack: { slackUrl },
+      stage
+    } = config()
+    if (status === 500 && stage === 'production') {
       await axios.post(slackUrl, {
         blocks: [
           {
