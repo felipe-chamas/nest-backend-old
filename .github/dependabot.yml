@@ -9,6 +9,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    ignore:
+      update-types: ["version-update:semver-major"]
     reviewers:
       - "aviggiano"
       - "felipe-chamas"
@@ -17,6 +19,8 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
+    ignore:
+      update-types: ["version-update:semver-major"]
     reviewers:
       - "aviggiano"
       - "felipe-chamas"
