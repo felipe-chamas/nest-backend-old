@@ -46,7 +46,7 @@
     "ethers": "^5.7.2",
     "express": "^4.18.2",
     "express-session": "^1.17.2",
-    "helmet": "^6.0.0",
+    "helmet": "^6.0.1",
     "mongodb": "^4.12.1",
     "mongoose": "^6.7.3",
     "mongoose-autopopulate": "^0.16.1",
