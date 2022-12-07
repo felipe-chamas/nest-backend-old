@@ -114,13 +114,16 @@ export class NftController {
     @Param('chainIdSource') chainIdSource: string,
     @Param('chainIdDestination') chainIdDestination: string,
     @Session() session: SessionData,
-    @Body() { txSource }: { txSource: string }
+    @Body() { txSource, accountIdDestination }: { txSource: string; accountIdDestination: string }
   ) {
     if (!session.user) throw new UnauthorizedException()
 
     const { uuid } = session.user
     const user = await this.userService.findByUUID(uuid)
-    if (!user.wallet) throw new BadRequestException(`Cannot bridge NFTs without a wallet`)
+
+    if (new AccountId(accountIdDestination).chainId.toString() !== chainIdDestination) {
+      throw new BadRequestException(`Invalid accountIdDestination chain ${accountIdDestination}`)
+    }
 
     const validBridgeMap: Record<ChainIdReference, ChainIdReference> = {
       [ChainIdReference.SOLANA_DEVNET]: ChainIdReference.BINANCE_TESTNET,
@@ -205,7 +208,7 @@ export class NftController {
     const txDestination = await this.venlyService.mint({
       pincode: destinationWalletPinCode,
       walletId: destinationWalletId,
-      walletAddress: user.wallet.address,
+      walletAddress: new AccountId(accountIdDestination).address,
       assetType: new AssetType(destinationAssetType)
     })
 

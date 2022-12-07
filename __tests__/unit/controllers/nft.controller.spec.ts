@@ -1,6 +1,7 @@
 import { BadRequestException, UnauthorizedException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { Test, TestingModule } from '@nestjs/testing'
+import { AccountId, ChainId } from 'caip'
 import { SessionData } from 'express-session'
 
 import { ChainIdReference } from '@common/enums/caip.enum'
@@ -135,37 +136,53 @@ describe('NftController', () => {
       const chainIdSource = 'chainIdSource'
       const chainIdDestination = 'chainIdDestination'
       const txSource = 'txSource'
+      const accountIdDestination = 'accountIdDestination'
       const session = { user: undefined, destroy: () => undefined } as SessionData
 
       await expect(
         controller.bridge(chainIdSource, chainIdDestination, session, {
-          txSource
+          txSource,
+          accountIdDestination
         })
       ).rejects.toEqual(new UnauthorizedException())
     })
 
-    it('If the user does not have a wallet return bad request', async () => {
+    it('If the user provides the wrong destination account id return bad request', async () => {
       const chainIdSource = 'chainIdSource'
       const chainIdDestination = 'chainIdDestination'
       const txSource = 'txSource'
+      const accountIdDestination = new AccountId({
+        chainId: new ChainId('namespace:reference'),
+        address: mockUser.accountIds[0].address
+      }).toString()
       const session = { user: mockUserWithoutWallet, destroy: () => undefined } as SessionData
 
       await expect(
         controller.bridge(chainIdSource, chainIdDestination, session, {
-          txSource
+          txSource,
+          accountIdDestination
         })
-      ).rejects.toEqual(new BadRequestException(`Cannot bridge NFTs without a wallet`))
+      ).rejects.toEqual(
+        new BadRequestException(
+          `Invalid accountIdDestination chain namespace:reference:${mockUser.accountIds[0].address}`
+        )
+      )
     })
 
     it('If the source or destination are invalid return bad request', async () => {
       const chainIdSource = 'chainIdSource'
-      const chainIdDestination = 'chainIdDestination'
+      const chainIdDestination = 'namespace:reference'
       const txSource = 'txSource'
+      const accountIdDestination = new AccountId({
+        chainId: new ChainId(chainIdDestination),
+        address: mockUser.accountIds[0].address
+      }).toString()
       const session = { user: mockUser, destroy: () => undefined } as SessionData
 
       await expect(
         controller.bridge(chainIdSource, chainIdDestination, session, {
-          txSource
+          txSource,
+          accountIdDestination
         })
       ).rejects.toEqual(
         new BadRequestException(`Invalid bridge from ${chainIdSource} to ${chainIdDestination}`)
@@ -176,10 +193,15 @@ describe('NftController', () => {
       const chainIdSource = ChainIdReference.SOLANA_TESTNET
       const chainIdDestination = ChainIdReference.BINANCE_TESTNET
       const txSource = bridgeTxSolana
+      const accountIdDestination = new AccountId({
+        chainId: new ChainId(chainIdDestination),
+        address: mockUser.accountIds[0].address
+      }).toString()
       const session = { user: mockUser, destroy: () => undefined } as SessionData
 
       const response = await controller.bridge(chainIdSource, chainIdDestination, session, {
-        txSource
+        txSource,
+        accountIdDestination
       })
 
       expect(response).toEqual(mockNftEvm)
