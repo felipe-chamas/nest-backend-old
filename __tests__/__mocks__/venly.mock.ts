@@ -1,6 +1,7 @@
 import { WalletBodyDto } from '@common/dto/venly.dto'
 import { VenlyService } from '@services/utils/venly.service'
 
+import { mockNftEvm } from './nft.mock'
 import { mockUser } from './user.mock'
 
 export const nonFungibleResponse = {
@@ -187,6 +188,34 @@ export const createWalletResponse = {
   ]
 }
 
+export const getWalletResponse = {
+  success: true,
+  result: {
+    id: '6ddcbcc3-e242-4bb5-b4f3-3913ccba3e8d',
+    address: '0xd7A742EFa8f3b24bc39EF288C2eEf3f1F6956a60',
+    walletType: 'WHITE_LABEL',
+    secretType: 'ETHEREUM',
+    createdAt: '2021-01-14T13:17:42.301523',
+    archived: false,
+    alias: 'magnetic_horse',
+    description: 'Just another test Wallet',
+    primary: false,
+    hasCustomPin: true,
+    identifier: 'arkane-created-wallet',
+    balance: {
+      available: true,
+      secretType: 'ETHEREUM',
+      balance: 1.0,
+      gasBalance: 0.0,
+      symbol: 'ETH',
+      gasSymbol: 'ETH',
+      rawBalance: '1',
+      rawGasBalance: '0',
+      decimals: 18
+    }
+  }
+}
+
 export const mockVenlyService: Partial<VenlyService> = {
   getTokenBalance: jest.fn().mockImplementation(async ({ walletId, token }) => {
     if (!walletId && !token) throw new Error('Required data missing')
@@ -203,5 +232,11 @@ export const mockVenlyService: Partial<VenlyService> = {
   createWallet: jest.fn().mockImplementation(async ({ pincode, uuid }: WalletBodyDto) => {
     if (!pincode || !uuid) throw new Error('Required data missing')
     return createWalletResponse.result
+  }),
+  getWallet: jest.fn().mockImplementation(async (walletId: string) => {
+    return [getWalletResponse].find((wallet) => wallet.result.id === walletId)?.result
+  }),
+  mint: jest.fn().mockImplementation(async () => {
+    return mockNftEvm
   })
 }

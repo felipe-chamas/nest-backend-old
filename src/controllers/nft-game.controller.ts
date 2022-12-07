@@ -9,7 +9,7 @@ import {
   ApiParam,
   ApiTags
 } from '@nestjs/swagger'
-import { AccountId } from 'caip'
+import { AccountId, AssetType } from 'caip'
 
 import { Auth } from '@common/decorators/auth.decorators'
 import { Role } from '@common/enums/role.enum'
@@ -18,10 +18,10 @@ import { EvmService } from '@services/utils/evm.service'
 import { VenlyService } from '@services/utils/venly.service'
 
 import {
+  MintWalletBodyDto,
   NFTTransferBodyDto,
   NFTWalletBodyDto,
-  PayableNFTWalletBodyDto,
-  WalletBodyDto
+  PayableNFTWalletBodyDto
 } from '../common/dto/venly.dto'
 
 @ApiTags('Game Control')
@@ -44,12 +44,17 @@ export class NftGameController {
   })
   @ApiExcludeEndpoint()
   @ApiCreatedResponse()
-  @ApiBody({ type: WalletBodyDto })
-  async mint(@Body() { uuid, pincode }: WalletBodyDto) {
+  @ApiBody({ type: MintWalletBodyDto })
+  async mint(@Body() { uuid, pincode, assetType }: MintWalletBodyDto) {
     const user = await this.userService.findByUUID(uuid)
     const walletId = user.wallet.id
     const walletAddress = user.wallet.address
-    return this.venlyService.mint({ walletId, walletAddress, pincode })
+    return this.venlyService.mint({
+      walletId,
+      walletAddress,
+      pincode,
+      assetType: new AssetType(assetType)
+    })
   }
 
   @Auth(Role.NFT_ADMIN)
@@ -110,7 +115,6 @@ export class NftGameController {
     const user = await this.userService.findByUUID(uuid)
     if (!user) throw new NotFoundException(`Can't find user with uuid: ${uuid}`)
     const walletId = user.wallet?.id
-    // FIXME this return value is not correct
     if (walletId) {
       return this.venlyService.getTokenBalance({ walletId, token })
     }

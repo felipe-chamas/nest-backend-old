@@ -103,6 +103,29 @@ export function IsAccountIdArray(object: object, propertyName: string) {
   })
 }
 
+export function IsAssetType(object: object, propertyName: string) {
+  registerDecorator({
+    name: 'isAssetType',
+    target: object.constructor,
+    propertyName: propertyName,
+    options: {
+      message:
+        'String should be formatted according to caip standard. See more ' +
+        'https://github.com/ChainAgnostic/CAIPs/blob/master/CAIPs/caip-19.md'
+    },
+    validator: {
+      validate(value: string | AssetTypeParams) {
+        try {
+          new AssetType(value)
+          return true
+        } catch (_) {
+          return false
+        }
+      }
+    }
+  })
+}
+
 export function IsAssetTypeArray(object: object, propertyName: string) {
   registerDecorator({
     name: 'isAssetTypeArray',

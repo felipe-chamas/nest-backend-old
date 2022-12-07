@@ -1,16 +1,22 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsNumber, IsString } from 'class-validator'
 
-import { IsAssetId, IsAssetIdArray } from '@common/decorators/caip.decorators'
+import {
+  IsAssetId,
+  IsAssetIdArray,
+  IsAssetType,
+  IsAssetTypeArray
+} from '@common/decorators/caip.decorators'
 import {
   ApiPropertyAssetIds,
+  ApiPropertyAssetType,
   ApiPropertyTo,
   ApiPropertyUserUUID,
   ApiPropertyValue
 } from '@common/decorators/docs.decorators'
 import { IsPincode } from '@common/decorators/venly.decorators'
 
-import type { AssetIdDto } from '@common/types/caip'
+import type { AssetIdDto, AssetTypeDto } from '@common/types/caip'
 
 export class WalletBodyDto {
   @IsString()
@@ -23,6 +29,12 @@ export class WalletBodyDto {
     example: '123456'
   })
   pincode: string
+}
+
+export class MintWalletBodyDto extends WalletBodyDto {
+  @IsAssetType
+  @ApiPropertyAssetType()
+  assetType: AssetTypeDto
 }
 
 export class NFTWalletBodyDto extends WalletBodyDto {

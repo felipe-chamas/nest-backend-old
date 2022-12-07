@@ -1,13 +1,24 @@
+import { BadRequestException, UnauthorizedException } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { Test, TestingModule } from '@nestjs/testing'
+import { SessionData } from 'express-session'
 
+import { ChainIdReference } from '@common/enums/caip.enum'
 import { NftController } from '@controllers/nft.controller'
+import { BridgeService } from '@services/bridge.service'
 import { NftCollectionService } from '@services/nft-collection.service'
+import { UserService } from '@services/user.service'
 import { EvmService } from '@services/utils/evm.service'
 import { SolanaService } from '@services/utils/solana.service'
+import { VenlyService } from '@services/utils/venly.service'
+import { mockBridge, mockBridgeService } from '__mocks__/bridge.mock'
+import { mockConfigService } from '__mocks__/config.mock'
 import { mockEvmService } from '__mocks__/evm.mock'
 import { mockNftCollectionService } from '__mocks__/nft-collection.mock'
 import { mockNftEvm, mockNftSolana } from '__mocks__/nft.mock'
-import { mockSolanaService } from '__mocks__/solana.mock'
+import { bridgeTxSolana, mockSolanaService } from '__mocks__/solana.mock'
+import { mockUser, mockUserService, mockUserWithoutWallet } from '__mocks__/user.mock'
+import { mockVenlyService } from '__mocks__/venly.mock'
 
 describe('NftController', () => {
   let controller: NftController
@@ -21,12 +32,28 @@ describe('NftController', () => {
           useValue: mockNftCollectionService
         },
         {
+          provide: UserService,
+          useValue: mockUserService
+        },
+        {
+          provide: BridgeService,
+          useValue: mockBridgeService
+        },
+        {
           provide: EvmService,
           useValue: mockEvmService
         },
         {
           provide: SolanaService,
           useValue: mockSolanaService
+        },
+        {
+          provide: VenlyService,
+          useValue: mockVenlyService
+        },
+        {
+          provide: ConfigService,
+          useValue: mockConfigService
         }
       ]
     }).compile()
@@ -101,5 +128,61 @@ describe('NftController', () => {
         const response = await controller.findByAccount(chainId, address, nftCollectionAddresses)
         expect(response[0]).toEqual(mockNftSolana)
       })
+  })
+
+  describe('bridge', () => {
+    it('If the user is not authenticated return unauthorized', async () => {
+      const chainIdSource = 'chainIdSource'
+      const chainIdDestination = 'chainIdDestination'
+      const txSource = 'txSource'
+      const session = { user: undefined, destroy: () => undefined } as SessionData
+
+      await expect(
+        controller.bridge(chainIdSource, chainIdDestination, session, {
+          txSource
+        })
+      ).rejects.toEqual(new UnauthorizedException())
+    })
+
+    it('If the user does not have a wallet return bad request', async () => {
+      const chainIdSource = 'chainIdSource'
+      const chainIdDestination = 'chainIdDestination'
+      const txSource = 'txSource'
+      const session = { user: mockUserWithoutWallet, destroy: () => undefined } as SessionData
+
+      await expect(
+        controller.bridge(chainIdSource, chainIdDestination, session, {
+          txSource
+        })
+      ).rejects.toEqual(new BadRequestException(`Cannot bridge NFTs without a wallet`))
+    })
+
+    it('If the source or destination are invalid return bad request', async () => {
+      const chainIdSource = 'chainIdSource'
+      const chainIdDestination = 'chainIdDestination'
+      const txSource = 'txSource'
+      const session = { user: mockUser, destroy: () => undefined } as SessionData
+
+      await expect(
+        controller.bridge(chainIdSource, chainIdDestination, session, {
+          txSource
+        })
+      ).rejects.toEqual(
+        new BadRequestException(`Invalid bridge from ${chainIdSource} to ${chainIdDestination}`)
+      )
+    })
+
+    it('If the information is valid return success', async () => {
+      const chainIdSource = ChainIdReference.SOLANA_TESTNET
+      const chainIdDestination = ChainIdReference.BINANCE_TESTNET
+      const txSource = bridgeTxSolana
+      const session = { user: mockUser, destroy: () => undefined } as SessionData
+
+      const response = await controller.bridge(chainIdSource, chainIdDestination, session, {
+        txSource
+      })
+
+      expect(response).toEqual(mockNftEvm)
+    })
   })
 })

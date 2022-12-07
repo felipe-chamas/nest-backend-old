@@ -2,7 +2,7 @@ import url from 'url'
 
 import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { AssetId } from 'caip'
+import { AssetId, AssetType } from 'caip'
 import { plainToInstance } from 'class-transformer'
 
 import { WalletBodyDto } from '@common/dto/venly.dto'
@@ -15,6 +15,7 @@ import { HttpVenlyAuthService } from './venly/auth.service'
 import type {
   AccessTokenResult,
   CreateWalletResult,
+  GetTxStatusResult,
   GetWalletResult,
   MintResult
 } from '@common/types/wallet'
@@ -25,9 +26,6 @@ export class VenlyService {
   client_secret: string
   application_id: string
 
-  nftCollectionAddress: string
-  binanceId: string
-
   constructor(
     private readonly config: ConfigService,
     private readonly apiService: HttpVenlyApiService,
@@ -36,13 +34,6 @@ export class VenlyService {
     this.client_id = this.config.get('venly.client_id')
     this.client_secret = this.config.get('venly.client_secret')
     this.application_id = this.config.get('venly.application_id')
-
-    // TODO: input production address once deployed
-    // TODO: change testnet address once deployed in MATIC
-    this.nftCollectionAddress =
-      this.config.get('stage') === 'production' ? '' : '0x83269feb3c2e078cd364b69b3a76c51074e45cfa'
-
-    this.binanceId = this.config.get('stage') === 'production' ? '56' : '97'
 
     this.apiService.axiosRef.defaults.baseURL =
       this.config.get('stage') === 'production'
@@ -110,8 +101,20 @@ export class VenlyService {
     return wallet
   }
 
-  async mint({ pincode, walletId, walletAddress }) {
+  async mint({
+    pincode,
+    walletId,
+    walletAddress,
+    assetType
+  }: {
+    pincode: string
+    walletId: string
+    walletAddress: string
+    assetType: AssetType
+  }) {
     await this.getAccessToken()
+
+    const nftCollectionAddress = assetType.assetName.reference
 
     const {
       data: {
@@ -122,7 +125,7 @@ export class VenlyService {
       transactionRequest: {
         walletId,
         type: 'CONTRACT_EXECUTION',
-        to: this.nftCollectionAddress,
+        to: nftCollectionAddress,
         secretType: 'BSC',
         functionName: 'mint',
         value: 0,
@@ -247,7 +250,21 @@ export class VenlyService {
     return responses.map((response) => response.data.result.transactionHash)
   }
 
-  async ArchiveWallet(walletId: string) {
+  async getTxStatus(transactionHash: string) {
+    await this.getAccessToken()
+
+    const {
+      data: {
+        result: { status }
+      }
+    } = await this.apiService.axiosRef.post<GetTxStatusResult>(
+      `transactions/BSC/${transactionHash}`
+    )
+
+    return status
+  }
+
+  async archiveWallet(walletId: string) {
     await this.getAccessToken()
 
     const {

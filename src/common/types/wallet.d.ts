@@ -78,3 +78,11 @@ export interface MintResult {
     transactionHash: string
   }
 }
+
+export interface GetTxStatusResult {
+  success: boolean
+  result: {
+    hash: string
+    status: 'SUCCEEDED' | string
+  }
+}

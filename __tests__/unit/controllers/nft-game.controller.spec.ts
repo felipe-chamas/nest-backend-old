@@ -56,7 +56,7 @@ describe('nftGameController', () => {
       }
     })
     it('getNfts must be called with correct data', async () => {
-      await controller.getUserNfts('testUUID', { nfts: ['testNft'] })
+      await controller.getUserNfts(mockUser.uuid, { nfts: ['testNft'] })
       const mockFunction = mockEvmService.getAccountNfts as jest.Mock
       const accountId = new AccountId({
         address: mockUser.wallet.address,
@@ -69,7 +69,7 @@ describe('nftGameController', () => {
       expect(mockFunction.mock.calls[0][1]).toMatchObject(['testNft'])
     })
     it('must return correct data', async () => {
-      const response = await controller.getUserNfts('testUUID', { nfts: ['testNft'] })
+      const response = await controller.getUserNfts(mockUser.uuid, { nfts: ['testNft'] })
       expect(response).toMatchObject([mockNftEvm])
     })
   })
@@ -85,7 +85,7 @@ describe('nftGameController', () => {
     })
 
     it('getNfts must be called with correct data', async () => {
-      await controller.getUserBalance('testUUID', { token: 'testToken' })
+      await controller.getUserBalance(mockUser.uuid, { token: 'testToken' })
 
       const mockFunction = mockVenlyService.getTokenBalance as jest.Mock
       expect(mockFunction.mock.calls[0][0]).toMatchObject({
@@ -94,7 +94,7 @@ describe('nftGameController', () => {
       })
     })
     it('must return correct data', async () => {
-      const response = await controller.getUserBalance('testUUID', { token: 'testToken' })
+      const response = await controller.getUserBalance(mockUser.uuid, { token: 'testToken' })
       expect(response).toMatchObject(tokenBalnceResponse.result)
     })
   })
@@ -128,7 +128,7 @@ describe('nftGameController', () => {
 
     it('upgrade must be called with correct data', async () => {
       await controller.upgrade({
-        uuid: 'uuid-user',
+        uuid: mockUser.uuid,
         assetId: assetIdTest,
         value: 2,
         pincode: 'code'
@@ -146,7 +146,7 @@ describe('nftGameController', () => {
 
     it('must return correct data', async () => {
       const response = await controller.upgrade({
-        uuid: 'uuid-user',
+        uuid: mockUser.uuid,
         assetId: assetIdTest,
         value: 2,
         pincode: 'code'
@@ -182,7 +182,7 @@ describe('nftGameController', () => {
 
     it('unbox must be called with correct data', async () => {
       await controller.unbox({
-        uuid: 'uuid-user',
+        uuid: mockUser.uuid,
         assetId: assetIdTest,
         pincode: 'code'
       })
@@ -198,7 +198,7 @@ describe('nftGameController', () => {
 
     it('must return correct data', async () => {
       const response = await controller.unbox({
-        uuid: 'uuid-user',
+        uuid: mockUser.uuid,
         assetId: assetIdTest,
         pincode: 'code'
       })

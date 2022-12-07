@@ -104,6 +104,25 @@ export const ApiPropertyDeletedAt = () =>
     example: '2022-07-07T14:12:34.567Z'
   })
 
+export const ApiPropertyAssetType = () =>
+  ApiProperty({
+    type: () => Object,
+    description: [
+      'Asset type.',
+      'Corresponds to where the collection is deployed on the blockchain, with `chainId` and `assetName` references.'
+    ].join('<br/>'),
+    example: {
+      chainId: {
+        namespace: 'solana',
+        reference: 'EtWTRABZaYq6iMfeYKouRu166VU2xqa1'
+      },
+      assetName: {
+        namespace: 'NonFungible',
+        reference: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
+      }
+    }
+  })
+
 export const ApiPropertyAssetTypes = () =>
   ApiProperty({
     type: () => [Object],

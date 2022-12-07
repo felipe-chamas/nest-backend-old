@@ -33,3 +33,20 @@ export interface SolscanTokenAccountResponse {
     collection: { key: string }
   }
 }
+
+interface TokenBalance {
+  accountIndex: number
+  mint: string
+  owner: string
+  programId: string
+  uiTokenAmount: { amount: string; decimals: number; uiAmount: number; uiAmountString: string }
+}
+
+export interface QuickNodeGetTransactionResponse {
+  result?: {
+    meta: {
+      preTokenBalances: [TokenBalance]
+      postTokenBalances: [TokenBalance, TokenBalance]
+    }
+  }
+}

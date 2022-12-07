@@ -8,6 +8,7 @@ import { Nft } from '@common/types/nft'
 import {
   ExternalApiNft,
   QuickNodeFetchNftsResponse,
+  QuickNodeGetTransactionResponse,
   SolscanTokenAccountResponse
 } from '@common/types/quicknode'
 
@@ -116,6 +117,45 @@ export class SolanaService {
         image: nft.imageUrl,
         attributes: nft.traits
       }
+    }
+  }
+
+  async getNftTransaction(
+    chainId: ChainId,
+    transactionHash: string
+  ): Promise<{
+    from: AccountId
+    to: AccountId
+    nft: NftDto
+  }> {
+    const { data, status } =
+      await this.quicknodeService.axiosRef.post<QuickNodeGetTransactionResponse>('', {
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'getTransaction',
+        params: [transactionHash, { encoding: 'jsonParsed', maxSupportedTransactionVersion: 0 }]
+      })
+
+    if (!data || !data.result)
+      throw new NotFoundException(`Transaction not found: ${transactionHash}`)
+    if (status !== 200) throw new BadRequestException()
+
+    const tx = data.result.meta
+    const { from, to, tokenAddress } = {
+      from: tx.preTokenBalances[0].owner,
+      to: tx.postTokenBalances[1].owner,
+      tokenAddress: tx.preTokenBalances[0].mint
+    }
+
+    const nfts = await this.getAccountNfts(new AccountId({ chainId, address: to }))
+    const nft = nfts.find((nft) => nft.assetId.tokenId === tokenAddress)
+
+    if (!nft) throw new NotFoundException(`NFT not found: ${tokenAddress}`)
+
+    return {
+      from: new AccountId({ chainId, address: from }),
+      to: new AccountId({ chainId, address: to }),
+      nft
     }
   }
 }
