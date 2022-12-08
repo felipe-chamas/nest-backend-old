@@ -102,7 +102,7 @@ export class NftController {
     }
   }
 
-  @Auth(Role.NFT_ADMIN)
+  @Auth(Role.NFT_ADMIN, Role.OWNER)
   @Post('bridge/:chainIdSource/:chainIdDestination')
   @ApiOperation({
     description: 'Bridges an NFT from one chain to another'
