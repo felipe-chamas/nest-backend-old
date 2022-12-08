@@ -17,10 +17,8 @@ import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger'
 import { AccountId, AssetId, AssetType, ChainId } from 'caip'
 import { SessionData } from 'express-session'
 
-import { Auth } from '@common/decorators/auth.decorators'
 import { NftDto } from '@common/dto/nft.dto'
 import { ChainIdReference } from '@common/enums/caip.enum'
-import { Role } from '@common/enums/role.enum'
 import { BridgeService } from '@services/bridge.service'
 import { NftCollectionService } from '@services/nft-collection.service'
 import { UserService } from '@services/user.service'
@@ -102,7 +100,6 @@ export class NftController {
     }
   }
 
-  @Auth(Role.NFT_ADMIN, Role.OWNER)
   @Post('bridge/:chainIdSource/:chainIdDestination')
   @ApiOperation({
     description: 'Bridges an NFT from one chain to another'
@@ -154,6 +151,14 @@ export class NftController {
       new ChainId(chainIdSource),
       txSource
     )
+
+    const userAccountIds = user.accountIds.map((accountId) => new AccountId(accountId).toString())
+    if (!userAccountIds.includes(from.toString())) {
+      throw new BadRequestException(
+        `Invalid bridge from ${from.toString()} (expected ${userAccountIds.toString()})`
+      )
+    }
+
     const [
       sourceAccountId,
       sourceAssetTypes,
@@ -170,12 +175,6 @@ export class NftController {
       this.config.get('bridge.destinationWalletMinimumBalance') as number
     ]
 
-    const userAccountIds = user.accountIds.map((accountId) => new AccountId(accountId).toString())
-    if (!userAccountIds.includes(from.toString())) {
-      throw new BadRequestException(
-        `Invalid bridge from ${from.toString()} (expected ${userAccountIds.toString()})`
-      )
-    }
     if (to.toString() !== sourceAccountId) {
       throw new BadRequestException(
         `Invalid bridge to ${to.toString()} (expected ${sourceAccountId})`

@@ -6,6 +6,7 @@ import { ethers } from 'ethers'
 
 import { NftDto } from '@common/dto/nft.dto'
 import { logger } from '@common/providers/logger'
+import { Metadata } from '@common/types/metadata'
 import {
   MoralisResponseNftsByAddress,
   MoralisResponseSearchNft,
@@ -88,9 +89,15 @@ export class EvmService {
     }
   }
 
-  async getMetadata(nft: MoralisResultNftsByAddress) {
+  async getMetadata(nft: MoralisResultNftsByAddress): Promise<Metadata> {
     if (nft.metadata) return JSON.parse(nft.metadata)
-    const { data } = await this.httpService.axiosRef.get(nft.token_uri)
-    return data
+
+    try {
+      const { data } = await this.httpService.axiosRef.get(nft.token_uri)
+      return data
+    } catch (err) {
+      logger.error(`Error fetching metadata for ${nft.token_uri}: ${err.message}`)
+      return {} as Metadata
+    }
   }
 }

@@ -257,8 +257,8 @@ export class VenlyService {
       data: {
         result: { status }
       }
-    } = await this.apiService.axiosRef.post<GetTxStatusResult>(
-      `transactions/BSC/${transactionHash}`
+    } = await this.apiService.axiosRef.get<GetTxStatusResult>(
+      `transactions/BSC/${transactionHash}/status`
     )
 
     return status
