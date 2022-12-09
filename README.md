@@ -19,3 +19,4 @@
 - [ ] Increment coverage
 - [ ] Update README documentation with better process (install + start + testing, etc)
 - [ ] Change Quicknode to Moralis (wait for pricing decision)
+
