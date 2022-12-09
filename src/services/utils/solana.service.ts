@@ -136,21 +136,18 @@ export class SolanaService {
         params: [transactionHash, { encoding: 'jsonParsed', maxSupportedTransactionVersion: 0 }]
       })
 
-    if (!data || !data.result)
+    if (!data || !data.result || status !== 200)
       throw new NotFoundException(`Transaction not found: ${transactionHash}`)
-    if (status !== 200) throw new BadRequestException()
 
     const tx = data.result.meta
-    const { from, to, tokenAddress } = {
-      from: tx.preTokenBalances[0].owner,
-      to: tx.postTokenBalances[1].owner,
-      tokenAddress: tx.preTokenBalances[0].mint
-    }
+    const from = tx.preTokenBalances[0].owner
+    const to = tx.postTokenBalances.find(({ owner }) => owner !== from)?.owner
+    const tokenAddress = tx.preTokenBalances[0].mint
 
     const nfts = await this.getAccountNfts(new AccountId({ chainId, address: to }))
     const nft = nfts.find((nft) => nft.assetId.tokenId === tokenAddress)
 
-    if (!nft) throw new NotFoundException(`NFT not found: ${tokenAddress}`)
+    if (!nft) throw new NotFoundException(`NFT ${tokenAddress} not found on bridge ${to}`)
 
     return {
       from: new AccountId({ chainId, address: from }),
