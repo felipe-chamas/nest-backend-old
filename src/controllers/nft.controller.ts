@@ -170,9 +170,9 @@ export class NftController {
       this.config.get('bridge.sourceAccountId') as string,
       this.config.get('bridge.sourceAssetTypes') as string[],
       this.config.get('bridge.destinationAssetTypes') as string[],
-      this.config.get('bridge.destinationWalletId') as string,
-      this.config.get('bridge.destinationWalletPinCode') as string,
-      this.config.get('bridge.destinationWalletMinimumBalance') as number
+      this.config.get('operator.walletId') as string,
+      this.config.get('operator.walletPinCode') as string,
+      this.config.get('operator.walletMinimumBalance') as number
     ]
 
     if (to.toString() !== sourceAccountId) {

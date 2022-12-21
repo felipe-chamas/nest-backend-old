@@ -1,6 +1,6 @@
 import url from 'url'
 
-import { Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { AssetId, AssetType } from 'caip'
 import { plainToInstance } from 'class-transformer'
@@ -9,6 +9,7 @@ import { WalletBodyDto } from '@common/dto/venly.dto'
 import { WalletDto } from '@common/dto/wallet.dto'
 import { AssetIdDto } from '@common/types/caip'
 
+import { NftUnboxingService } from './nftUnboxing.services'
 import { HttpVenlyApiService } from './venly/api.service'
 import { HttpVenlyAuthService } from './venly/auth.service'
 
@@ -29,7 +30,8 @@ export class VenlyService {
   constructor(
     private readonly config: ConfigService,
     private readonly apiService: HttpVenlyApiService,
-    private readonly authService: HttpVenlyAuthService
+    private readonly authService: HttpVenlyAuthService,
+    private readonly nftUnboxingService: NftUnboxingService
   ) {
     this.client_id = this.config.get('venly.client_id')
     this.client_secret = this.config.get('venly.client_secret')
@@ -141,10 +143,19 @@ export class VenlyService {
     return transactionHash
   }
 
-  async unbox({ pincode, walletId, assetId }) {
+  async unbox(assetId: AssetIdDto) {
     await this.getAccessToken()
 
-    const caipAssetId = new AssetId(assetId)
+    const assetType = new AssetType({ assetName: assetId.assetName, chainId: assetId.chainId })
+    const nftUnboxing = await this.nftUnboxingService.findByAssetType(assetType)
+    if (!nftUnboxing) throw new NotFoundException(`asset can't be unboxed: ${assetType}`)
+    const { nfts, tokenCount } = nftUnboxing
+
+    const [walletId, pincode, unboxAddress] = [
+      this.config.get('operator.walletId') as string,
+      this.config.get('operator.walletPinCode') as string,
+      this.config.get('unbox.contractAddress') as string
+    ]
 
     const {
       data: {
@@ -155,14 +166,22 @@ export class VenlyService {
       transactionRequest: {
         walletId,
         type: 'CONTRACT_EXECUTION',
-        to: caipAssetId.assetName.reference,
+        to: unboxAddress,
         secretType: 'BSC',
         functionName: 'unbox',
         value: 0,
         inputs: [
           {
             type: 'uint256',
-            value: caipAssetId.tokenId
+            value: assetId.tokenId
+          },
+          {
+            type: 'address[]',
+            value: nfts
+          },
+          {
+            type: 'uint256[]',
+            value: tokenCount
           }
         ]
       }
@@ -274,5 +293,42 @@ export class VenlyService {
     })
 
     return result
+  }
+
+  async approveNft(
+    walletId: string,
+    pincode: string,
+    nftAddress: string,
+    tokenId: string,
+    to: string
+  ) {
+    await this.getAccessToken()
+
+    const {
+      data: {
+        result: { transactionHash }
+      }
+    } = await this.apiService.axiosRef.post<MintResult>('transactions/execute', {
+      pincode,
+      transactionRequest: {
+        walletId,
+        type: 'CONTRACT_EXECUTION',
+        to: nftAddress,
+        secretType: 'BSC',
+        functionName: 'approve',
+        value: 0,
+        inputs: [
+          {
+            type: 'address',
+            value: to
+          },
+          {
+            type: 'uint256',
+            value: tokenId
+          }
+        ]
+      }
+    })
+    return transactionHash
   }
 }

@@ -64,11 +64,22 @@ export class NftGameController {
   })
   @ApiOkResponse({ type: String })
   @ApiBody({ type: NFTWalletBodyDto })
-  async unbox(@Body() { uuid, assetId, pincode }: NFTWalletBodyDto) {
-    const user = await this.userService.findByUUID(uuid)
-    if (!user) throw new NotFoundException(`Can't find user with uuid: ${uuid}`)
-    const walletId = user.wallet.id
-    return this.venlyService.unbox({ walletId, assetId, pincode })
+  async unbox(@Body() { assetId, uuid, pincode }: NFTWalletBodyDto) {
+    if (uuid) {
+      const user = await this.userService.findByUUID(uuid)
+      if (!user) throw new NotFoundException(`Can't find user with uuid: ${uuid}`)
+
+      const to = this.config.get('unbox.contractAddress') as string
+      await this.venlyService.approveNft(
+        user.wallet.id,
+        pincode,
+        assetId.assetName.reference,
+        assetId.tokenId,
+        to
+      )
+    }
+
+    return this.venlyService.unbox(assetId)
   }
 
   @Auth(Role.NFT_ADMIN)

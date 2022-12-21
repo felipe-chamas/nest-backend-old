@@ -1,12 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsNumber, IsString } from 'class-validator'
 
-import {
-  IsAssetId,
-  IsAssetIdArray,
-  IsAssetType,
-  IsAssetTypeArray
-} from '@common/decorators/caip.decorators'
+import { IsAssetId, IsAssetIdArray, IsAssetType } from '@common/decorators/caip.decorators'
 import {
   ApiPropertyAssetIds,
   ApiPropertyAssetType,
@@ -43,10 +38,14 @@ export class NFTWalletBodyDto extends WalletBodyDto {
   assetId: AssetIdDto
 }
 
-export class PayableNFTWalletBodyDto extends NFTWalletBodyDto {
+export class PayableNFTWalletBodyDto extends WalletBodyDto {
   @IsNumber()
   @ApiPropertyValue()
   value: number
+
+  @IsAssetId
+  @ApiPropertyAssetIds()
+  assetId: AssetIdDto
 }
 
 export class NFTTransferBodyDto {

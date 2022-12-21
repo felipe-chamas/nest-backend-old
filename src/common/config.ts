@@ -39,6 +39,14 @@ export default () => ({
   slack: {
     slackUrl: process.env.SLACK_URL
   },
+  unbox: {
+    contractAddress: process.env.UNBOX_ADDRESS
+  },
+  operator: {
+    walletId: process.env.BRIDGE_DESTINATION_WALLET_ID,
+    walletPinCode: process.env.BRIDGE_DESTINATION_WALLET_PIN_CODE,
+    walletMinimumBalance: 1
+  },
   bridge: {
     sourceAccountId: process.env.BRIDGE_SOURCE_ACCOUNT_ID,
     sourceAssetTypes: process.env.BRIDGE_SOURCE_ASSET_TYPES
@@ -46,9 +54,6 @@ export default () => ({
       : [],
     destinationAssetTypes: process.env.BRIDGE_DESTINATION_ASSET_TYPES
       ? process.env.BRIDGE_DESTINATION_ASSET_TYPES.split(',')
-      : [],
-    destinationWalletId: process.env.BRIDGE_DESTINATION_WALLET_ID,
-    destinationWalletPinCode: process.env.BRIDGE_DESTINATION_WALLET_PIN_CODE,
-    destinationWalletMinimumBalance: 1
+      : []
   }
 })

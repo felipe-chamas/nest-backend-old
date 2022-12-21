@@ -29,9 +29,9 @@ describe('userController (e2e)', () => {
     venlyService = app.get<VenlyService>(VenlyService)
   })
   afterAll(async () => {
-    await app.close()
-    await mongoConnection.close()
     await Promise.all(createdWalletsIds.map((id) => venlyService.archiveWallet(id)))
+    await mongoConnection.close()
+    await app.close()
   })
 
   describe('POST /user/wallet', () => {

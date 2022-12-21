@@ -189,11 +189,7 @@ describe('nftGameController', () => {
 
       const mockFunction = mockVenlyService.unbox as jest.Mock
 
-      expect(mockFunction.mock.calls[0][0]).toMatchObject({
-        walletId: mockUser.wallet.id,
-        assetId: assetIdTest,
-        pincode: 'code'
-      })
+      expect(mockFunction.mock.calls[0][0]).toMatchObject(assetIdTest)
     })
 
     it('must return correct data', async () => {

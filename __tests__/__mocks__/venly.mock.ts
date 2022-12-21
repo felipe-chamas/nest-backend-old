@@ -1,4 +1,5 @@
 import { WalletBodyDto } from '@common/dto/venly.dto'
+import { AssetIdDto } from '@common/types/caip'
 import { VenlyService } from '@services/utils/venly.service'
 
 import { mockNftEvm } from './nft.mock'
@@ -225,8 +226,8 @@ export const mockVenlyService: Partial<VenlyService> = {
     if (!pincode && !walletId && !assetId && !value) throw new Error('Required data missing')
     return transactionResponse.result
   }),
-  unbox: jest.fn().mockImplementation(async ({ walletId, assetId, pincode }) => {
-    if (!pincode && !walletId && !assetId) throw new Error('Required data missing')
+  unbox: jest.fn().mockImplementation(async (assetId: AssetIdDto) => {
+    if (!assetId) throw new Error('Required data missing')
     return transactionResponse.result
   }),
   createWallet: jest.fn().mockImplementation(async ({ pincode, uuid }: WalletBodyDto) => {
@@ -238,5 +239,8 @@ export const mockVenlyService: Partial<VenlyService> = {
   }),
   mint: jest.fn().mockImplementation(async () => {
     return mockNftEvm
+  }),
+  approveNft: jest.fn().mockImplementation(async () => {
+    return '0x00'
   })
 }

@@ -3,5 +3,7 @@ const baseConfig = require('./jest.config.js')
 
 module.exports = {
   ...baseConfig,
-  roots: ['<rootDir>/__tests__/e2e']
+  roots: ['<rootDir>/__tests__/e2e'],
+  maxConcurrency: 1,
+  maxWorkers: 1
 }
