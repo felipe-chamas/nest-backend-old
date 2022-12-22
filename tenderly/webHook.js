@@ -34,7 +34,6 @@ const actionFn = async (context, alertEvent) => {
     address: alertEvent.from
   }
 
-  const transactionHash = alertEvent.transactionHash
   const box = {
     namespace: alertEvent.logs[0].address,
     reference: unbox.args[0].toString()
@@ -45,7 +44,6 @@ const actionFn = async (context, alertEvent) => {
   }))
 
   const data = {
-    transactionHash,
     accountId,
     box,
     nfts

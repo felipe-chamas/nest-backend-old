@@ -10,6 +10,7 @@ import { UserDto, UserSchema } from '@common/schemas/user.schema'
 import { AppModule } from '@modules/app.module'
 import { unboxUser } from '__mocks__/dbUsers'
 import { nftLegendaryBox } from '__mocks__/nftUnboxingMock'
+import { transferUser1, transferUser2 } from '__mocks__/trasnsferUsers'
 
 import type { AssetIdDto } from '@common/types/caip'
 
@@ -29,6 +30,12 @@ describe('Nft Game controller (e2e)', () => {
   })
 
   afterAll(async () => {
+    const collections = await mongoConnection.db.collections()
+    const deleteCollectionsPromise = Promise.all(
+      collections.map((collection) => collection.deleteMany({}))
+    )
+    await deleteCollectionsPromise
+
     await mongoConnection.close()
     await app.close()
   })
@@ -47,8 +54,7 @@ describe('Nft Game controller (e2e)', () => {
 
       UserModel = mongoConnection.model(UserDto.name, UserSchema)
       const testUser = new UserModel(unboxUser)
-      const newUser = await testUser.save()
-      console.log({ newUser })
+      await testUser.save()
 
       provider = new ethers.providers.JsonRpcProvider(
         'https://data-seed-prebsc-1-s1.binance.org:8545/',
@@ -235,6 +241,179 @@ describe('Nft Game controller (e2e)', () => {
           expect(args[1]).toEqual(nftLegendaryBox.nfts)
           expect(args[2]).toHaveLength(1)
           expect(args[2][0]).toHaveLength(2)
+        })
+    })
+  })
+
+  describe('transfer', () => {
+    let UserModel: Model<UserDto>,
+      provider: ethers.providers.JsonRpcProvider,
+      badgeAssetIds: AssetIdDto[],
+      NftBadge: ethers.Contract,
+      BoxAssetId: AssetIdDto,
+      NFTBox: ethers.Contract
+    const pincode = process.env.TEST_VENLY_PIN
+    beforeAll(async () => {
+      UserModel = mongoConnection.model(UserDto.name, UserSchema)
+      const testUser1 = new UserModel(transferUser1)
+      await testUser1.save()
+
+      const testUser2 = new UserModel(transferUser2)
+      await testUser2.save()
+
+      provider = new ethers.providers.JsonRpcProvider(
+        'https://data-seed-prebsc-1-s1.binance.org:8545/',
+        97
+      )
+      const minterPrivateKey = process.env.TEST_MINTER_WALLET_PRIVATE_KEY
+      const signer = new ethers.Wallet(minterPrivateKey, provider)
+
+      const abi = [
+        'event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)',
+        'function batchMint(address[] calldata accounts, uint256 tokens) external',
+        'function ownerOf(uint256 _tokenId) external view returns (address)'
+      ]
+
+      const badgeInterface = new ethers.utils.Interface(abi)
+
+      NftBadge = new ethers.Contract('0x70d09Dc7Bc72B50B4D200b36f59B12016396F5E0', abi, signer)
+
+      const tx = await NftBadge.batchMint([transferUser1.wallet.address], 4)
+      const receipt = await tx.wait()
+      const logs = receipt.events.map(({ data, topics }) =>
+        badgeInterface.parseLog({ data, topics })
+      )
+      const transfersEvents = logs.filter(({ name }) => name === 'Transfer')
+      badgeAssetIds = transfersEvents.map((event) => {
+        return {
+          tokenId: event.args.tokenId.toString(),
+          chainId: {
+            namespace: 'eip155',
+            reference: '97'
+          },
+          assetName: {
+            namespace: 'erc721',
+            reference: NftBadge.address
+          }
+        }
+      })
+
+      const boxAbi = [
+        'function mint(address to) external returns (uint256 tokenId)',
+        'event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)',
+        'function ownerOf(uint256 _tokenId) external view returns (address)'
+      ]
+
+      const boxInterface = new ethers.utils.Interface(abi)
+
+      NFTBox = new ethers.Contract(nftLegendaryBox.assetType.assetName.reference, boxAbi, signer)
+
+      const boxMintTx = await NFTBox.mint(unboxUser.wallet.address)
+      const boxMintReceipt = await boxMintTx.wait()
+      const boxMintLogs = boxMintReceipt.events.map(({ data, topics }) =>
+        boxInterface.parseLog({ data, topics })
+      )
+      const tokenId = boxMintLogs.find(({ name }) => name === 'Transfer').args.tokenId.toString()
+      BoxAssetId = {
+        tokenId,
+        chainId: nftLegendaryBox.assetType.chainId,
+        assetName: nftLegendaryBox.assetType.assetName
+      }
+    }, 500000)
+    afterAll(async () => {
+      UserModel.deleteMany({})
+    })
+    it('if user is not in the db throw a not found exeption', async () => {
+      const uuid = 'badUUID'
+      return supertest(app.getHttpServer())
+        .post(`/game/user/${uuid}/nft/transfer`)
+        .send({
+          assetIds: badgeAssetIds,
+          to: transferUser2.wallet.address,
+          pincode
+        })
+        .expect(404)
+        .expect({
+          statusCode: 404,
+          message: `Can't find user with uuid: ${uuid}`,
+          error: 'Not Found'
+        })
+    })
+    it('transfer one NFT to an other Venly wallet successfully', async () => {
+      const nft = badgeAssetIds[0]
+      return supertest(app.getHttpServer())
+        .post(`/game/user/${transferUser1.uuid}/nft/transfer`)
+        .send({
+          assetIds: [nft],
+          to: transferUser2.wallet.address,
+          pincode
+        })
+        .expect(201)
+        .then(async (res) => {
+          const body = res.body
+          expect(body).toHaveLength(1)
+          const tx = await provider.getTransaction(body[0])
+          await tx.wait()
+          const NftOwner = await NftBadge.ownerOf(nft.tokenId)
+          expect(NftOwner).toEqual(transferUser2.wallet.address)
+        })
+    })
+    it('transfer two NFTs to an other Venly wallet successfully', async () => {
+      const nfts = [badgeAssetIds[1], badgeAssetIds[2]]
+      return supertest(app.getHttpServer())
+        .post(`/game/user/${transferUser1.uuid}/nft/transfer`)
+        .send({
+          assetIds: nfts,
+          to: transferUser2.wallet.address,
+          pincode
+        })
+        .expect(201)
+        .then(async (res) => {
+          const body = res.body
+          expect(body).toHaveLength(1)
+
+          const tx = await provider.getTransaction(body[0])
+          await tx.wait()
+
+          const nftsOwners = await Promise.all(nfts.map((nft) => NftBadge.ownerOf(nft.tokenId)))
+
+          nftsOwners.forEach((owner) => {
+            expect(owner).toEqual(transferUser2.wallet.address)
+          })
+        })
+    })
+
+    it('transfer two NFTs from two different contracts to an other Venly wallet successfully', async () => {
+      const nfts: AssetIdDto[] = [badgeAssetIds[3], BoxAssetId]
+      return supertest(app.getHttpServer())
+        .post(`/game/user/${transferUser1.uuid}/nft/transfer`)
+        .send({
+          assetIds: nfts,
+          to: transferUser2.wallet.address,
+          pincode
+        })
+        .expect(201)
+        .then(async (res) => {
+          const body = res.body
+          expect(body).toHaveLength(2)
+
+          const transactions = await Promise.all(
+            body.map((hash: string) => provider.getTransaction(hash))
+          )
+          await Promise.all(transactions.map((tx) => tx.wait()))
+
+          const nftsOwners = await Promise.all(
+            nfts.map((nft) => {
+              if (NftBadge.address === nft.assetName.reference) {
+                return NftBadge.ownerOf(nft.tokenId)
+              }
+              return NFTBox.ownerOf(nft.tokenId)
+            })
+          )
+
+          nftsOwners.forEach((owner) => {
+            expect(owner).toEqual(transferUser2.wallet.address)
+          })
         })
     })
   })

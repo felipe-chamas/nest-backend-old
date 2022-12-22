@@ -144,7 +144,6 @@ export class NftGameController {
     @Body() { pincode, assetIds, to }: NFTTransferBodyDto,
     @Param('uuid') uuid: string
   ) {
-    console.log(pincode)
     const user = await this.userService.findByUUID(uuid)
     if (!user) throw new NotFoundException(`Can't find user with uuid: ${uuid}`)
 
