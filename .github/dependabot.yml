@@ -12,7 +12,6 @@ updates:
     ignore:
       update-types: ["version-update:semver-major"]
     reviewers:
-      - "aviggiano"
       - "felipe-chamas"
 
   - package-ecosystem: "npm" # See documentation for possible values
@@ -22,6 +21,5 @@ updates:
     ignore:
       update-types: ["version-update:semver-major"]
     reviewers:
-      - "aviggiano"
       - "felipe-chamas"
     open-pull-requests-limit: 25
