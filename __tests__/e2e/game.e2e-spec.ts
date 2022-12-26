@@ -1,5 +1,6 @@
 import { INestApplication } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
+import Ajv from 'ajv'
 import { AssetType } from 'caip'
 import { ethers } from 'ethers'
 import { connect, Connection, Model } from 'mongoose'
@@ -8,7 +9,7 @@ import supertest from 'supertest'
 import { NftUnboxingDto, NftUnboxingSchema } from '@common/schemas/nft-unboxing.schema'
 import { UserDto, UserSchema } from '@common/schemas/user.schema'
 import { AppModule } from '@modules/app.module'
-import { unboxUser } from '__mocks__/dbUsers'
+import { unboxUser, walletUser } from '__mocks__/dbUsers'
 import { nftLegendaryBox } from '__mocks__/nftUnboxingMock'
 import { transferUser1, transferUser2 } from '__mocks__/trasnsferUsers'
 
@@ -414,6 +415,149 @@ describe('Nft Game controller (e2e)', () => {
           nftsOwners.forEach((owner) => {
             expect(owner).toEqual(transferUser2.wallet.address)
           })
+        })
+    })
+  })
+
+  describe('get user nfts', () => {
+    let UserModel: Model<UserDto>
+    beforeAll(async () => {
+      UserModel = mongoConnection.model(UserDto.name, UserSchema)
+      const userWithWallet = new UserModel(unboxUser)
+      await userWithWallet.save()
+      const noWalletUser = new UserModel(walletUser)
+      await noWalletUser.save()
+    })
+    afterAll(async () => {
+      UserModel.deleteMany({})
+    })
+    it('if user is not in the db throw a not found exeption', async () => {
+      const uuid = 'badUUID'
+      return supertest(app.getHttpServer())
+        .get(`/game/user/${uuid}/nft`)
+        .expect(404)
+        .expect({
+          statusCode: 404,
+          message: `Can't find user with uuid: ${uuid}`,
+          error: 'Not Found'
+        })
+    })
+    it('if user is not have a venly wallet return empty array', async () => {
+      return supertest(app.getHttpServer())
+        .get(`/game/user/${walletUser.uuid}/nft`)
+        .expect(200)
+        .then((res) => {
+          const { body } = res
+          expect(body).toHaveLength(0)
+        })
+    })
+    it('return nfts successfully', async () => {
+      return supertest(app.getHttpServer())
+        .get(`/game/user/${unboxUser.uuid}/nft`)
+        .expect(200)
+        .then((res) => {
+          const { body } = res
+          const ajv = new Ajv()
+
+          const stringSchema = {
+            type: 'string',
+            minLength: 2
+          }
+
+          const numericSchema = { type: 'string', pattern: '[0-9]+' }
+
+          const chainIdSchema = {
+            type: 'object',
+            properties: {
+              namespace: { type: 'string', pattern: 'eip155' },
+              reference: numericSchema
+            },
+            required: ['namespace', 'reference'],
+            additionalProperties: false
+          }
+
+          const assetNameSchema = {
+            type: 'object',
+            properties: {
+              namespace: { type: 'string', pattern: 'erc721' },
+              reference: { type: 'string', pattern: '0x.+' }
+            },
+            required: ['namespace', 'reference'],
+            additionalProperties: false
+          }
+
+          const assetIdSchema = {
+            type: 'object',
+            properties: {
+              chainId: chainIdSchema,
+              assetName: assetNameSchema,
+              tokenId: numericSchema
+            },
+            required: ['chainId', 'assetName', 'tokenId'],
+            additionalProperties: false
+          }
+
+          const uriSchema = {
+            type: 'string',
+            pattern: '^https://.+'
+          }
+
+          const attributesSchema = {
+            type: 'array',
+            minItems: 1,
+            items: {
+              type: 'object',
+              properties: {
+                trait_type: stringSchema,
+                value: numericSchema
+              },
+              required: ['trait_type', 'value']
+            }
+          }
+
+          const metadataSchema = {
+            type: 'object',
+            properties: {
+              name: stringSchema,
+              description: stringSchema,
+              image: uriSchema,
+              external_url: uriSchema,
+              symbol: stringSchema,
+              attributes: attributesSchema
+            },
+            required: ['name', 'description', 'image', 'symbol', 'attributes']
+          }
+
+          const schema = {
+            type: 'array',
+            minItems: 1,
+            items: {
+              type: 'object',
+              properties: {
+                assetId: assetIdSchema,
+                tokenUri: uriSchema,
+                metadata: metadataSchema
+              },
+              required: ['assetId', 'tokenUri', 'metadata'],
+              additionalProperties: false
+            }
+          }
+
+          const validate = ajv.compile(schema)
+          const valid = validate(body)
+
+          if (!valid) {
+            const errors = validate.errors
+            const indexes = errors.map((error) => Number(error.instancePath.split('/')[1]))
+            const displayErrors = indexes.map((index, i) => ({
+              validationError: errors[i],
+              failItem: body[index]
+            }))
+
+            console.log(JSON.stringify(displayErrors, null, 2))
+          }
+
+          expect(valid).toBe(true)
         })
     })
   })
