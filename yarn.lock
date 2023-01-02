@@ -5923,10 +5923,10 @@ nest-router@^1.0.9:
   resolved "https://registry.yarnpkg.com/nest-router/-/nest-router-1.0.9.tgz#cbe814dadf90b765e0a5b77c562479d5d523a485"
   integrity sha512-ZyRdSVs9GczI+39B7tNXsxfBXQOYnEF6l/q2aLYG8wSEvRHRDXAlzZ1SIosDibM02pLahGkDNLFC+nZ8uzJGDQ==
 
-nest-winston@^1.7.0:
-  version "1.7.0"
-  resolved "https://registry.yarnpkg.com/nest-winston/-/nest-winston-1.7.0.tgz#92fd415d42c882e1d07201fb962140e5ba291c4c"
-  integrity sha512-FJ94dJ++8BEjQfK5TuqiY5g7pP48RLRss41Bm6bCCfzYgywymEI6m+HPHW9K/q2i7wO5TU6Sva51/Rvmmhxddw==
+nest-winston@^1.8.0:
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/nest-winston/-/nest-winston-1.8.0.tgz#86b5960f82ef0caf4e16c7f528ff10446abfd52f"
+  integrity sha512-DyoNrly6DXjNG2ZPXSD2+w+pgEE8u0y0iwsaLZsufFLIKB/YNgP7zIXV5JxIqns0e5QzLlxdHhO2hx+1W8dvCw==
   dependencies:
     fast-safe-stringify "^2.1.1"
 

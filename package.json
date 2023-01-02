@@ -52,7 +52,7 @@
     "mongoose-autopopulate": "^0.17.0",
     "mongoose-delete": "^0.5.4",
     "nest-router": "^1.0.9",
-    "nest-winston": "^1.7.0",
+    "nest-winston": "^1.8.0",
     "passport": "^0.6.0",
     "passport-custom": "^1.1.1",
     "passport-discord": "^0.1.4",
