@@ -48,7 +48,7 @@
     "express-session": "^1.17.2",
     "helmet": "^6.0.1",
     "mongodb": "^4.13.0",
-    "mongoose": "^6.8.1",
+    "mongoose": "^6.8.2",
     "mongoose-autopopulate": "^0.17.0",
     "mongoose-delete": "^0.5.4",
     "nest-router": "^1.0.9",
