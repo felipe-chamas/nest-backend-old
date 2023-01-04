@@ -3,7 +3,7 @@
 ### TODOs:
 
 - [x] Change typeORM to mongoose.
-- [x] Remove unused routes
+- [x] Remove unused routes.
 - [x] Remove unused entities/columns
 - [x] Create VenlyService
 - [x] Create MoralisService
@@ -19,5 +19,3 @@
 - [ ] Increment coverage
 - [ ] Update README documentation with better process (install + start + testing, etc)
 - [ ] Change Quicknode to Moralis (wait for pricing decision)
-
-
