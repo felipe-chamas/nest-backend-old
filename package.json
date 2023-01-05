@@ -12,7 +12,7 @@
     "lint": "eslint \"{src,__tests__}/**/*.ts\"",
     "test": "jest --config ./__tests__/jest.config.js",
     "test:cov": "yarn test --coverage",
-    "test:e2e": "jest --config ./__tests__/jest-e2e.config.js",
+    "test:e2e": "jest --config ./__tests__/jest-e2e.config.js --runInBand",
     "prepare": "husky install",
     "get:secrets": "aws secretsmanager get-secret-value --region us-east-1 --secret-id .env | jq --raw-output '.SecretString' > .env",
     "put:secrets": "aws secretsmanager put-secret-value --region us-east-1 --secret-id .env --secret-string file://.env"
