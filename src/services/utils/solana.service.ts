@@ -75,23 +75,25 @@ export class SolanaService {
     nfts.push(assets.map((nft) => this.formatNft(accountId.chainId, nft)))
 
     await Promise.all(
-      Array(totalPages).map(async (_, i) => {
-        if (i === 0) return
-        const {
-          data: { result }
-        } = await this.quicknodeService.axiosRef.post<QuickNodeFetchNftsResponse>('', {
-          jsonrpc: '2.0',
-          id: 1,
-          method: 'qn_fetchNFTs',
-          params: {
-            wallet: accountId.address,
-            omitFields: ['provenance', 'creators'],
-            page: i + 1,
-            perPage: 40
-          }
+      Array(totalPages)
+        .fill(true)
+        .map(async (_, i) => {
+          if (i === 0) return
+          const {
+            data: { result }
+          } = await this.quicknodeService.axiosRef.post<QuickNodeFetchNftsResponse>('', {
+            jsonrpc: '2.0',
+            id: 1,
+            method: 'qn_fetchNFTs',
+            params: {
+              wallet: accountId.address,
+              omitFields: ['provenance', 'creators'],
+              page: i + 1,
+              perPage: 40
+            }
+          })
+          nfts.push(result.assets.map((nft) => this.formatNft(accountId.chainId, nft)))
         })
-        nfts.push(result.assets.map((nft) => this.formatNft(accountId.chainId, nft)))
-      })
     )
 
     return nfts.flat()
