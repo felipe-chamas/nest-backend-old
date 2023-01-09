@@ -5830,10 +5830,10 @@ mongodb@^4.13.0:
     "@aws-sdk/credential-providers" "^3.186.0"
     saslprep "^1.0.3"
 
-mongoose-autopopulate@^0.17.0:
-  version "0.17.0"
-  resolved "https://registry.yarnpkg.com/mongoose-autopopulate/-/mongoose-autopopulate-0.17.0.tgz#9bfa9558116e442d6dbf8fc9cdcb01a7367cbb7b"
-  integrity sha512-bLIrFTtSyrd6N1uQHjiuAh4ysBm7FVSdTDW5/IeotS5MP1Z0LJYR8sMRkZuN4H/xzf7nJ+nVGikPGgb4NBaPrg==
+mongoose-autopopulate@^0.17.1:
+  version "0.17.1"
+  resolved "https://registry.yarnpkg.com/mongoose-autopopulate/-/mongoose-autopopulate-0.17.1.tgz#1beff684ae427076186383e07191e059ef3c6316"
+  integrity sha512-a2EzHvvol0L9k4XVR+ekzRVdiW+7mqCUTvhStPh2yr00cMV3/g/Z7o29ilQh2RMBFszRO+97wsy+1S8Z3Zf+sg==
 
 mongoose-delete@^0.5.4:
   version "0.5.4"

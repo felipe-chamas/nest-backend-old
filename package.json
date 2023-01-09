@@ -49,7 +49,7 @@
     "helmet": "^6.0.1",
     "mongodb": "^4.13.0",
     "mongoose": "^6.8.3",
-    "mongoose-autopopulate": "^0.17.0",
+    "mongoose-autopopulate": "^0.17.1",
     "mongoose-delete": "^0.5.4",
     "nest-router": "^1.0.9",
     "nest-winston": "^1.8.0",
