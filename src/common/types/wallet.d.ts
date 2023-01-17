@@ -86,3 +86,25 @@ export interface GetTxStatusResult {
     status: 'SUCCEEDED' | string
   }
 }
+
+export interface GetBalance {
+  success: boolean
+  result: {
+    available: boolean
+    secretType: string
+    balance: number
+    gasBalance: number
+    symbol: string
+    gasSymbol: string
+    rawBalance: string
+    rawGasBalance: string
+    decimals: number
+  }
+}
+
+export interface TransferNativeToken {
+  success: boolean
+  result: {
+    transactionHash: string
+  }
+}

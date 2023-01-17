@@ -1,7 +1,8 @@
 import url from 'url'
 
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
+import axios from 'axios'
 import { AssetId, AssetType } from 'caip'
 import { plainToInstance } from 'class-transformer'
 
@@ -16,9 +17,11 @@ import { HttpVenlyAuthService } from './venly/auth.service'
 import type {
   AccessTokenResult,
   CreateWalletResult,
+  GetBalance,
   GetTxStatusResult,
   GetWalletResult,
-  MintResult
+  MintResult,
+  TransferNativeToken
 } from '@common/types/wallet'
 
 @Injectable()
@@ -330,5 +333,112 @@ export class VenlyService {
       }
     })
     return transactionHash
+  }
+
+  async getBalance(walletId: string) {
+    await this.getAccessToken()
+    const {
+      data: {
+        result: { balance }
+      }
+    } = await this.apiService.axiosRef.get<GetBalance>(`wallets/${walletId}/balance`)
+
+    return balance
+  }
+
+  async transferNativeToken(walletId: string, pincode: string, value: number, to: string) {
+    await this.getAccessToken()
+    const { data } = await this.apiService.axiosRef.post<TransferNativeToken>(
+      `/transactions/execute`,
+      {
+        transactionRequest: {
+          type: 'TRANSFER',
+          walletId,
+          to,
+          secretType: 'BSC',
+          value
+        },
+        pincode
+      }
+    )
+    return data
+  }
+
+  async topUp(walletId: string, address: string) {
+    const topuperId = this.config.get('topuper.id')
+    const topuperMinBalance = this.config.get('topuper.minBalance')
+    const topuperBalance = await this.getBalance(topuperId)
+
+    if (topuperBalance < topuperMinBalance) {
+      const message = `*Falco Backend Alert*: \n - *message:* Top up wallet reached minimum balance\n - *Actual Balance:* ${topuperBalance}\n - *Minimum Balance:* ${topuperMinBalance}\n`
+      const stage = this.config.get('stage')
+      if (stage === 'production') {
+        const slackUrl = this.config.get('slack.slackUrl')
+        await axios.post(slackUrl, {
+          blocks: [
+            {
+              type: 'section',
+              text: {
+                type: 'mrkdwn',
+                text: message
+              }
+            }
+          ]
+        })
+      } else {
+        console.log(message)
+      }
+    }
+
+    const userBalance = await this.getBalance(walletId)
+    const userMinBalance = this.config.get('topuper.userMinBalance')
+
+    if (userBalance < userMinBalance) {
+      const refill = this.config.get('topuper.userRefill')
+      if (topuperBalance < refill && userBalance < userMinBalance)
+        throw new InternalServerErrorException(
+          `can't top up user account.\n - user balance: ${userBalance} \n - topuper balance: ${topuperBalance}`
+        )
+
+      const pincode = this.config.get('topuper.pincode')
+      const data = await this.transferNativeToken(topuperId, pincode, Number(refill), address)
+      if (!data.success) throw new InternalServerErrorException('top up transaction failed')
+
+      const waitTx = async () => {
+        let txStatus = 'UNKNOWN'
+        let count = 0
+        return new Promise(async (resolve, reject) => {
+          do {
+            txStatus = await this.getTxStatus(data.result.transactionHash)
+            count += 1
+            await new Promise((resolve) => setTimeout(() => resolve(null), 2000))
+          } while (txStatus === 'UNKNOWN' && count < 8)
+          if (count >= 7) reject("can't get transaction status")
+          resolve(txStatus)
+        })
+      }
+      const txStatus = await waitTx()
+
+      if (txStatus !== 'SUCCEEDED')
+        throw new InternalServerErrorException('top up transaction failed')
+
+      const waitTransfer = async () => {
+        let balance = 0
+        let count = 0
+        return new Promise(async (resolve, reject) => {
+          do {
+            balance = await this.getBalance(walletId)
+            count += 1
+            await new Promise((resolve) => setTimeout(() => resolve(null), 2000))
+          } while (balance < userMinBalance && count < 8)
+          if (count >= 7) reject("user balance didn't update")
+          resolve(balance)
+        })
+      }
+
+      await waitTransfer()
+
+      return txStatus
+    }
   }
 }

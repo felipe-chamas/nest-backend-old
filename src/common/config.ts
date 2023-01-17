@@ -55,5 +55,12 @@ export default () => ({
     destinationAssetTypes: process.env.BRIDGE_DESTINATION_ASSET_TYPES
       ? process.env.BRIDGE_DESTINATION_ASSET_TYPES.split(',')
       : []
+  },
+  topuper: {
+    id: process.env.TOPUPER_WALLET_ID,
+    minBalance: process.env.TOPUPER_MIN_BALANCE,
+    userMinBalance: process.env.TOPUPER_USER_MIN_BALANCE,
+    userRefill: process.env.TOPUPER_USER_REFILL,
+    pincode: process.env.TOPUPER_WALLET_PINCODE
   }
 })

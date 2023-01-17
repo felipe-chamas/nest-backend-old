@@ -4,7 +4,7 @@
 
 - [x] Change typeORM to mongoose.
 - [x] Remove unused routes.
-- [x] Remove unused entities/columns
+- [x] Remove unused entities/columns.
 - [x] Create VenlyService
 - [x] Create MoralisService
 - [x] Create QuicknodeService

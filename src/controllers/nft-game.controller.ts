@@ -93,7 +93,8 @@ export class NftGameController {
     const user = await this.userService.findByUUID(uuid)
     if (!user) throw new NotFoundException(`Can't find user with uuid: ${uuid}`)
 
-    const walletId = user.wallet.id
+    const { id: walletId, address: walletAddress } = user.wallet
+    await this.venlyService.topUp(walletId, walletAddress)
 
     return this.venlyService.upgrade({ walletId, assetId, value, pincode })
   }
@@ -148,6 +149,7 @@ export class NftGameController {
     if (!user) throw new NotFoundException(`Can't find user with uuid: ${uuid}`)
 
     const { id: walletId, address: venlyAddress } = user.wallet
+    await this.venlyService.topUp(walletId, venlyAddress)
 
     return this.venlyService.transfer(venlyAddress, to, assetIds, pincode, walletId)
   }

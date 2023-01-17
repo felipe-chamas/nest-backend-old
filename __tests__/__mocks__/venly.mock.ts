@@ -242,5 +242,9 @@ export const mockVenlyService: Partial<VenlyService> = {
   }),
   approveNft: jest.fn().mockImplementation(async () => {
     return '0x00'
+  }),
+  topUp: jest.fn().mockImplementation(async (walletId: string, address: string) => {
+    if (!walletId || !address) throw new Error('Required data missing')
+    return 'SUCCEEDED'
   })
 }

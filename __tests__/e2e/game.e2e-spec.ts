@@ -19,6 +19,8 @@ describe('Nft Game controller (e2e)', () => {
   let mongoConnection: Connection, app: INestApplication
   jest.setTimeout(500000)
 
+  const BscRpcUrl = 'https://data-seed-prebsc-2-s3.binance.org:8545'
+
   beforeAll(async () => {
     const mongoUri = process.env.MONGODB_CICD_URI
     mongoConnection = (await connect(mongoUri)).connection
@@ -57,10 +59,7 @@ describe('Nft Game controller (e2e)', () => {
       const testUser = new UserModel(unboxUser)
       await testUser.save()
 
-      provider = new ethers.providers.JsonRpcProvider(
-        'https://data-seed-prebsc-1-s1.binance.org:8545/',
-        97
-      )
+      provider = new ethers.providers.JsonRpcProvider(BscRpcUrl, 97)
       const minterPrivateKey = process.env.TEST_MINTER_WALLET_PRIVATE_KEY
       const signer = new ethers.Wallet(minterPrivateKey, provider)
 
@@ -156,10 +155,7 @@ describe('Nft Game controller (e2e)', () => {
       const testNftUnboxing = new NftUnboxingModel(nftLegendaryBox)
       await testNftUnboxing.save()
 
-      provider = new ethers.providers.JsonRpcProvider(
-        'https://data-seed-prebsc-1-s1.binance.org:8545/',
-        97
-      )
+      provider = new ethers.providers.JsonRpcProvider(BscRpcUrl, 97)
       const minterPrivateKey = process.env.TEST_MINTER_WALLET_PRIVATE_KEY
       const minterSigner = new ethers.Wallet(minterPrivateKey, provider)
 
@@ -262,10 +258,7 @@ describe('Nft Game controller (e2e)', () => {
       const testUser2 = new UserModel(transferUser2)
       await testUser2.save()
 
-      provider = new ethers.providers.JsonRpcProvider(
-        'https://data-seed-prebsc-1-s1.binance.org:8545/',
-        97
-      )
+      provider = new ethers.providers.JsonRpcProvider(BscRpcUrl, 97)
       const minterPrivateKey = process.env.TEST_MINTER_WALLET_PRIVATE_KEY
       const signer = new ethers.Wallet(minterPrivateKey, provider)
 
