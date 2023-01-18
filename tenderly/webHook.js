@@ -49,12 +49,15 @@ const actionFn = async (context, alertEvent) => {
     nfts
   }
 
+  const TbsApiKey = await context.secrets.get('TbsApiKey')
+
   const config = {
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'X-API-KEY': TbsApiKey
     }
   }
-  await axios.post('https://test-api.nicolasdeheza.repl.co', data, config)
+  await axios.post('http://kd1.apps.theharvestgame.com/nft/unbox', data, config)
 }
 // Do not change this.
 module.exports = { actionFn }
