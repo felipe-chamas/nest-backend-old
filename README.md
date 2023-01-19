@@ -1,10 +1,18 @@
 # Backend source code
 
+# Important ⚠
+
+If you are going to add an endpoint to trigger a **Venly transaction** thats pay **gas fees** on `/game` be sure to add the `topUp` venly service on your controller to top up the venly wallet.
+
+```typescript
+topUp(walletId: string, address: string)
+```
+
 ### TODOs:
 
 - [x] Change typeORM to mongoose.
 - [x] Remove unused routes.
-- [x] Remove unused entities/columns.
+- [x] Remove unused entities/columns
 - [x] Create VenlyService
 - [x] Create MoralisService
 - [x] Create QuicknodeService
