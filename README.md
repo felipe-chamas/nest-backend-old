@@ -2,7 +2,7 @@
 
 # Important ⚠
 
-If you are going to add an endpoint to trigger a **Venly transaction** thats pay **gas fees** on `/game` be sure to add the `topUp` venly service on your controller to top up the venly wallet.
+If you are going to add an endpoint to trigger a **Venly transaction** thats pay **gas fees** on `/game` be sure to add the `topUp` venly service on your controller to top up the user venly wallet.
 
 ```typescript
 topUp(walletId: string, address: string)
