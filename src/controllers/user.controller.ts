@@ -67,6 +67,14 @@ export class UserController {
     return user
   }
 
+  @Auth(Role.USER_ADMIN)
+  @Get('elixir')
+  @ApiOperation({ description: 'Returns or creates an user linked to elixir' })
+  @ApiOkResponse({ type: UserDto })
+  async findOrCreateElixirUser(@Body() { jwt }: ElixirBodyDto) {
+    return this.userService.findOrCreateElixirUser(jwt)
+  }
+
   @Auth(Role.USER_ADMIN, Role.ROLE_ADMIN, Role.OWNER)
   @Patch(':uuid')
   @ApiOperation({ description: 'Updates a User' })
@@ -94,18 +102,6 @@ export class UserController {
     const user = await this.userService.findByUUID(uuid)
     if (!user) throw new NotFoundException(`Can't find user with uuid: ${uuid}`)
     return user
-  }
-
-  @Auth(Role.USER_ADMIN)
-  @Get('elixir/:elixirId')
-  @ApiOperation({ description: 'Returns or creates an user linked to elixir' })
-  @ApiParam({ name: 'elixirId', type: String })
-  @ApiOkResponse({ type: UserDto })
-  async findOrCreateElixirUser(
-    @Param('elixirId') elixirId: string,
-    @Body() { jwt }: ElixirBodyDto
-  ) {
-    return this.userService.findOrCreateElixirUser(jwt, elixirId)
   }
 
   @Auth(Role.USER_ADMIN)

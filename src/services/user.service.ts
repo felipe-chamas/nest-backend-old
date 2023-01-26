@@ -70,13 +70,7 @@ export class UserService {
     return user
   }
 
-  async findOrCreateElixirUser(jwt: string, elixirId: string) {
-    const userWithFoundElixirId = await this.findByElixirId(elixirId)
-
-    if (userWithFoundElixirId) {
-      return userWithFoundElixirId
-    }
-
+  async findOrCreateElixirUser(jwt: string) {
     const { data: userInfo, status: userInfoStatus } =
       await this.elixirService.axiosRef.get<ElixirUserInfo>('/sdk/v2/userinfo', {
         headers: { authorization: `Bearer ${jwt}` }
@@ -89,6 +83,13 @@ export class UserService {
       throw new BadRequestException(
         "Could not get user data from valid rei key, this shouldn't happen, so contact Elixir"
       )
+    }
+
+    const elixirId = userInfo.data.sub
+    const userWithFoundElixirId = await this.findByElixirId(elixirId)
+
+    if (userWithFoundElixirId) {
+      return userWithFoundElixirId
     }
 
     const { wallets } = userInfo.data

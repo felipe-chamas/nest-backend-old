@@ -66,7 +66,6 @@ export const findOrCreateBySteamIdResponse = {
 type UserResult = UserDocument & { _id: ObjectId }
 
 export const testElixirJwt = 'fajskfsfasfnwerjsadfxlvcxziouwefsd'
-export const testElixirId = '1238014'
 
 export const mockUserService: Partial<UserService> = {
   findByUUID: jest.fn().mockImplementation(async (uuid: string) => {
@@ -86,8 +85,8 @@ export const mockUserService: Partial<UserService> = {
     return findOrCreateBySteamIdResponse.result
   }),
 
-  findOrCreateElixirUser: jest.fn().mockImplementation(async (jwt: string, elixirId: string) => {
-    if (jwt && elixirId) {
+  findOrCreateElixirUser: jest.fn().mockImplementation(async (jwt: string) => {
+    if (jwt) {
       return mockUser
     }
   })
