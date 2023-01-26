@@ -18,6 +18,9 @@ export default () => ({
     realm: process.env.STEAM_REALM,
     apiKey: process.env.STEAM_API_KEY
   },
+  elixir: {
+    apiKey: process.env.ELIXIR_API_KEY
+  },
   epic: {
     clientID: process.env.EPIC_CLIENT_ID,
     clientSecret: process.env.EPIC_SECRET_KEY,

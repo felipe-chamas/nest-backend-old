@@ -17,7 +17,7 @@ export interface Wallet extends WalletDto {
   hasCustomPin: boolean
   balance: {
     available: boolean
-    secretType: 'ETHEREUM' | 'BSC'
+    secretType: AvailableChainsType
     balance: number
     gasBalance: number
     symbol: 'ETH' | 'BNB'
@@ -108,3 +108,6 @@ export interface TransferNativeToken {
     transactionHash: string
   }
 }
+
+export const availableChainsList = ['ETHEREUM', 'BSC'] as const
+export type AvailableChainsType = (typeof availableChains)[number]

@@ -11,7 +11,9 @@ import {
   mockUser,
   mockAdmin,
   mockUserService,
-  findOrCreateBySteamIdResponse
+  findOrCreateBySteamIdResponse,
+  testElixirId,
+  testElixirJwt
 } from '__mocks__/user.mock'
 import { mockVenlyService, createWalletResponse } from '__mocks__/venly.mock'
 
@@ -121,6 +123,13 @@ describe('UserController', () => {
     it('must return correct data', async () => {
       const response = await controller.findBySteamId(testSteamId)
       expect(response).toMatchObject(findOrCreateBySteamIdResponse.result)
+    })
+  })
+
+  describe('findOrCreateElixirUser', () => {
+    it('must return correct data', async () => {
+      const response = await controller.findOrCreateElixirUser(testElixirId, { jwt: testElixirJwt })
+      expect(response).toMatchObject(mockUser)
     })
   })
 })

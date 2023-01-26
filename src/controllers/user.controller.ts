@@ -26,6 +26,7 @@ import { GetPagination, Pagination } from '@common/decorators/pagination.decorat
 import { WalletBodyDto } from '@common/dto/venly.dto'
 import { Role } from '@common/enums/role.enum'
 import { UserDto } from '@common/schemas/user.schema'
+import { ElixirBodyDto } from '@common/types/elixir'
 import { UserService } from '@services/user.service'
 import { VenlyService } from '@services/utils/venly.service'
 
@@ -93,6 +94,18 @@ export class UserController {
     const user = await this.userService.findByUUID(uuid)
     if (!user) throw new NotFoundException(`Can't find user with uuid: ${uuid}`)
     return user
+  }
+
+  @Auth(Role.USER_ADMIN)
+  @Get('elixir/:elixirId')
+  @ApiOperation({ description: 'Returns or creates an user linked to elixir' })
+  @ApiParam({ name: 'elixirId', type: String })
+  @ApiOkResponse({ type: UserDto })
+  async findOrCreateElixirUser(
+    @Param('elixirId') elixirId: string,
+    @Body() { jwt }: ElixirBodyDto
+  ) {
+    return this.userService.findOrCreateElixirUser(jwt, elixirId)
   }
 
   @Auth(Role.USER_ADMIN)

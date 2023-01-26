@@ -4,9 +4,11 @@ import { Test, TestingModule } from '@nestjs/testing'
 
 import { UserDto } from '@common/schemas/user.schema'
 import { UserService } from '@services/user.service'
+import { HttpElixirApiService } from '@services/utils/elixir/api.service'
 import { HttpSteamApiService } from '@services/utils/steam/api.service'
 import { VenlyService } from '@services/utils/venly.service'
 import { mockConfigService } from '__mocks__/config.mock'
+import { mockElixirApiService } from '__mocks__/elixir.mock'
 import { mockSteamApiService } from '__mocks__/steam.mock'
 import { mockUser, userModelMockFactory } from '__mocks__/user.mock'
 import { mockVenlyService } from '__mocks__/venly.mock'
@@ -33,6 +35,10 @@ describe('UserService', () => {
         {
           provide: HttpSteamApiService,
           useValue: mockSteamApiService
+        },
+        {
+          provide: HttpElixirApiService,
+          useValue: mockElixirApiService
         }
       ]
     }).compile()
