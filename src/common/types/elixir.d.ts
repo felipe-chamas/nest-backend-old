@@ -29,7 +29,3 @@ export interface ElixirUserInfo {
     exp: number
   }
 }
-
-export interface ElixirBodyDto {
-  jwt: string
-}

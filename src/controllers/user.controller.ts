@@ -8,7 +8,8 @@ import {
   Session,
   UnauthorizedException,
   Post,
-  NotFoundException
+  NotFoundException,
+  Query
 } from '@nestjs/common'
 import {
   ApiBody,
@@ -26,7 +27,6 @@ import { GetPagination, Pagination } from '@common/decorators/pagination.decorat
 import { WalletBodyDto } from '@common/dto/venly.dto'
 import { Role } from '@common/enums/role.enum'
 import { UserDto } from '@common/schemas/user.schema'
-import { ElixirBodyDto } from '@common/types/elixir'
 import { UserService } from '@services/user.service'
 import { VenlyService } from '@services/utils/venly.service'
 
@@ -70,8 +70,9 @@ export class UserController {
   @Auth(Role.USER_ADMIN)
   @Get('elixir')
   @ApiOperation({ description: 'Returns or creates an user linked to elixir' })
+  @ApiParam({ name: 'jwt', type: String })
   @ApiOkResponse({ type: UserDto })
-  async findOrCreateElixirUser(@Body() { jwt }: ElixirBodyDto) {
+  async findOrCreateElixirUser(@Query('jwt') jwt: string) {
     return this.userService.findOrCreateElixirUser(jwt)
   }
 

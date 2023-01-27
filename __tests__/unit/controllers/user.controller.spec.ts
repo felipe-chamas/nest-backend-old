@@ -127,7 +127,7 @@ describe('UserController', () => {
 
   describe('findOrCreateElixirUser', () => {
     it('must return correct data', async () => {
-      const response = await controller.findOrCreateElixirUser({ jwt: testElixirJwt })
+      const response = await controller.findOrCreateElixirUser(testElixirJwt)
       expect(response).toMatchObject(mockUser)
     })
   })
