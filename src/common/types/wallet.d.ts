@@ -109,5 +109,35 @@ export interface TransferNativeToken {
   }
 }
 
+
+export interface UpdatePin {
+  success: boolean
+  result: {
+    id: string
+    address: string
+    walletType: string
+    secretType: string
+    createdAt: string
+    archived: boolean
+    alias: string
+    description: string
+    primary: boolean
+    hasCustomPin: boolean
+    identifier: string
+    balance: {
+      available: boolean
+      secretType: string
+      balance: number
+      gasBalance: number
+      symbol: string
+      gasSymbol: string
+      rawBalance: string
+      rawGasBalance: string
+      decimals: number
+    }
+  }
+}
+ 
 export const availableChainsList = ['ETHEREUM', 'BSC'] as const
 export type AvailableChainsType = (typeof availableChains)[number]
+

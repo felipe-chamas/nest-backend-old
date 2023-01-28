@@ -7,7 +7,9 @@ import { NftGameController } from '@controllers/nft-game.controller'
 import { UserService } from '@services/user.service'
 import { EvmService } from '@services/utils/evm.service'
 import { VenlyService } from '@services/utils/venly.service'
+import { PinService } from '@services/utils/venly/pin.service'
 import { mockEvmService } from '__mocks__/evm.mock'
+import { mockPinService } from '__mocks__/pin.mock'
 import { mockUserService, mockUser } from '__mocks__/user.mock'
 import { mockVenlyService, tokenBalnceResponse, transactionResponse } from '__mocks__/venly.mock'
 
@@ -35,6 +37,10 @@ describe('nftGameController', () => {
         {
           provide: ConfigService,
           useValue: { get: () => '97' }
+        },
+        {
+          provide: PinService,
+          useValue: mockPinService
         }
       ]
     }).compile()
@@ -118,8 +124,7 @@ describe('nftGameController', () => {
         await controller.upgrade({
           uuid: uuid,
           assetId: assetIdTest,
-          value: 2,
-          pincode: 'code'
+          value: 2
         })
       } catch (error) {
         expect(error).toBeInstanceOf(NotFoundException)
@@ -130,8 +135,7 @@ describe('nftGameController', () => {
       await controller.upgrade({
         uuid: mockUser.uuid,
         assetId: assetIdTest,
-        value: 2,
-        pincode: 'code'
+        value: 2
       })
 
       const mockFunction = mockVenlyService.upgrade as jest.Mock
@@ -139,8 +143,7 @@ describe('nftGameController', () => {
       expect(mockFunction.mock.calls[0][0]).toMatchObject({
         walletId: mockUser.wallet.id,
         assetId: assetIdTest,
-        value: 2,
-        pincode: 'code'
+        value: 2
       })
     })
 
@@ -148,8 +151,7 @@ describe('nftGameController', () => {
       const response = await controller.upgrade({
         uuid: mockUser.uuid,
         assetId: assetIdTest,
-        value: 2,
-        pincode: 'code'
+        value: 2
       })
       expect(response).toMatchObject(transactionResponse.result)
     })
@@ -172,8 +174,7 @@ describe('nftGameController', () => {
       try {
         await controller.unbox({
           uuid: uuid,
-          assetId: assetIdTest,
-          pincode: 'code'
+          assetId: assetIdTest
         })
       } catch (error) {
         expect(error).toBeInstanceOf(NotFoundException)
@@ -183,8 +184,7 @@ describe('nftGameController', () => {
     it('unbox must be called with correct data', async () => {
       await controller.unbox({
         uuid: mockUser.uuid,
-        assetId: assetIdTest,
-        pincode: 'code'
+        assetId: assetIdTest
       })
 
       const mockFunction = mockVenlyService.unbox as jest.Mock
@@ -195,8 +195,7 @@ describe('nftGameController', () => {
     it('must return correct data', async () => {
       const response = await controller.unbox({
         uuid: mockUser.uuid,
-        assetId: assetIdTest,
-        pincode: 'code'
+        assetId: assetIdTest
       })
       expect(response).toMatchObject(transactionResponse.result)
     })

@@ -57,7 +57,7 @@ const actionFn = async (context, alertEvent) => {
       'X-API-KEY': TbsApiKey
     }
   }
-  await axios.post('http://kd1.apps.theharvestgame.com/nft/unbox', data, config)
+  await axios.post('https://api.kd1.apps.theharvestgame.com/nft/unbox', data, config)
 }
 // Do not change this.
 module.exports = { actionFn }

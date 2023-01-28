@@ -8,6 +8,7 @@ import { UserService } from '@services/user.service'
 import { HttpElixirApiModule } from './utils/elixir/api.module'
 import { HttpSteamApiModule } from './utils/steam/api.module'
 import { VenlyModule } from './utils/venly.module'
+import { PinModule } from './utils/venly/pin.module'
 
 @Module({
   controllers: [UserController],
@@ -20,6 +21,7 @@ import { VenlyModule } from './utils/venly.module'
     ]),
     VenlyModule,
     HttpSteamApiModule,
+    PinModule,
     HttpElixirApiModule
   ],
   exports: [UserService],

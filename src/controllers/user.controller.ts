@@ -29,13 +29,15 @@ import { Role } from '@common/enums/role.enum'
 import { UserDto } from '@common/schemas/user.schema'
 import { UserService } from '@services/user.service'
 import { VenlyService } from '@services/utils/venly.service'
+import { PinService } from '@services/utils/venly/pin.service'
 
 @ApiTags('Users')
 @Controller()
 export class UserController {
   constructor(
     private readonly userService: UserService,
-    private readonly venlyService: VenlyService
+    private readonly venlyService: VenlyService,
+    private readonly pinService: PinService
   ) {}
 
   @Auth(Role.USER_ADMIN)
@@ -119,9 +121,10 @@ export class UserController {
   @ApiOperation({ description: 'Creates a wallet for this user' })
   @ApiParam({ name: 'uuid', type: String })
   @ApiOkResponse({ type: UserDto })
-  async createWallet(@Body() { uuid, pincode }: WalletBodyDto) {
+  async createWallet(@Body() { uuid }: WalletBodyDto) {
     const user = await this.userService.findByUUID(uuid)
     if (!user) throw new NotFoundException(`Can't find user with uuid: ${uuid}`)
+    const pincode = await this.pinService.newPin(uuid)
     const wallet = await this.venlyService.createWallet({ pincode, uuid })
     return this.userService.update(uuid, { wallet })
   }

@@ -13,6 +13,9 @@ inputs:
   registry-name:
     description: 'Registry Name'
     required: true
+  cronjob-registry-name:
+    description: 'Cronjob Registry Name'
+    required: true
   service-name:
     description: 'Service Name'
     required: true
@@ -53,6 +56,19 @@ runs:
       uses: aws-actions/amazon-ecr-login@v1
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
+    - name: Build and Tag Cronjob image
+      uses: docker/build-push-action@v3
+      with:
+        context: ./cronjobs
+        tags: ${{ steps.login-ecr.outputs.registry }}/${{ inputs.cronjob-registry-name }}:latest
+        push: false
+        load: true
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+    - name: Push Cronjob image to ECR
+      working-directory: ./cronjobs
+      shell: bash
+      run: docker push ${{ steps.login-ecr.outputs.registry }}/${{ inputs.cronjob-registry-name }}:latest
     - name: Build and Tag image
       uses: docker/build-push-action@v3
       with:

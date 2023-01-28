@@ -6,7 +6,7 @@ import axios from 'axios'
 import { AssetId, AssetType } from 'caip'
 import { plainToInstance } from 'class-transformer'
 
-import { WalletBodyDto } from '@common/dto/venly.dto'
+import { WalletServiceDto } from '@common/dto/venly.dto'
 import { WalletDto } from '@common/dto/wallet.dto'
 import { AssetIdDto } from '@common/types/caip'
 
@@ -21,7 +21,8 @@ import type {
   GetTxStatusResult,
   GetWalletResult,
   MintResult,
-  TransferNativeToken
+  TransferNativeToken,
+  UpdatePin
 } from '@common/types/wallet'
 
 @Injectable()
@@ -90,7 +91,7 @@ export class VenlyService {
     return result
   }
 
-  async createWallet({ pincode, uuid }: WalletBodyDto) {
+  async createWallet({ pincode, uuid }: WalletServiceDto) {
     await this.getAccessToken()
 
     const {
@@ -440,5 +441,14 @@ export class VenlyService {
 
       return txStatus
     }
+  }
+
+  async updatePin(oldPin: string, newPin: string, walletId: string) {
+    await this.getAccessToken()
+    const { data } = await this.apiService.axiosRef.patch<UpdatePin>(`/wallets/${walletId}`, {
+      pincode: oldPin,
+      newPincode: newPin
+    })
+    return data
   }
 }

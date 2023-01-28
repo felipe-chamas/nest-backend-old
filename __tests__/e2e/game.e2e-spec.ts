@@ -1,25 +1,35 @@
+import { getRedisToken } from '@liaoliaots/nestjs-redis'
 import { INestApplication } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
 import Ajv from 'ajv'
 import { AssetType } from 'caip'
 import { ethers } from 'ethers'
+import { Redis } from 'ioredis'
 import { connect, Connection, Model } from 'mongoose'
 import supertest from 'supertest'
 
 import { NftUnboxingDto, NftUnboxingSchema } from '@common/schemas/nft-unboxing.schema'
 import { UserDto, UserSchema } from '@common/schemas/user.schema'
 import { AppModule } from '@modules/app.module'
-import { unboxUser, walletUser } from '__mocks__/dbUsers'
+import { VenlyService } from '@services/utils/venly.service'
+import { PinService } from '@services/utils/venly/pin.service'
+import { testUserWithWallet, unboxUser, walletUser } from '__mocks__/dbUsers'
 import { nftLegendaryBox } from '__mocks__/nftUnboxingMock'
 import { transferUser1, transferUser2 } from '__mocks__/trasnsferUsers'
 
 import type { AssetIdDto } from '@common/types/caip'
 
 describe('Nft Game controller (e2e)', () => {
-  let mongoConnection: Connection, app: INestApplication
+  let mongoConnection: Connection,
+    app: INestApplication,
+    redis: Redis,
+    venlyService: VenlyService,
+    pinService: PinService
   jest.setTimeout(500000)
 
   const BscRpcUrl = 'https://data-seed-prebsc-2-s3.binance.org:8545'
+  const deleteRedis = []
+  const deleteWallets = []
 
   beforeAll(async () => {
     const mongoUri = process.env.MONGODB_CICD_URI
@@ -28,6 +38,9 @@ describe('Nft Game controller (e2e)', () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule]
     }).compile()
+    redis = moduleFixture.get<Redis>(getRedisToken('default'))
+    venlyService = moduleFixture.get<VenlyService>(VenlyService)
+    pinService = moduleFixture.get<PinService>(PinService)
     app = moduleFixture.createNestApplication()
     await app.init()
   })
@@ -39,6 +52,9 @@ describe('Nft Game controller (e2e)', () => {
     )
     await deleteCollectionsPromise
 
+    await Promise.all(deleteRedis.map((uuid) => redis.del(uuid)))
+    await Promise.all(deleteWallets.map((walletId) => venlyService.archiveWallet(walletId)))
+
     await mongoConnection.close()
     await app.close()
   })
@@ -47,13 +63,23 @@ describe('Nft Game controller (e2e)', () => {
     let assetId: AssetIdDto,
       provider: ethers.providers.JsonRpcProvider,
       NftUnboxingModel: Model<NftUnboxingDto>,
-      UserModel: Model<UserDto>
-    const testUserPin = process.env.TEST_VENLY_PIN
+      UserModel: Model<UserDto>,
+      testUserPin: string
 
     beforeAll(async () => {
       NftUnboxingModel = mongoConnection.model(NftUnboxingDto.name, NftUnboxingSchema)
       const testNftUnboxing = new NftUnboxingModel(nftLegendaryBox)
       await testNftUnboxing.save()
+
+      testUserPin = await pinService.newPin(unboxUser.uuid)
+      const userWallet = await venlyService.createWallet({
+        pincode: testUserPin,
+        uuid: unboxUser.uuid
+      })
+      unboxUser.wallet = userWallet
+
+      deleteRedis.push(unboxUser.uuid)
+      deleteWallets.push(userWallet.id)
 
       UserModel = mongoConnection.model(UserDto.name, UserSchema)
       const testUser = new UserModel(unboxUser)
@@ -94,8 +120,7 @@ describe('Nft Game controller (e2e)', () => {
         .post('/game/unbox')
         .send({
           assetId,
-          uuid,
-          pincode: 'test'
+          uuid
         })
         .expect(404)
         .expect({
@@ -111,15 +136,14 @@ describe('Nft Game controller (e2e)', () => {
         .post('/game/unbox')
         .send({
           assetId: badAssetId,
-          uuid: unboxUser.uuid,
-          pincode: testUserPin
+          uuid: unboxUser.uuid
         })
         .expect(500)
     })
     it('return a valid transaction hash on success', async () => {
       return supertest(app.getHttpServer())
         .post('/game/unbox')
-        .send({ assetId, uuid: unboxUser.uuid, pincode: testUserPin })
+        .send({ assetId, uuid: unboxUser.uuid })
         .expect(201)
         .then(async (res) => {
           const txHash = res.text
@@ -249,11 +273,33 @@ describe('Nft Game controller (e2e)', () => {
       NftBadge: ethers.Contract,
       BoxAssetId: AssetIdDto,
       NFTBox: ethers.Contract
-    const pincode = process.env.TEST_VENLY_PIN
     beforeAll(async () => {
       UserModel = mongoConnection.model(UserDto.name, UserSchema)
+
+      const user1pin = await pinService.newPin(transferUser1.uuid)
+      const user1Wallet = await venlyService.createWallet({
+        pincode: user1pin,
+        uuid: transferUser1.uuid
+      })
+
+      transferUser1.wallet = user1Wallet
+
+      deleteRedis.push(transferUser1.uuid)
+      deleteWallets.push(user1Wallet.id)
+
       const testUser1 = new UserModel(transferUser1)
       await testUser1.save()
+
+      const user2pin = await pinService.newPin(transferUser2.uuid)
+      const user2Wallet = await venlyService.createWallet({
+        pincode: user2pin,
+        uuid: transferUser2.uuid
+      })
+
+      transferUser2.wallet = user2Wallet
+
+      deleteRedis.push(transferUser2.uuid)
+      deleteWallets.push(user2Wallet.id)
 
       const testUser2 = new UserModel(transferUser2)
       await testUser2.save()
@@ -302,7 +348,7 @@ describe('Nft Game controller (e2e)', () => {
 
       NFTBox = new ethers.Contract(nftLegendaryBox.assetType.assetName.reference, boxAbi, signer)
 
-      const boxMintTx = await NFTBox.mint(unboxUser.wallet.address)
+      const boxMintTx = await NFTBox.mint(transferUser1.wallet.address)
       const boxMintReceipt = await boxMintTx.wait()
       const boxMintLogs = boxMintReceipt.events.map(({ data, topics }) =>
         boxInterface.parseLog({ data, topics })
@@ -323,8 +369,7 @@ describe('Nft Game controller (e2e)', () => {
         .post(`/game/user/${uuid}/nft/transfer`)
         .send({
           assetIds: badgeAssetIds,
-          to: transferUser2.wallet.address,
-          pincode
+          to: transferUser2.wallet.address
         })
         .expect(404)
         .expect({
@@ -339,8 +384,7 @@ describe('Nft Game controller (e2e)', () => {
         .post(`/game/user/${transferUser1.uuid}/nft/transfer`)
         .send({
           assetIds: [nft],
-          to: transferUser2.wallet.address,
-          pincode
+          to: transferUser2.wallet.address
         })
         .expect(201)
         .then(async (res) => {
@@ -358,8 +402,7 @@ describe('Nft Game controller (e2e)', () => {
         .post(`/game/user/${transferUser1.uuid}/nft/transfer`)
         .send({
           assetIds: nfts,
-          to: transferUser2.wallet.address,
-          pincode
+          to: transferUser2.wallet.address
         })
         .expect(201)
         .then(async (res) => {
@@ -383,8 +426,7 @@ describe('Nft Game controller (e2e)', () => {
         .post(`/game/user/${transferUser1.uuid}/nft/transfer`)
         .send({
           assetIds: nfts,
-          to: transferUser2.wallet.address,
-          pincode
+          to: transferUser2.wallet.address
         })
         .expect(201)
         .then(async (res) => {
@@ -416,7 +458,7 @@ describe('Nft Game controller (e2e)', () => {
     let UserModel: Model<UserDto>
     beforeAll(async () => {
       UserModel = mongoConnection.model(UserDto.name, UserSchema)
-      const userWithWallet = new UserModel(unboxUser)
+      const userWithWallet = new UserModel(testUserWithWallet)
       await userWithWallet.save()
       const noWalletUser = new UserModel(walletUser)
       await noWalletUser.save()
@@ -446,7 +488,7 @@ describe('Nft Game controller (e2e)', () => {
     })
     it('return nfts successfully', async () => {
       return supertest(app.getHttpServer())
-        .get(`/game/user/${unboxUser.uuid}/nft`)
+        .get(`/game/user/${testUserWithWallet.uuid}/nft`)
         .expect(200)
         .then((res) => {
           const { body } = res

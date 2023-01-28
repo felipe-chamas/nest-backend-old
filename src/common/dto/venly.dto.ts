@@ -13,7 +13,7 @@ import { IsPincode } from '@common/decorators/venly.decorators'
 
 import type { AssetIdDto, AssetTypeDto } from '@common/types/caip'
 
-export class WalletBodyDto {
+export class WalletServiceDto {
   @IsString()
   @ApiPropertyUserUUID()
   uuid: string
@@ -24,6 +24,12 @@ export class WalletBodyDto {
     example: '123456'
   })
   pincode: string
+}
+
+export class WalletBodyDto {
+  @IsString()
+  @ApiPropertyUserUUID()
+  uuid: string
 }
 
 export class MintWalletBodyDto extends WalletBodyDto {
@@ -56,11 +62,4 @@ export class NFTTransferBodyDto {
   @IsString()
   @ApiPropertyTo()
   to: string
-
-  @IsPincode
-  @ApiProperty({
-    description: '4-6 digit PIN code',
-    example: '123456'
-  })
-  pincode: string
 }

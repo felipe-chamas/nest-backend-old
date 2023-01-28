@@ -49,3 +49,21 @@ services:
     command: mongod
     environment:
       MONGO_INITDB_DATABASE: 'database'
+  cronjobs:
+    build: ./cronjobs
+    volumes:
+      - ./cronjobs:/app
+    command: yarn start
+    environment:
+      - REDIS_IO_HOST=${REDIS_IO_HOST}
+      - REDIS_IO_PORT=${REDIS_IO_PORT}
+      - REDIS_IO_PASSWORD=${REDIS_IO_PASSWORD}
+      - PEPPER=${PEPPER}
+      - VENLY_CLIENT_ID=${VENLY_CLIENT_ID}
+      - VENLY_CLIENT_SECRET=${VENLY_CLIENT_SECRET}
+      - VENLY_APPLICATION_ID=${VENLY_APPLICATION_ID}
+      - STAGE=${STAGE}
+      - MONGODB_URI=${MONGODB_URI}
+      - SLACK_URL=${SLACK_URL}
+    depends_on:
+      - mongo

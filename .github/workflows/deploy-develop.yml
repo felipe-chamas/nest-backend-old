@@ -11,6 +11,7 @@ on:
 
 env:
   REGISTRY_NAME: 'webserver-develop-ecr'
+  CRONJOB_REGISTRY_NAME: 'webserver-develop-cronjobs-ecr'
   SERVICE_NAME: 'webserver-develop-service'
   CLUSTER_NAME: 'webserver-develop-cluster'
   CONTAINER_NAME: 'webserver-develop-ecs-container'
@@ -32,6 +33,7 @@ jobs:
           aws-access-key: ${{ secrets.AWS_ACCESS_KEY_ID_DEVELOP }}
           aws-region: ${{ secrets.AWS_REGION_DEVELOP }}
           registry-name: ${{ env.REGISTRY_NAME }}
+          cronjob-registry-name: ${{ env.CRONJOB_REGISTRY_NAME }}
           service-name: ${{ env.SERVICE_NAME }}
           cluster-name: ${{ env.CLUSTER_NAME }}
           container-name: ${{ env.CONTAINER_NAME }}

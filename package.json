@@ -12,7 +12,7 @@
     "lint": "eslint \"{src,__tests__}/**/*.ts\"",
     "test": "jest --config ./__tests__/jest.config.js",
     "test:cov": "yarn test --coverage",
-    "test:e2e": "jest --config ./__tests__/jest-e2e.config.js --runInBand",
+    "test:e2e": "STAGE=test jest --config ./__tests__/jest-e2e.config.js --runInBand",
     "prepare": "husky install",
     "get:secrets": "aws secretsmanager get-secret-value --region us-east-1 --secret-id .env | jq --raw-output '.SecretString' > .env",
     "put:secrets": "aws secretsmanager put-secret-value --region us-east-1 --secret-id .env --secret-string file://.env"
@@ -23,6 +23,7 @@
   },
   "private": true,
   "dependencies": {
+    "@liaoliaots/nestjs-redis": "^9.0.5",
     "@nestjs/axios": "^0.0.8",
     "@nestjs/common": "^8.0.0",
     "@nestjs/config": "^2.0.0",
@@ -47,6 +48,7 @@
     "express": "^4.18.2",
     "express-session": "^1.17.2",
     "helmet": "^6.0.1",
+    "ioredis": "^5.2.5",
     "mongodb": "^4.13.0",
     "mongoose": "^6.8.4",
     "mongoose-autopopulate": "^0.17.1",

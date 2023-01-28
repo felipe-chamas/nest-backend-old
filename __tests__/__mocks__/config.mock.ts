@@ -26,6 +26,8 @@ export const mockConfigService: Partial<ConfigService> = {
             assetName: mockNftSolana.assetId.assetName
           }).toString()
         ]
+      case config === 'pepper':
+        return 'test-pepper'
       default:
         return config
     }
