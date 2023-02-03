@@ -51,6 +51,10 @@ export default async function updateSaltsAndPins() {
     users.map((user) => updateUserPinAndSalt(user.uuid, user.wallet.id, redisClient))
   )
   console.log('done!')
+
+  await redisClient.quit()
+  await mongoose.disconnect()
+
   if (getEnv('STAGE') === 'production') {
     await slackAlert('users pin and salts updates process ran')
   }
