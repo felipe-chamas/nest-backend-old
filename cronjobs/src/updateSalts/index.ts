@@ -39,6 +39,8 @@ async function updateUserPinAndSalt(uuid: string, walletId: string, redis: Redis
 }
 
 export default async function updateSaltsAndPins() {
+  console.log('Start Update')
+
   await mongoose.connect(mongoUri)
   console.log('querying users...')
   const users = await User.find({ wallet: { $ne: null } })
