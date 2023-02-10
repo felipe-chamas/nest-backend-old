@@ -217,34 +217,6 @@ export const getWalletResponse = {
   }
 }
 
-const updatePinSuccess = {
-  success: true,
-  result: {
-    id: '944124ed-305d-4e56-a0fd-bce1c7f1537c',
-    address: '0x5f6EadB01E6E130634850cDC9071862eD2607775',
-    walletType: 'UNRECOVERABLE_WHITE_LABEL',
-    secretType: 'ETHEREUM',
-    createdAt: '2021-01-22T19:22:29.252188',
-    archived: false,
-    alias: 'graceful_panda',
-    description: 'My first unrecoverable wallet',
-    primary: false,
-    hasCustomPin: true,
-    identifier: 'type=unrecoverable',
-    balance: {
-      available: true,
-      secretType: 'ETHEREUM',
-      balance: 0.0,
-      gasBalance: 0.0,
-      symbol: 'ETH',
-      gasSymbol: 'ETH',
-      rawBalance: '0',
-      rawGasBalance: '0',
-      decimals: 18
-    }
-  }
-}
-
 export const mockVenlyService: Partial<VenlyService> = {
   getTokenBalance: jest.fn().mockImplementation(async ({ walletId, token }) => {
     if (!walletId && !token) throw new Error('Required data missing')
@@ -274,12 +246,5 @@ export const mockVenlyService: Partial<VenlyService> = {
   topUp: jest.fn().mockImplementation(async (walletId: string, address: string) => {
     if (!walletId || !address) throw new Error('Required data missing')
     return 'SUCCEEDED'
-  }),
-  updatePin: jest
-    .fn()
-    .mockImplementation(async (oldPin: string, newPin: string, walletId: string) => {
-      if (!oldPin || !newPin || !walletId) throw new Error('Required data missing')
-      if (walletId === 'error') throw new Error('test error')
-      return updatePinSuccess
-    })
+  })
 }

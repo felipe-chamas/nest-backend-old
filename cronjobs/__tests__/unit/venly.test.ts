@@ -51,7 +51,7 @@ describe('venly', () => {
     it('request must be sent to the correct arguments', async () => {
       await updatePin(oldPin, newPin, walletId)
       expect(mockAxios.patch.mock.calls[0][0]).toEqual(
-        'https://api-wallet-staging.venly.io/api' + `/wallets/${walletId}`
+        'https://api-wallet-staging.venly.io/api' + `/wallets/${walletId}/security`
       )
       expect(mockAxios.patch.mock.calls[0][1]).toEqual({
         pincode: oldPin,

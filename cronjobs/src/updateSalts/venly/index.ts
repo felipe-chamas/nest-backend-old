@@ -37,7 +37,7 @@ async function getAccessToken() {
 
 export async function updatePin(oldPin: string, newPin: string, walletId: string) {
   const accessToken = await getAccessToken()
-  const url = venlyUrl + `/wallets/${walletId}`
+  const url = venlyUrl + `/wallets/${walletId}/security`
   const config = {
     headers: {
       Authorization: accessToken

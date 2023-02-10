@@ -28,7 +28,8 @@ describe('updateSalts', () => {
         async () =>
           ({
             get: mockRedisGet,
-            set: mockRedisSet
+            set: mockRedisSet,
+            quit: jest.fn()
           } as unknown as Redis)
       )
     })

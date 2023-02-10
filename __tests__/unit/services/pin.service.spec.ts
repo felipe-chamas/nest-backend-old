@@ -69,11 +69,9 @@ describe('pinService', function () {
   })
   describe('getPin', function () {
     const uuid = 'user-uuid'
-    const updatePin = mockVenlyService.updatePin as jest.Mock
 
     beforeEach(async () => {
       await mockRedis.set(uuid, null)
-      updatePin.mockClear()
     })
     it("if salt wasn't updated return the last pin", async function () {
       const firstPin = await service.newPin(uuid)

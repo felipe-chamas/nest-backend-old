@@ -50,8 +50,7 @@ export default async function updateSaltsAndPins() {
   await Promise.all(
     users.map((user) => updateUserPinAndSalt(user.uuid, user.wallet.id, redisClient))
   )
-  // remove this when we know that have the correct pepper.
-  console.log('Pepper: ', getEnv('PEPPER'))
+
   console.log('done!')
 
   await redisClient.quit()

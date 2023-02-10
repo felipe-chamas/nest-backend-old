@@ -94,13 +94,13 @@ export const usersE2e = [
     },
     __v: 0,
     wallet: {
-      id: '8df2ee3d-d83e-45f7-b22b-95da5860d0ca',
-      address: '0x3A8a36c930507E5a0d8Fe0ef3e697DaC8Ef7BcCB',
+      id: '94cc9147-262f-4e65-bcb6-a4c286cf58bb',
+      address: '0xb0861b6850b8dA4dDFfDef331738545049CdFE6C',
       walletType: 'WHITE_LABEL',
       secretType: 'BSC',
       identifier: 'cronjobUser',
-      description: 'Fiendish Duck',
-      createdAt: '2023-01-27T22:51:21.569777545'
+      description: 'Gossamer Badger',
+      createdAt: '2023-02-10T18:18:54.162553661'
     }
   },
   {
