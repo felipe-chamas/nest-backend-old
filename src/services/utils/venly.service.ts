@@ -2,7 +2,6 @@ import url from 'url'
 
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import axios from 'axios'
 import { AssetId, AssetType } from 'caip'
 import { plainToInstance } from 'class-transformer'
 
@@ -11,6 +10,7 @@ import { WalletDto } from '@common/dto/wallet.dto'
 import { AssetIdDto } from '@common/types/caip'
 
 import { NftUnboxingService } from './nftUnboxing.services'
+import { SlackService } from './slack/slack.service'
 import { HttpVenlyApiService } from './venly/api.service'
 import { HttpVenlyAuthService } from './venly/auth.service'
 
@@ -34,7 +34,8 @@ export class VenlyService {
     private readonly config: ConfigService,
     private readonly apiService: HttpVenlyApiService,
     private readonly authService: HttpVenlyAuthService,
-    private readonly nftUnboxingService: NftUnboxingService
+    private readonly nftUnboxingService: NftUnboxingService,
+    private readonly slackService: SlackService
   ) {
     this.client_id = this.config.get('venly.client_id')
     this.client_secret = this.config.get('venly.client_secret')
@@ -373,18 +374,7 @@ export class VenlyService {
       const message = `*Falco Backend Alert*: \n - *message:* Top up wallet reached minimum balance\n - *Actual Balance:* ${topuperBalance}\n - *Minimum Balance:* ${topuperMinBalance}\n`
       const stage = this.config.get('stage')
       if (stage === 'production') {
-        const slackUrl = this.config.get('slack.slackUrl')
-        await axios.post(slackUrl, {
-          blocks: [
-            {
-              type: 'section',
-              text: {
-                type: 'mrkdwn',
-                text: message
-              }
-            }
-          ]
-        })
+        await this.slackService.triggerAlert(message)
       } else {
         console.log(message)
       }

@@ -49,7 +49,7 @@ export default () => ({
   operator: {
     walletId: process.env.BRIDGE_DESTINATION_WALLET_ID,
     walletPinCode: process.env.BRIDGE_DESTINATION_WALLET_PIN_CODE,
-    walletMinimumBalance: 1
+    walletMinimumBalance: process.env.NODE_ENV === 'production' ? 1 : 0.5
   },
   bridge: {
     sourceAccountId: process.env.BRIDGE_SOURCE_ACCOUNT_ID,

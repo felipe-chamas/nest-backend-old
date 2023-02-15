@@ -5,6 +5,7 @@ import { NftUnboxingDto, NftUnboxingSchema } from '@common/schemas/nft-unboxing.
 import { NftUnboxingService } from '@services/utils/nftUnboxing.services'
 import { VenlyService } from '@services/utils/venly.service'
 
+import { SlackModule } from './slack/slack.module'
 import { HttpVenlyApiModule } from './venly/api.module'
 import { HttpVenlyAuthModule } from './venly/auth.module'
 
@@ -12,7 +13,8 @@ import { HttpVenlyAuthModule } from './venly/auth.module'
   imports: [
     HttpVenlyApiModule,
     HttpVenlyAuthModule,
-    MongooseModule.forFeature([{ name: NftUnboxingDto.name, schema: NftUnboxingSchema }])
+    MongooseModule.forFeature([{ name: NftUnboxingDto.name, schema: NftUnboxingSchema }]),
+    SlackModule
   ],
   providers: [VenlyService, NftUnboxingService],
   exports: [VenlyService]
