@@ -16,6 +16,7 @@ import { Role } from '@common/enums/role.enum'
 import { UserService } from '@services/user.service'
 import { EvmService } from '@services/utils/evm.service'
 import { VenlyService } from '@services/utils/venly.service'
+import { PinService } from '@services/utils/venly/pin.service'
 
 import {
   MintWalletBodyDto,
@@ -31,7 +32,8 @@ export class NftGameController {
     private readonly userService: UserService,
     private readonly venlyService: VenlyService,
     private readonly evmService: EvmService,
-    private readonly config: ConfigService
+    private readonly config: ConfigService,
+    private readonly pinService: PinService
   ) {}
 
   @Auth(Role.NFT_ADMIN)
@@ -45,10 +47,12 @@ export class NftGameController {
   @ApiExcludeEndpoint()
   @ApiCreatedResponse()
   @ApiBody({ type: MintWalletBodyDto })
-  async mint(@Body() { uuid, pincode, assetType }: MintWalletBodyDto) {
+  async mint(@Body() { uuid, assetType }: MintWalletBodyDto) {
     const user = await this.userService.findByUUID(uuid)
     const walletId = user.wallet.id
     const walletAddress = user.wallet.address
+    const pincode = await this.pinService.getPin(uuid)
+    await this.venlyService.topUp(walletId, walletAddress)
     return this.venlyService.mint({
       walletId,
       walletAddress,
@@ -64,11 +68,28 @@ export class NftGameController {
   })
   @ApiOkResponse({ type: String })
   @ApiBody({ type: NFTWalletBodyDto })
-  async unbox(@Body() { uuid, assetId, pincode }: NFTWalletBodyDto) {
-    const user = await this.userService.findByUUID(uuid)
-    if (!user) throw new NotFoundException(`Can't find user with uuid: ${uuid}`)
-    const walletId = user.wallet.id
-    return this.venlyService.unbox({ walletId, assetId, pincode })
+  async unbox(@Body() { assetId, uuid }: NFTWalletBodyDto) {
+    if (uuid) {
+      const user = await this.userService.findByUUID(uuid)
+      if (!user) throw new NotFoundException(`Can't find user with uuid: ${uuid}`)
+
+      const to = this.config.get('unbox.contractAddress') as string
+      const walletId = user.wallet.id
+      const walletAddress = user.wallet.address
+      const pincode = await this.pinService.getPin(uuid)
+
+      await this.venlyService.topUp(walletId, walletAddress)
+
+      await this.venlyService.approveNft(
+        walletId,
+        pincode,
+        assetId.assetName.reference,
+        assetId.tokenId,
+        to
+      )
+    }
+
+    return this.venlyService.unbox(assetId)
   }
 
   @Auth(Role.NFT_ADMIN)
@@ -78,11 +99,13 @@ export class NftGameController {
   })
   @ApiOkResponse({ type: String })
   @ApiBody({ type: PayableNFTWalletBodyDto })
-  async upgrade(@Body() { uuid, assetId, value, pincode }: PayableNFTWalletBodyDto) {
+  async upgrade(@Body() { uuid, assetId, value }: PayableNFTWalletBodyDto) {
     const user = await this.userService.findByUUID(uuid)
     if (!user) throw new NotFoundException(`Can't find user with uuid: ${uuid}`)
 
-    const walletId = user.wallet.id
+    const { id: walletId, address: walletAddress } = user.wallet
+    const pincode = this.pinService.getPin(uuid)
+    await this.venlyService.topUp(walletId, walletAddress)
 
     return this.venlyService.upgrade({ walletId, assetId, value, pincode })
   }
@@ -129,15 +152,13 @@ export class NftGameController {
   @ApiOkResponse({ type: String })
   @ApiBody({ type: NFTTransferBodyDto })
   @ApiParam({ name: 'uuid', type: String })
-  async transfer(
-    @Body() { pincode, assetIds, to }: NFTTransferBodyDto,
-    @Param('uuid') uuid: string
-  ) {
-    console.log(pincode)
+  async transfer(@Body() { assetIds, to }: NFTTransferBodyDto, @Param('uuid') uuid: string) {
     const user = await this.userService.findByUUID(uuid)
     if (!user) throw new NotFoundException(`Can't find user with uuid: ${uuid}`)
 
     const { id: walletId, address: venlyAddress } = user.wallet
+    const pincode = await this.pinService.getPin(uuid)
+    await this.venlyService.topUp(walletId, venlyAddress)
 
     return this.venlyService.transfer(venlyAddress, to, assetIds, pincode, walletId)
   }

@@ -1,5 +1,7 @@
+import { getRedisToken } from '@liaoliaots/nestjs-redis'
 import { INestApplication } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
+import { Redis } from 'ioredis'
 import { connect, Connection, Model } from 'mongoose'
 import supertest from 'supertest'
 
@@ -12,7 +14,8 @@ describe('userController (e2e)', () => {
   let app: INestApplication,
     mongoConnection: Connection,
     UserModel: Model<UserDto>,
-    venlyService: VenlyService
+    venlyService: VenlyService,
+    redis: Redis
   const createdWalletsIds: string[] = []
   jest.setTimeout(90000)
 
@@ -26,12 +29,14 @@ describe('userController (e2e)', () => {
     }).compile()
     app = moduleFixture.createNestApplication()
     await app.init()
+    redis = app.get<Redis>(getRedisToken('default'))
     venlyService = app.get<VenlyService>(VenlyService)
   })
   afterAll(async () => {
-    await app.close()
-    await mongoConnection.close()
     await Promise.all(createdWalletsIds.map((id) => venlyService.archiveWallet(id)))
+    await mongoConnection.close()
+    await redis.del(walletUser.uuid)
+    await app.close()
   })
 
   describe('POST /user/wallet', () => {
@@ -46,8 +51,7 @@ describe('userController (e2e)', () => {
       return supertest(app.getHttpServer())
         .post('/user/wallet')
         .send({
-          uuid: 'badUUID',
-          pincode: '123456'
+          uuid: 'badUUID'
         })
         .expect(404)
         .expect({
@@ -61,8 +65,7 @@ describe('userController (e2e)', () => {
       return supertest(app.getHttpServer())
         .post('/user/wallet')
         .send({
-          uuid: walletUser.uuid,
-          pincode: '123456'
+          uuid: walletUser.uuid
         })
         .expect(201)
         .then((res) => {

@@ -1,23 +1,27 @@
 import url from 'url'
 
-import { Injectable } from '@nestjs/common'
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { AssetId, AssetType } from 'caip'
 import { plainToInstance } from 'class-transformer'
 
-import { WalletBodyDto } from '@common/dto/venly.dto'
+import { WalletServiceDto } from '@common/dto/venly.dto'
 import { WalletDto } from '@common/dto/wallet.dto'
 import { AssetIdDto } from '@common/types/caip'
 
+import { NftUnboxingService } from './nftUnboxing.services'
+import { SlackService } from './slack/slack.service'
 import { HttpVenlyApiService } from './venly/api.service'
 import { HttpVenlyAuthService } from './venly/auth.service'
 
 import type {
   AccessTokenResult,
   CreateWalletResult,
+  GetBalance,
   GetTxStatusResult,
   GetWalletResult,
-  MintResult
+  MintResult,
+  TransferNativeToken
 } from '@common/types/wallet'
 
 @Injectable()
@@ -29,7 +33,9 @@ export class VenlyService {
   constructor(
     private readonly config: ConfigService,
     private readonly apiService: HttpVenlyApiService,
-    private readonly authService: HttpVenlyAuthService
+    private readonly authService: HttpVenlyAuthService,
+    private readonly nftUnboxingService: NftUnboxingService,
+    private readonly slackService: SlackService
   ) {
     this.client_id = this.config.get('venly.client_id')
     this.client_secret = this.config.get('venly.client_secret')
@@ -85,7 +91,7 @@ export class VenlyService {
     return result
   }
 
-  async createWallet({ pincode, uuid }: WalletBodyDto) {
+  async createWallet({ pincode, uuid }: WalletServiceDto) {
     await this.getAccessToken()
 
     const {
@@ -141,10 +147,19 @@ export class VenlyService {
     return transactionHash
   }
 
-  async unbox({ pincode, walletId, assetId }) {
+  async unbox(assetId: AssetIdDto) {
     await this.getAccessToken()
 
-    const caipAssetId = new AssetId(assetId)
+    const assetType = new AssetType({ assetName: assetId.assetName, chainId: assetId.chainId })
+    const nftUnboxing = await this.nftUnboxingService.findByAssetType(assetType)
+    if (!nftUnboxing) throw new NotFoundException(`asset can't be unboxed: ${assetType}`)
+    const { nfts, tokenCount } = nftUnboxing
+
+    const [walletId, pincode, unboxAddress] = [
+      this.config.get('operator.walletId') as string,
+      this.config.get('operator.walletPinCode') as string,
+      this.config.get('unbox.contractAddress') as string
+    ]
 
     const {
       data: {
@@ -155,14 +170,22 @@ export class VenlyService {
       transactionRequest: {
         walletId,
         type: 'CONTRACT_EXECUTION',
-        to: caipAssetId.assetName.reference,
+        to: unboxAddress,
         secretType: 'BSC',
         functionName: 'unbox',
         value: 0,
         inputs: [
           {
             type: 'uint256',
-            value: caipAssetId.tokenId
+            value: assetId.tokenId
+          },
+          {
+            type: 'address[]',
+            value: nfts
+          },
+          {
+            type: 'uint256[]',
+            value: tokenCount
           }
         ]
       }
@@ -274,5 +297,138 @@ export class VenlyService {
     })
 
     return result
+  }
+
+  async approveNft(
+    walletId: string,
+    pincode: string,
+    nftAddress: string,
+    tokenId: string,
+    to: string
+  ) {
+    await this.getAccessToken()
+
+    const {
+      data: {
+        result: { transactionHash }
+      }
+    } = await this.apiService.axiosRef.post<MintResult>('transactions/execute', {
+      pincode,
+      transactionRequest: {
+        walletId,
+        type: 'CONTRACT_EXECUTION',
+        to: nftAddress,
+        secretType: 'BSC',
+        functionName: 'approve',
+        value: 0,
+        inputs: [
+          {
+            type: 'address',
+            value: to
+          },
+          {
+            type: 'uint256',
+            value: tokenId
+          }
+        ]
+      }
+    })
+    return transactionHash
+  }
+
+  async getBalance(walletId: string) {
+    await this.getAccessToken()
+    const {
+      data: {
+        result: { balance }
+      }
+    } = await this.apiService.axiosRef.get<GetBalance>(`wallets/${walletId}/balance`)
+
+    return balance
+  }
+
+  async transferNativeToken(walletId: string, pincode: string, value: number, to: string) {
+    await this.getAccessToken()
+    const { data } = await this.apiService.axiosRef.post<TransferNativeToken>(
+      `/transactions/execute`,
+      {
+        transactionRequest: {
+          type: 'TRANSFER',
+          walletId,
+          to,
+          secretType: 'BSC',
+          value
+        },
+        pincode
+      }
+    )
+    return data
+  }
+
+  async topUp(walletId: string, address: string) {
+    const topuperId = this.config.get('topuper.id')
+    const topuperMinBalance = this.config.get('topuper.minBalance')
+    const topuperBalance = await this.getBalance(topuperId)
+
+    if (topuperBalance < topuperMinBalance) {
+      const message = `*Falco Backend Alert*: \n - *message:* Top up wallet reached minimum balance\n - *Actual Balance:* ${topuperBalance}\n - *Minimum Balance:* ${topuperMinBalance}\n`
+      const stage = this.config.get('stage')
+      if (stage === 'production') {
+        await this.slackService.triggerAlert(message)
+      } else {
+        console.log(message)
+      }
+    }
+
+    const userBalance = await this.getBalance(walletId)
+    const userMinBalance = this.config.get('topuper.userMinBalance')
+
+    if (userBalance < userMinBalance) {
+      const refill = this.config.get('topuper.userRefill')
+      if (topuperBalance < refill && userBalance < userMinBalance)
+        throw new InternalServerErrorException(
+          `can't top up user account.\n - user balance: ${userBalance} \n - topuper balance: ${topuperBalance}`
+        )
+
+      const pincode = this.config.get('topuper.pincode')
+      const data = await this.transferNativeToken(topuperId, pincode, Number(refill), address)
+      if (!data.success) throw new InternalServerErrorException('top up transaction failed')
+
+      const waitTx = async () => {
+        let txStatus = 'UNKNOWN'
+        let count = 0
+        return new Promise(async (resolve, reject) => {
+          do {
+            txStatus = await this.getTxStatus(data.result.transactionHash)
+            count += 1
+            await new Promise((resolve) => setTimeout(() => resolve(null), 2000))
+          } while (txStatus === 'UNKNOWN' && count < 8)
+          if (count >= 7) reject("can't get transaction status")
+          resolve(txStatus)
+        })
+      }
+      const txStatus = await waitTx()
+
+      if (txStatus !== 'SUCCEEDED')
+        throw new InternalServerErrorException('top up transaction failed')
+
+      const waitTransfer = async () => {
+        let balance = 0
+        let count = 0
+        return new Promise(async (resolve, reject) => {
+          do {
+            balance = await this.getBalance(walletId)
+            count += 1
+            await new Promise((resolve) => setTimeout(() => resolve(null), 2000))
+          } while (balance < userMinBalance && count < 8)
+          if (count >= 7) reject("user balance didn't update")
+          resolve(balance)
+        })
+      }
+
+      await waitTransfer()
+
+      return txStatus
+    }
   }
 }

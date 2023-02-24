@@ -65,6 +65,8 @@ export const findOrCreateBySteamIdResponse = {
 }
 type UserResult = UserDocument & { _id: ObjectId }
 
+export const testElixirJwt = 'fajskfsfasfnwerjsadfxlvcxziouwefsd'
+
 export const mockUserService: Partial<UserService> = {
   findByUUID: jest.fn().mockImplementation(async (uuid: string) => {
     const user =
@@ -81,6 +83,12 @@ export const mockUserService: Partial<UserService> = {
   findOrCreateBySteamId: jest.fn().mockImplementation(async (steamId: string) => {
     if (!steamId) throw new Error('Required data missing')
     return findOrCreateBySteamIdResponse.result
+  }),
+
+  findOrCreateElixirUser: jest.fn().mockImplementation(async (jwt: string) => {
+    if (jwt) {
+      return mockUser
+    }
   })
 }
 

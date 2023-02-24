@@ -5,6 +5,7 @@ on:
 
 env:
   REGISTRY_NAME: 'webserver-production-ecr'
+  CRONJOB_REGISTRY_NAME: 'webserver-production-cronjobs-ecr'
   SERVICE_NAME: 'webserver-production-service'
   CLUSTER_NAME: 'webserver-production-cluster'
   CONTAINER_NAME: 'webserver-production-ecs-container'
@@ -25,6 +26,7 @@ jobs:
           aws-access-key: ${{ secrets.AWS_ACCESS_KEY_ID_PRODUCTION }}
           aws-region: ${{ secrets.AWS_REGION_PRODUCTION }}
           registry-name: ${{ env.REGISTRY_NAME }}
+          cronjob-registry-name: ${{ env.CRONJOB_REGISTRY_NAME }}
           service-name: ${{ env.SERVICE_NAME }}
           cluster-name: ${{ env.CLUSTER_NAME }}
           container-name: ${{ env.CONTAINER_NAME }}

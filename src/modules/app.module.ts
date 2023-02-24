@@ -1,7 +1,10 @@
+import 'dotenv/config'
+import { RedisModule } from '@liaoliaots/nestjs-redis'
 import { Module } from '@nestjs/common'
 import { APP_FILTER } from '@nestjs/core'
 import { RouterModule } from 'nest-router'
 
+import { config } from '@common/constants/redisConfig'
 import { HttpExceptionFilter } from '@common/filters/http-exception.filter'
 import { AppController } from '@controllers/app.controller'
 import { routes } from '@routes'
@@ -23,7 +26,10 @@ import { MongoDbProvider } from './utils/mongo.module'
     NftCollectionModule,
     NftModule,
     UserModule,
-    AuthModule
+    AuthModule,
+    RedisModule.forRoot({
+      config
+    })
   ],
   controllers: [AppController],
   providers: [

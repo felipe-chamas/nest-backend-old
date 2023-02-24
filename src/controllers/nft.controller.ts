@@ -23,6 +23,7 @@ import { BridgeService } from '@services/bridge.service'
 import { NftCollectionService } from '@services/nft-collection.service'
 import { UserService } from '@services/user.service'
 import { EvmService } from '@services/utils/evm.service'
+import { SlackService } from '@services/utils/slack/slack.service'
 import { SolanaService } from '@services/utils/solana.service'
 import { VenlyService } from '@services/utils/venly.service'
 
@@ -36,7 +37,8 @@ export class NftController {
     private readonly evmService: EvmService,
     private readonly solanaService: SolanaService,
     private readonly venlyService: VenlyService,
-    private readonly config: ConfigService
+    private readonly config: ConfigService,
+    private readonly slackService: SlackService
   ) {}
 
   @Get(':chainId/:assetName/:tokenId')
@@ -170,9 +172,9 @@ export class NftController {
       this.config.get('bridge.sourceAccountId') as string,
       this.config.get('bridge.sourceAssetTypes') as string[],
       this.config.get('bridge.destinationAssetTypes') as string[],
-      this.config.get('bridge.destinationWalletId') as string,
-      this.config.get('bridge.destinationWalletPinCode') as string,
-      this.config.get('bridge.destinationWalletMinimumBalance') as number
+      this.config.get('operator.walletId') as string,
+      this.config.get('operator.walletPinCode') as string,
+      this.config.get('operator.walletMinimumBalance') as number
     ]
 
     if (to.toString() !== sourceAccountId) {
@@ -197,9 +199,12 @@ export class NftController {
       destinationWalletMinimumBalance
 
     if (!hasBalance) {
-      throw new InternalServerErrorException(
-        `Insufficient balance in destination wallet minter. Try again later.`
-      )
+      const stage = this.config.get('stage')
+      const message = '⚠Insufficient balance in destination wallet minter‼⚠'
+      if (stage === 'production') {
+        await this.slackService.triggerAlert(message)
+      }
+      console.log(message)
     }
 
     const { _id: bridgeId } = await this.bridgeService.create({ txSource })

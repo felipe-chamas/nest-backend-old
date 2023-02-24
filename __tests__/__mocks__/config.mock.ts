@@ -8,7 +8,7 @@ export const mockConfigService: Partial<ConfigService> = {
     switch (true) {
       case config === 'bridge.sourceAccountId':
         return '0xfefe'
-      case config === 'bridge.destinationWalletId':
+      case config === 'operator.walletId':
         return '6ddcbcc3-e242-4bb5-b4f3-3913ccba3e8d'
       case config === 'bridge.destinationAssetTypes':
         return [
@@ -17,7 +17,7 @@ export const mockConfigService: Partial<ConfigService> = {
             assetName: mockNftEvm.assetId.assetName
           }).toString()
         ]
-      case config === 'bridge.destinationWalletMinimumBalance':
+      case config === 'operator.walletMinimumBalance':
         return 0.1
       case config === 'bridge.sourceAssetTypes':
         return [
@@ -26,6 +26,8 @@ export const mockConfigService: Partial<ConfigService> = {
             assetName: mockNftSolana.assetId.assetName
           }).toString()
         ]
+      case config === 'pepper':
+        return 'test-pepper'
       default:
         return config
     }

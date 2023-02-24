@@ -3,6 +3,7 @@ export default () => ({
   stage: process.env.STAGE || 'development',
   session_secret: process.env.SESSION_SECRET,
   redis_url: process.env.REDIS_URL,
+  redis_io_url: process.env.REDIS_IO_URL,
   mongo_uri:
     process.env.NODE_ENV === 'test' ? process.env.MONGODB_CICD_URI : process.env.MONGODB_URI,
   docs: {
@@ -17,6 +18,9 @@ export default () => ({
     returnURL: process.env.STEAM_RETURN_URL,
     realm: process.env.STEAM_REALM,
     apiKey: process.env.STEAM_API_KEY
+  },
+  elixir: {
+    apiKey: process.env.ELIXIR_API_KEY
   },
   epic: {
     clientID: process.env.EPIC_CLIENT_ID,
@@ -39,6 +43,14 @@ export default () => ({
   slack: {
     slackUrl: process.env.SLACK_URL
   },
+  unbox: {
+    contractAddress: process.env.UNBOX_ADDRESS
+  },
+  operator: {
+    walletId: process.env.BRIDGE_DESTINATION_WALLET_ID,
+    walletPinCode: process.env.BRIDGE_DESTINATION_WALLET_PIN_CODE,
+    walletMinimumBalance: process.env.NODE_ENV === 'production' ? 1 : 0.5
+  },
   bridge: {
     sourceAccountId: process.env.BRIDGE_SOURCE_ACCOUNT_ID,
     sourceAssetTypes: process.env.BRIDGE_SOURCE_ASSET_TYPES
@@ -46,9 +58,14 @@ export default () => ({
       : [],
     destinationAssetTypes: process.env.BRIDGE_DESTINATION_ASSET_TYPES
       ? process.env.BRIDGE_DESTINATION_ASSET_TYPES.split(',')
-      : [],
-    destinationWalletId: process.env.BRIDGE_DESTINATION_WALLET_ID,
-    destinationWalletPinCode: process.env.BRIDGE_DESTINATION_WALLET_PIN_CODE,
-    destinationWalletMinimumBalance: 1
-  }
+      : []
+  },
+  topuper: {
+    id: process.env.TOPUPER_WALLET_ID,
+    minBalance: process.env.TOPUPER_MIN_BALANCE,
+    userMinBalance: process.env.TOPUPER_USER_MIN_BALANCE,
+    userRefill: process.env.TOPUPER_USER_REFILL,
+    pincode: process.env.TOPUPER_WALLET_PINCODE
+  },
+  pepper: process.env.PEPPER
 })

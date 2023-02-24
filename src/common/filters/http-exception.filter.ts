@@ -28,7 +28,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
             type: 'section',
             text: {
               type: 'mrkdwn',
-              text: `*Falco Bakend Alert*: \n - *path:* ${request.url}\n - *status code:* ${status} \n - *name:* ${exception.name}\n - *message:* ${exception.message}`
+              text: `*Falco Backend Alert*: \n - *path:* ${request.url}\n - *status code:* ${status} \n - *name:* ${exception.name}\n - *message:* ${exception.message}`
             }
           }
         ]

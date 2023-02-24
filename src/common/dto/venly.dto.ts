@@ -1,12 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsNumber, IsString } from 'class-validator'
 
-import {
-  IsAssetId,
-  IsAssetIdArray,
-  IsAssetType,
-  IsAssetTypeArray
-} from '@common/decorators/caip.decorators'
+import { IsAssetId, IsAssetIdArray, IsAssetType } from '@common/decorators/caip.decorators'
 import {
   ApiPropertyAssetIds,
   ApiPropertyAssetType,
@@ -18,7 +13,7 @@ import { IsPincode } from '@common/decorators/venly.decorators'
 
 import type { AssetIdDto, AssetTypeDto } from '@common/types/caip'
 
-export class WalletBodyDto {
+export class WalletServiceDto {
   @IsString()
   @ApiPropertyUserUUID()
   uuid: string
@@ -29,6 +24,12 @@ export class WalletBodyDto {
     example: '123456'
   })
   pincode: string
+}
+
+export class WalletBodyDto {
+  @IsString()
+  @ApiPropertyUserUUID()
+  uuid: string
 }
 
 export class MintWalletBodyDto extends WalletBodyDto {
@@ -43,10 +44,14 @@ export class NFTWalletBodyDto extends WalletBodyDto {
   assetId: AssetIdDto
 }
 
-export class PayableNFTWalletBodyDto extends NFTWalletBodyDto {
+export class PayableNFTWalletBodyDto extends WalletBodyDto {
   @IsNumber()
   @ApiPropertyValue()
   value: number
+
+  @IsAssetId
+  @ApiPropertyAssetIds()
+  assetId: AssetIdDto
 }
 
 export class NFTTransferBodyDto {
@@ -57,11 +62,4 @@ export class NFTTransferBodyDto {
   @IsString()
   @ApiPropertyTo()
   to: string
-
-  @IsPincode
-  @ApiProperty({
-    description: '4-6 digit PIN code',
-    example: '123456'
-  })
-  pincode: string
 }

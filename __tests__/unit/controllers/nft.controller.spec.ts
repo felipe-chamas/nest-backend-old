@@ -10,13 +10,15 @@ import { BridgeService } from '@services/bridge.service'
 import { NftCollectionService } from '@services/nft-collection.service'
 import { UserService } from '@services/user.service'
 import { EvmService } from '@services/utils/evm.service'
+import { SlackService } from '@services/utils/slack/slack.service'
 import { SolanaService } from '@services/utils/solana.service'
 import { VenlyService } from '@services/utils/venly.service'
-import { mockBridge, mockBridgeService } from '__mocks__/bridge.mock'
+import { mockBridgeService } from '__mocks__/bridge.mock'
 import { mockConfigService } from '__mocks__/config.mock'
 import { mockEvmService } from '__mocks__/evm.mock'
 import { mockNftCollectionService } from '__mocks__/nft-collection.mock'
 import { mockNftEvm, mockNftSolana } from '__mocks__/nft.mock'
+import { slackServiceMock } from '__mocks__/slack.mock'
 import { bridgeTxSolana, mockSolanaService } from '__mocks__/solana.mock'
 import { mockUser, mockUserService, mockUserWithoutWallet } from '__mocks__/user.mock'
 import { mockVenlyService } from '__mocks__/venly.mock'
@@ -55,6 +57,10 @@ describe('NftController', () => {
         {
           provide: ConfigService,
           useValue: mockConfigService
+        },
+        {
+          provide: SlackService,
+          useValue: slackServiceMock
         }
       ]
     }).compile()
