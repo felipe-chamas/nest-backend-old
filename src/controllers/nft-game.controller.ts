@@ -10,7 +10,13 @@ import {
   ApiTags
 } from '@nestjs/swagger'
 import { AccountId, AssetType } from 'caip'
+import { ethers } from 'ethers'
 
+import {
+  HASH_ZERO,
+  MAX_WAIT_FOR_SIGNED_AGREEMENT,
+  SBT_COUNTER_INCREMENT_HASH
+} from '@common/constants/signature'
 import { Auth } from '@common/decorators/auth.decorators'
 import { Role } from '@common/enums/role.enum'
 import { UserService } from '@services/user.service'
@@ -73,7 +79,7 @@ export class NftGameController {
       const user = await this.userService.findByUUID(uuid)
       if (!user) throw new NotFoundException(`Can't find user with uuid: ${uuid}`)
 
-      const to = this.config.get('unbox.contractAddress') as string
+      const to = this.config.get('contracts.unboxAddress') as string
       const walletId = user.wallet.id
       const walletAddress = user.wallet.address
       const pincode = await this.pinService.getPin(uuid)
@@ -89,7 +95,13 @@ export class NftGameController {
       )
     }
 
-    return this.venlyService.unbox(assetId)
+    const operatorUUID = this.config.get('operator.uuid')
+    const operator = await this.userService.findByUUID(operatorUUID)
+    if (!operator) throw new NotFoundException(`Can't find user with uuid: ${operatorUUID}`)
+    const operatorPincode = await this.pinService.getPin(operatorUUID)
+    const operatorWalletId = operator.wallet.id
+
+    return this.venlyService.unbox({ assetId, operatorWalletId, operatorPincode })
   }
 
   @Auth(Role.NFT_ADMIN)
@@ -161,5 +173,56 @@ export class NftGameController {
     await this.venlyService.topUp(walletId, venlyAddress)
 
     return this.venlyService.transfer(venlyAddress, to, assetIds, pincode, walletId)
+  }
+
+  @Auth(Role.OWNER)
+  @Get('user/:uuid/matches')
+  @ApiOperation({
+    description: 'Returns user match rank metadata'
+  })
+  @ApiOkResponse({ type: String })
+  @ApiParam({ name: 'uuid', type: String })
+  async getMatches(@Param('uuid') uuid: string) {
+    const user = await this.userService.findByUUID(uuid)
+    if (!user) throw new NotFoundException(`Can't find user with uuid: ${uuid}`)
+
+    return this.venlyService.getUserMatchesMetadata(user.wallet.address)
+  }
+
+  @Auth(Role.NFT_ADMIN)
+  @Post('user/:uuid/matches')
+  @ApiOperation({
+    description: 'increment user match rank in the SBT contract'
+  })
+  @ApiOkResponse({ type: String })
+  @ApiParam({ name: 'uuid', type: String })
+  async incrementMatches(@Param('uuid') uuid: string) {
+    const user = await this.userService.findByUUID(uuid)
+    if (!user) throw new NotFoundException(`Can't find user with uuid: ${uuid}`)
+
+    const pincode = await this.pinService.getPin(uuid)
+    const { id: walletId, address: spender } = user.wallet
+    const contractAddress = this.config.get('contracts.sbtMatchesAddress') as string
+    const deadline = Math.round((new Date().getTime() + MAX_WAIT_FOR_SIGNED_AGREEMENT) / 1000)
+
+    const operatorUUID = this.config.get('operator.uuid')
+    const operator = await this.userService.findByUUID(operatorUUID)
+    if (!operator) throw new NotFoundException(`Can't find user with uuid: ${operatorUUID}`)
+    const operatorPincode = await this.pinService.getPin(operatorUUID)
+    const operatorWalletId = operator.wallet.id
+
+    const signature = await this.venlyService.signOperatorPermit({
+      operatorPincode,
+      operatorWalletId,
+      contractAddress,
+      spender,
+      allowedFunction: SBT_COUNTER_INCREMENT_HASH,
+      allowedParameters: HASH_ZERO,
+      deadline
+    })
+
+    const data = ethers.utils.defaultAbiCoder.encode(['uint256', 'bytes'], [deadline, signature])
+
+    return this.venlyService.incrementMatches(pincode, walletId, data)
   }
 }

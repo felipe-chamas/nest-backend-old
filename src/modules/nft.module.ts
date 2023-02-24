@@ -9,6 +9,7 @@ import { EvmModule } from './utils/evm.module'
 import { SlackModule } from './utils/slack/slack.module'
 import { SolanaModule } from './utils/solana.module'
 import { VenlyModule } from './utils/venly.module'
+import { PinModule } from './utils/venly/pin.module'
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { VenlyModule } from './utils/venly.module'
     EvmModule,
     SolanaModule,
     VenlyModule,
+    PinModule,
     SlackModule
   ],
   controllers: [NftController]

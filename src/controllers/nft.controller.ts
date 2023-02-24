@@ -5,6 +5,7 @@ import {
   DefaultValuePipe,
   Get,
   InternalServerErrorException,
+  NotFoundException,
   Param,
   ParseArrayPipe,
   Post,
@@ -26,6 +27,7 @@ import { EvmService } from '@services/utils/evm.service'
 import { SlackService } from '@services/utils/slack/slack.service'
 import { SolanaService } from '@services/utils/solana.service'
 import { VenlyService } from '@services/utils/venly.service'
+import { PinService } from '@services/utils/venly/pin.service'
 
 @ApiTags('Nfts')
 @Controller()
@@ -37,8 +39,9 @@ export class NftController {
     private readonly evmService: EvmService,
     private readonly solanaService: SolanaService,
     private readonly venlyService: VenlyService,
-    private readonly config: ConfigService,
-    private readonly slackService: SlackService
+    private readonly pinService: PinService,
+    private readonly slackService: SlackService,
+    private readonly config: ConfigService
   ) {}
 
   @Get(':chainId/:assetName/:tokenId')
@@ -165,17 +168,21 @@ export class NftController {
       sourceAccountId,
       sourceAssetTypes,
       destinationAssetTypes,
-      destinationWalletId,
-      destinationWalletPinCode,
+      destinationUserUUID,
       destinationWalletMinimumBalance
     ] = [
       this.config.get('bridge.sourceAccountId') as string,
       this.config.get('bridge.sourceAssetTypes') as string[],
       this.config.get('bridge.destinationAssetTypes') as string[],
-      this.config.get('operator.walletId') as string,
-      this.config.get('operator.walletPinCode') as string,
+      this.config.get('operator.uuid') as string,
       this.config.get('operator.walletMinimumBalance') as number
     ]
+
+    const destinationUser = await this.userService.findByUUID(destinationUserUUID)
+    if (!destinationUser)
+      throw new NotFoundException(`Can't find user with uuid: ${destinationUserUUID}`)
+    const destinationWalletPinCode = await this.pinService.getPin(destinationUserUUID)
+    const destinationWalletId = destinationUser.wallet.id
 
     if (to.toString() !== sourceAccountId) {
       throw new BadRequestException(

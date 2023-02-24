@@ -79,6 +79,27 @@ export interface MintResult {
   }
 }
 
+export interface SignatureResult {
+  success: boolean
+  result: {
+    type: 'HEX_SIGNATURE'
+    r: string
+    s: string
+    v: string
+    signature: string
+  }
+}
+
+type ContractReadOutput =
+  | { type: 'string'; value: string }
+  | { type: 'uint256'; value: number }
+  | { type: 'address'; value: string }
+
+export interface ContractReadResult {
+  success: boolean
+  result: Array<ContractReadOutput>
+}
+
 export interface GetTxStatusResult {
   success: boolean
   result: {
@@ -109,35 +130,5 @@ export interface TransferNativeToken {
   }
 }
 
-
-export interface UpdatePin {
-  success: boolean
-  result: {
-    id: string
-    address: string
-    walletType: string
-    secretType: string
-    createdAt: string
-    archived: boolean
-    alias: string
-    description: string
-    primary: boolean
-    hasCustomPin: boolean
-    identifier: string
-    balance: {
-      available: boolean
-      secretType: string
-      balance: number
-      gasBalance: number
-      symbol: string
-      gasSymbol: string
-      rawBalance: string
-      rawGasBalance: string
-      decimals: number
-    }
-  }
-}
- 
 export const availableChainsList = ['ETHEREUM', 'BSC'] as const
 export type AvailableChainsType = (typeof availableChains)[number]
-

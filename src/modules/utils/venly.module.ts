@@ -1,8 +1,9 @@
+import { HttpModule } from '@nestjs/axios'
 import { Module } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
 
 import { NftUnboxingDto, NftUnboxingSchema } from '@common/schemas/nft-unboxing.schema'
-import { NftUnboxingService } from '@services/utils/nftUnboxing.services'
+import { NftUnboxingService } from '@services/utils/nftUnboxing.service'
 import { VenlyService } from '@services/utils/venly.service'
 
 import { SlackModule } from './slack/slack.module'
@@ -13,6 +14,7 @@ import { HttpVenlyAuthModule } from './venly/auth.module'
   imports: [
     HttpVenlyApiModule,
     HttpVenlyAuthModule,
+    HttpModule,
     MongooseModule.forFeature([{ name: NftUnboxingDto.name, schema: NftUnboxingSchema }]),
     SlackModule
   ],

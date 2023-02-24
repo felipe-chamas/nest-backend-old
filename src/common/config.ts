@@ -43,12 +43,12 @@ export default () => ({
   slack: {
     slackUrl: process.env.SLACK_URL
   },
-  unbox: {
-    contractAddress: process.env.UNBOX_ADDRESS
+  contracts: {
+    unboxAddress: process.env.UNBOX_ADDRESS,
+    sbtMatchesAddress: process.env.SBT_MATCHES_ADDRESS
   },
   operator: {
-    walletId: process.env.BRIDGE_DESTINATION_WALLET_ID,
-    walletPinCode: process.env.BRIDGE_DESTINATION_WALLET_PIN_CODE,
+    uuid: process.env.OPERATOR_WALLET_USER_UUID,
     walletMinimumBalance: process.env.NODE_ENV === 'production' ? 1 : 0.5
   },
   bridge: {

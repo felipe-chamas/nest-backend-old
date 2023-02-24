@@ -1,5 +1,6 @@
 import url from 'url'
 
+import { HttpService } from '@nestjs/axios'
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { AssetId, AssetType } from 'caip'
@@ -8,19 +9,22 @@ import { plainToInstance } from 'class-transformer'
 import { WalletServiceDto } from '@common/dto/venly.dto'
 import { WalletDto } from '@common/dto/wallet.dto'
 import { AssetIdDto } from '@common/types/caip'
+import { Metadata } from '@common/types/metadata'
 
-import { NftUnboxingService } from './nftUnboxing.services'
+import { NftUnboxingService } from './nftUnboxing.service'
 import { SlackService } from './slack/slack.service'
 import { HttpVenlyApiService } from './venly/api.service'
 import { HttpVenlyAuthService } from './venly/auth.service'
 
 import type {
   AccessTokenResult,
+  ContractReadResult,
   CreateWalletResult,
   GetBalance,
   GetTxStatusResult,
   GetWalletResult,
   MintResult,
+  SignatureResult,
   TransferNativeToken
 } from '@common/types/wallet'
 
@@ -34,6 +38,7 @@ export class VenlyService {
     private readonly config: ConfigService,
     private readonly apiService: HttpVenlyApiService,
     private readonly authService: HttpVenlyAuthService,
+    private readonly httpService: HttpService,
     private readonly nftUnboxingService: NftUnboxingService,
     private readonly slackService: SlackService
   ) {
@@ -147,7 +152,15 @@ export class VenlyService {
     return transactionHash
   }
 
-  async unbox(assetId: AssetIdDto) {
+  async unbox({
+    assetId,
+    operatorPincode,
+    operatorWalletId
+  }: {
+    operatorPincode: string
+    operatorWalletId: string
+    assetId: AssetIdDto
+  }) {
     await this.getAccessToken()
 
     const assetType = new AssetType({ assetName: assetId.assetName, chainId: assetId.chainId })
@@ -155,20 +168,16 @@ export class VenlyService {
     if (!nftUnboxing) throw new NotFoundException(`asset can't be unboxed: ${assetType}`)
     const { nfts, tokenCount } = nftUnboxing
 
-    const [walletId, pincode, unboxAddress] = [
-      this.config.get('operator.walletId') as string,
-      this.config.get('operator.walletPinCode') as string,
-      this.config.get('unbox.contractAddress') as string
-    ]
+    const unboxAddress = this.config.get('contracts.unboxAddress') as string
 
     const {
       data: {
         result: { transactionHash }
       }
     } = await this.apiService.axiosRef.post<MintResult>('transactions/execute', {
-      pincode,
+      pincode: operatorPincode,
       transactionRequest: {
-        walletId,
+        walletId: operatorWalletId,
         type: 'CONTRACT_EXECUTION',
         to: unboxAddress,
         secretType: 'BSC',
@@ -430,5 +439,220 @@ export class VenlyService {
 
       return txStatus
     }
+  }
+
+  async getContractName(contractAddress: string) {
+    await this.getAccessToken()
+
+    const {
+      data: {
+        result: [{ value: name }]
+      }
+    } = await this.apiService.axiosRef.post<ContractReadResult>('contracts/read', {
+      secretType: 'BSC',
+      walletAddress: '0x0000000000000000000000000000000000000000',
+      contractAddress,
+      functionName: 'name',
+      outputs: [
+        {
+          type: 'string'
+        }
+      ]
+    })
+
+    return name
+  }
+
+  async getSpenderNonce(contractAddress: string, spender: string) {
+    await this.getAccessToken()
+
+    const {
+      data: {
+        result: [{ value: nonce }]
+      }
+    } = await this.apiService.axiosRef.post<ContractReadResult>('contracts/read', {
+      secretType: 'BSC',
+      walletAddress: '0x0000000000000000000000000000000000000000',
+      contractAddress,
+      functionName: 'nonces',
+      inputs: [
+        {
+          type: 'address',
+          value: spender
+        }
+      ],
+      outputs: [
+        {
+          type: 'uint256'
+        }
+      ]
+    })
+
+    return nonce
+  }
+
+  async signOperatorPermit({
+    operatorPincode,
+    operatorWalletId,
+    contractAddress,
+    spender,
+    allowedFunction,
+    allowedParameters,
+    deadline
+  }: {
+    operatorPincode: string
+    operatorWalletId: string
+    contractAddress: string
+    spender: string
+    allowedFunction: string
+    allowedParameters: string
+    deadline: number | string
+  }) {
+    await this.getAccessToken()
+
+    const name = await this.getContractName(contractAddress)
+    const nonce = await this.getSpenderNonce(contractAddress, spender)
+    const chainId = this.config.get('stage') === 'production' ? 56 : 97
+
+    const {
+      data: {
+        result: { signature }
+      }
+    } = await this.apiService.axiosRef.post<SignatureResult>('signatures', {
+      pincode: operatorPincode,
+      signatureRequest: {
+        type: 'EIP712',
+        secretType: 'BSC',
+        walletId: operatorWalletId,
+        data: {
+          types: {
+            Permit: [
+              { name: 'allowedFunction', type: 'bytes4' },
+              { name: 'allowedParameters', type: 'bytes32' },
+              { name: 'deadline', type: 'uint256' },
+              { name: 'spender', type: 'address' },
+              { name: 'nonce', type: 'uint256' }
+            ],
+            EIP712Domain: [
+              {
+                name: 'name',
+                type: 'string'
+              },
+              {
+                name: 'version',
+                type: 'string'
+              },
+              {
+                name: 'chainId',
+                type: 'uint256'
+              },
+              {
+                name: 'verifyingContract',
+                type: 'address'
+              }
+            ]
+          },
+          primaryType: 'Permit',
+          domain: {
+            name,
+            version: '1',
+            chainId,
+            verifyingContract: contractAddress
+          },
+          message: {
+            allowedFunction,
+            allowedParameters,
+            deadline,
+            spender,
+            nonce
+          }
+        }
+      }
+    })
+
+    return signature
+  }
+
+  async incrementMatches(pincode: string, walletId: string, data: string) {
+    await this.getAccessToken()
+
+    const sbtMatchesAddress = this.config.get('contracts.sbtMatchesAddress') as string
+
+    const {
+      data: {
+        result: { transactionHash }
+      }
+    } = await this.apiService.axiosRef.post<MintResult>('transactions/execute', {
+      pincode,
+      transactionRequest: {
+        walletId,
+        type: 'CONTRACT_EXECUTION',
+        to: sbtMatchesAddress,
+        secretType: 'BSC',
+        functionName: 'increment',
+        value: 0,
+        inputs: [
+          {
+            type: 'bytes',
+            value: data
+          }
+        ]
+      }
+    })
+
+    return transactionHash
+  }
+
+  async getUserMatchesMetadata(walletAddress: string) {
+    await this.getAccessToken()
+
+    const sbtMatchesAddress = this.config.get('contracts.sbtMatchesAddress') as string
+
+    const {
+      data: {
+        result: [{ value: tokenId }]
+      }
+    } = await this.apiService.axiosRef.post<ContractReadResult>('contracts/read', {
+      secretType: 'BSC',
+      walletAddress: '0x0000000000000000000000000000000000000000',
+      contractAddress: sbtMatchesAddress,
+      functionName: 'tokenOfOwner',
+      inputs: [
+        {
+          type: 'address',
+          value: walletAddress
+        }
+      ],
+      outputs: [
+        {
+          type: 'uint256'
+        }
+      ]
+    })
+
+    const {
+      data: {
+        result: [{ value: tokenURI }]
+      }
+    } = await this.apiService.axiosRef.post<ContractReadResult>('contracts/read', {
+      secretType: 'BSC',
+      walletAddress: '0x0000000000000000000000000000000000000000',
+      contractAddress: sbtMatchesAddress,
+      functionName: 'tokenURI',
+      inputs: [
+        {
+          type: 'uint256',
+          value: tokenId as number
+        }
+      ],
+      outputs: [
+        {
+          type: 'string'
+        }
+      ]
+    })
+
+    const { data: metadata } = await this.httpService.axiosRef.get<Metadata>(tokenURI as string)
+    return metadata
   }
 }
