@@ -6,4 +6,6 @@ export const MAX_INT = '0xffffffffffffffffffffffffffffffffffffffffffffffffffffff
 
 export const HASH_ZERO = ethers.constants.HashZero
 
-export const SBT_COUNTER_INCREMENT_HASH = '0xcb0de25a'
+export const SBT_COUNTER_INCREMENT_HASH = ethers.utils
+  .solidityKeccak256(['string'], ['increment(bytes)'])
+  .substring(0, 10)
