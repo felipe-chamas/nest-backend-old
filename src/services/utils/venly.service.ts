@@ -8,6 +8,7 @@ import { plainToInstance } from 'class-transformer'
 
 import { WalletServiceDto } from '@common/dto/venly.dto'
 import { WalletDto } from '@common/dto/wallet.dto'
+import { logger } from '@common/providers/logger'
 import { AssetIdDto } from '@common/types/caip'
 import { Metadata } from '@common/types/metadata'
 
@@ -510,8 +511,12 @@ export class VenlyService {
   }) {
     await this.getAccessToken()
 
+    logger.info('Contract: ', contractAddress)
+    logger.info('Spender: ', spender)
     const name = await this.getContractName(contractAddress)
+    logger.info('Name: ', name)
     const nonce = await this.getSpenderNonce(contractAddress, spender)
+    logger.info('Nonce: ', nonce)
     const chainId = this.config.get('stage') === 'production' ? 56 : 97
 
     const {
@@ -569,6 +574,8 @@ export class VenlyService {
         }
       }
     })
+
+    logger.info('Sig: ', signature)
 
     return signature
   }

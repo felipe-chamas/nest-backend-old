@@ -19,6 +19,7 @@ import {
 } from '@common/constants/signature'
 import { Auth } from '@common/decorators/auth.decorators'
 import { Role } from '@common/enums/role.enum'
+import { logger } from '@common/providers/logger'
 import { UserService } from '@services/user.service'
 import { EvmService } from '@services/utils/evm.service'
 import { VenlyService } from '@services/utils/venly.service'
@@ -210,6 +211,8 @@ export class NftGameController {
     if (!operator) throw new NotFoundException(`Can't find user with uuid: ${operatorUUID}`)
     const operatorPincode = await this.pinService.getPin(operatorUUID)
     const operatorWalletId = operator.wallet.id
+
+    logger.info(operatorWalletId)
 
     const signature = await this.venlyService.signOperatorPermit({
       operatorPincode,
