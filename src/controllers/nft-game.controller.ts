@@ -212,7 +212,7 @@ export class NftGameController {
     const operatorPincode = await this.pinService.getPin(operatorUUID)
     const operatorWalletId = operator.wallet.id
 
-    logger.info(operatorWalletId)
+    logger.info(operatorWalletId, contractAddress, spender)
 
     const signature = await this.venlyService.signOperatorPermit({
       operatorPincode,
