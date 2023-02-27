@@ -512,6 +512,7 @@ export class VenlyService {
     await this.getAccessToken()
 
     logger.info('Contract: ', contractAddress)
+    logger.info('Contract env: ', this.config.get('contracts.sbtMatchesAddress'))
     logger.info('Spender: ', spender)
     const name = await this.getContractName(contractAddress)
     logger.info('Name: ', name)
