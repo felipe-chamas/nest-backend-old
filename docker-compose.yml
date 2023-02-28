@@ -18,7 +18,7 @@ services:
       - FRONTEND_URL=${FRONTEND_URL}
       - DOCS_TOKEN=${DOCS_TOKEN}
       - QUICKNODE_URI=${QUICKNODE_URI}
-      - MONGODB_URI=mongodb://mongo:27017/database
+      - MONGODB_URI=${MONGODB_URI}
       - VENLY_CLIENT_ID=${VENLY_CLIENT_ID}
       - VENLY_CLIENT_SECRET=${VENLY_CLIENT_SECRET}
       - VENLY_APPLICATION_ID=${VENLY_APPLICATION_ID}
@@ -27,10 +27,10 @@ services:
     ports:
       - 8080:8080
     depends_on:
-      - mongo
+      # - mongo
       - redis
     links:
-      - mongo
+      # - mongo
       - redis
     volumes:
       - .:/usr/src/app
@@ -42,28 +42,28 @@ services:
     restart: always
     ports:
       - 6379:6379
-  mongo:
-    image: mongo
-    ports:
-      - 27017:27017
-    command: mongod
-    environment:
-      MONGO_INITDB_DATABASE: 'database'
-  cronjobs:
-    build: ./cronjobs
-    volumes:
-      - ./cronjobs:/app
-    command: yarn start
-    environment:
-      - REDIS_IO_HOST=${REDIS_IO_HOST}
-      - REDIS_IO_PORT=${REDIS_IO_PORT}
-      - REDIS_IO_PASSWORD=${REDIS_IO_PASSWORD}
-      - PEPPER=${PEPPER}
-      - VENLY_CLIENT_ID=${VENLY_CLIENT_ID}
-      - VENLY_CLIENT_SECRET=${VENLY_CLIENT_SECRET}
-      - VENLY_APPLICATION_ID=${VENLY_APPLICATION_ID}
-      - STAGE=${STAGE}
-      - MONGODB_URI=${MONGODB_URI}
-      - SLACK_URL=${SLACK_URL}
-    depends_on:
-      - mongo
+  # mongo:
+  #   image: mongo
+  #   ports:
+  #     - 27017:27017
+  #   command: mongod
+  #   environment:
+  #     MONGO_INITDB_DATABASE: 'database'
+  # cronjobs:
+  #   build: ./cronjobs
+  #   volumes:
+  #     - ./cronjobs:/app
+  #   command: yarn start
+  #   environment:
+  #     - REDIS_IO_HOST=${REDIS_IO_HOST}
+  #     - REDIS_IO_PORT=${REDIS_IO_PORT}
+  #     - REDIS_IO_PASSWORD=${REDIS_IO_PASSWORD}
+  #     - PEPPER=${PEPPER}
+  #     - VENLY_CLIENT_ID=${VENLY_CLIENT_ID}
+  #     - VENLY_CLIENT_SECRET=${VENLY_CLIENT_SECRET}
+  #     - VENLY_APPLICATION_ID=${VENLY_APPLICATION_ID}
+  #     - STAGE=${STAGE}
+  #     - MONGODB_URI=${MONGODB_URI}
+  #     - SLACK_URL=${SLACK_URL}
+  #   depends_on:
+  #     - mongo
